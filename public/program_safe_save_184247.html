@@ -1,0 +1,29 @@
+
+<div id="program-zone" layout="row" onSelectStart="return false;" onMouseDown="return false"> 
+  <div id="program-component-list" ng-controller="ComponentListController">
+    <md-tabs md-dynamic-height="md-dynamic-height" md-border-bottom="md-border-bottom">
+      <md-tab label="基本">
+        <md-content class="md-padding">
+          <md-list ng-cloak="ng-cloak">
+            <md-item add-component-button="add-component-button" ng-click="addComponent(componentId)" ng-repeat="(componentId, data) in generalComponents">
+              <croset-component md-ink-ripple="md-ink-ripple" data="data" croset-component-in-list="croset-component-in-list"></croset-component>
+            </md-item>
+          </md-list>
+        </md-content>
+      </md-tab>
+      <md-tab label="アイテム">
+        <md-content class="md-padding">
+          <md-list ng-cloak="ng-cloak">
+            <md-item add-component-button="add-component-button" ng-click="addElementComponent(componentId)" ng-repeat="(componentId, data) in elementComponents">
+              <croset-component md-ink-ripple="md-ink-ripple" data="data" croset-component-in-list="croset-component-in-list" croset-element-component-in-list="croset-element-component-in-list"></croset-component>
+            </md-item>
+          </md-list>
+        </md-content>
+      </md-tab>
+    </md-tabs>
+  </div>
+  <div id="program-code-wrapper" class="mat-wrapper flex">
+    <div id="program-code" flex="flex" ng-controller="CodeController" class="croset-mat">
+    </div>
+  </div>
+</div>

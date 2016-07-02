@@ -1,0 +1,31 @@
+
+<div id="editor" layout="row">
+  <div id="progress" layout="column" ng-show="progress.isLoading"><img src="http://assets.materialup.com/uploads/d0b393f6-3975-48dd-b7ca-bf0289187c6e/preview"/>
+    <md-progress-linear md-mode="determinate" value="{{progress.determinateValue}}"></md-progress-linear>
+  </div>
+  <div id="mode-changer" layout="column">
+    <md-button ng-repeat="(name, modeObj) in modeList" ng-click="changeMode(name)" ng-class="{'mode-icon-active': name==mode}" aria-label="ModeIcon" class="selected md-icon-button">
+      <md-icon class="material-icons">{{modeObj.icon}}</md-icon>
+      <p>{{mode}}</p>
+    </md-button>
+  </div>
+  <div id="left-zone" class="editor-card flex">
+    <div ui-view="left" class="ui-view-fade"></div>
+  </div>
+  <div id="screen-zone" ng-controller="ScreenController" ng-style="{transform: 'scale(' + screenScaleRatio + ')', marginRight: marginRight}" class="marvel-device iphone6 silver">
+    <div class="top-bar"></div>
+    <div class="sleep"></div>
+    <div class="volume"></div>
+    <div class="camera"></div>
+    <div class="sensor"></div>
+    <div class="speaker"></div>
+    <div id="screen" class="screen">
+      <resizer></resizer>
+    </div>
+    <div class="home"></div>
+    <div class="bottom-bar"></div>
+  </div>
+  <div id="right-zone" class="editor-card flex">
+    <div ui-view="right" class="ui-view-fade"></div>
+  </div>
+</div>

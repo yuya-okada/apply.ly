@@ -1,0 +1,129 @@
+html(ng-app="Croset" ng-controller="CrosetController")
+	head
+		title Croset
+		
+		//- ルートによって切り替えるcss
+		link(rel="stylesheet" ng-repeat="path in cssPaths track by $index" ng-href="{{path}}.css")
+		
+		
+		
+		//- Material Icons
+		link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
+		
+		//- jQueryUI
+		link(rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css")
+		//- 24カラムグリッドシステム
+		link(rel="stylesheet" type="text/css" href="css/responsive.gs.24col.css")
+		//- PureCSSのモック素材
+		link(rel="stylesheet" type="text/css" href="css/pure-css-mobile-devices.min.css")
+		//- iconパック
+		link(rel="stylesheet" type="text/css" href="css/icomoon.css")
+		//- Google Material Icon
+		link(href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet")
+		//- Common Class
+		link(rel="stylesheet" type="text/css" href="css/commonClass.css")
+		//- メインのCSS
+		link(rel="stylesheet" type="text/css" href="css/index.css")
+		//- エディタ画面のCSS
+		link(rel="stylesheet" type="text/css" href="css/editor.css")
+		//- アプリコンパイル時に含まれるCSS
+		link(rel="stylesheet" type="text/css" href="css/screen.css")
+		//- Angular Material
+		link(rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.7/angular-material.min.css")
+		//- MdColorPicker(https://github.com/brianpkelley/md-color-picker)
+		link(rel="stylesheet" type="text/css" href="js/md-color-picker/md-color-picker.css")
+		
+		//- Query for JSON
+		script(src="js/jLinq.js")
+		//- jQuery
+		script(src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js")
+		//- jQueryUI
+		script(src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js")
+		//- タップイベント統合ライブラリ
+		script(src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.4/hammer.js")
+		//- AngularJS
+		script(src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js")
+		//- AngularJSのアニメーションモジュール
+		script(src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js")
+
+		script(src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js")
+		script(src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js")
+		//- AngularJSのルーティング
+		script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.18/angular-ui-router.js")
+		//- UI Routerにスタイルをつける機能を追加
+		script(src="js/ui-router-styles/ui-router-styles.js")
+		//- Angular Material
+		script(src="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.7/angular-material.min.js")
+		//- Angular Material Icons (https://klarsys.github.io/angular-material-icons/)
+		script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-material-icons/0.6.0/angular-material-icons.min.js")
+		//- Angular Material IconsのMorphing
+		script(src="https://cdnjs.cloudflare.com/ajax/libs/SVG-Morpheus/0.1.8/svg-morpheus.js")
+		//- MdColorPickerの前提ライブラリ
+		script(src="js/md-color-picker/tiny-color.min.js")
+		//- MdColorPicker(https://github.com/brianpkelley/md-color-picker)
+		script(src="js/md-color-picker/md-color-picker.js")
+
+		//- ドラッグ＆ドロップモジュール (https://github.com/codef0rmer/angular-dragdrop)
+		script(src="js/ng-dragdrop/angular-dragdrop.js")
+
+		//- Fire Base
+		script(src="https://cdn.firebase.com/js/client/2.2.1/firebase.js")
+
+		//- メインのJS
+		script(src="js/app.js")
+		//- エディタ画面のJS
+		script(src="js/editor.js")
+		//- エディタ画面のJS
+		script(src="js/built-in.js")
+		//- UIデザイン画面のJS
+		script(src="js/design.js")
+		//- プログラム画面のJS
+		script(src="js/program.js")
+		
+		
+	body
+		div(layout="row" role="main" flex)
+			//- サイドメニュー
+			md-sidenav.md-sidenav-left(md-component-id="side-menu" md-disable-backdrop="")
+				div(ng-controller="SideMenuController")
+					md-toolbar(ng-click="toggleSideNav()")
+						h1.md-toolbar-tools Croset
+						
+					#user-cover-img.max-width(layout="column")
+						div(layout="row")
+							img#user-icon(src="img/icon.png"	)
+							
+							div(layout="column")
+								span Name
+					
+					md-list(ng-cloak)
+						md-list-item(ng-click="navigateTo(sideLink.sref)" ng-repeat="sideLink in sideLinks track by $index" ng-class="{sideLinkChild: sideLink.isChild}")
+							md-icon(aria-label="Menu" class="material-icons") {{sideLink.icon}}
+							p {{sideLink.text}}
+
+
+
+			div.max-height.max-width
+
+				//- ヘッダー
+				md-toolbar#header(ng-controller="HeaderController")
+					.md-toolbar-tools
+						//- サイドメニューを開くボタン
+						md-button#toggle-side-nav.md-icon-button(ng-click="toggleSideNav()" ng-hide="isOpenRight()" aria-label="Menu")
+							md-icon.material-icons menu
+						//- サービス名。ロゴ
+						h2
+							span デザイン
+							
+						//- span.vertical-line
+						//- タイトル
+						h2
+							span Project名
+						
+						span(flex)
+						//- 実行
+						md-button.md-icon-button(ng-click="run()")
+							md-icon.material-icons play_arrow
+		
+			
+				main(ui-view="")

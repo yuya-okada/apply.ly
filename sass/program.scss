@@ -1,0 +1,229 @@
+@import "compass";
+@import "valiables";
+@import "commonClass";
+@import "mixins";
+
+#left-zone {
+	flex: 0 !important;
+
+}
+
+#program-zone {
+
+	position: relative;
+	height: 100%;
+	padding: 0;
+	background-color: white;
+
+	@include user-select(none);										// ユーザーによる選択を禁止
+	@include display-flex;
+	@include flex-direction(row);
+	@extend .shadow1;
+
+	#program-component-list {
+		border-right: 1px solid #e1e1e1;
+		background-color: #f6f6f6;
+		position: relative;
+		height: 100%;
+		width: 250px;
+
+		md-tabs {
+			height: 100%;
+			md-tabs-wrapper {
+				background-color: white;
+			}
+			md-content {
+				height: 100%;
+				background-color: #f6f6f6;
+
+				md-item {
+					display: block;
+					margin-bottom: 15px;
+				}
+			}
+		}
+	}
+
+	#program-code {
+		width: 10000px;
+		height: 10000px;
+		position: absolute;
+		overflow: scroll;
+		transform: scale(1);
+		transform-origin: top left;
+	}
+	#program-code-wrapper {
+		position: relative;
+		height: 100%;
+		background-color: #FDFDFD;
+		overflow: scroll;
+	}
+}
+
+
+
+
+
+croset-component-in-code {
+	position: absolute;
+	height: 0;
+
+}
+
+croset-component {
+	position: relative;
+	display: inline-block;
+
+	&.ui-draggable-dragging {
+		z-index: 1000;
+		.croset-component-body {
+			@extend .shadow2
+		}
+	}
+
+	&.bottom-border {
+		border-bottom: 2px solid $ac;
+	}
+
+	&.right-border {
+		border-right: 2px solid $mc;
+	}
+
+	croset-component-function, croset-component-property, croset-component-literal {
+		display: flex;
+		flex-wrap: nowrap;
+		padding: 5px 10px 7px 10px;
+	}
+	croset-component-mat {
+		display: block;
+
+		.croset-mat-flex {
+			display: flex;
+			padding: 5px 10px 0px 10px;
+			flex-wrap: nowrap;
+		}
+		md-divider {
+			margin-top: 7px;
+		}
+		.mat-wrapper {
+			min-width: 300px;
+			min-height: 300px;
+			background-color: #FDFDFD;
+			position: relative;
+			overflow: scroll;
+
+			.croset-component-input-mat-card {
+				position: absolute;
+				width: 500%;
+				height: 500%;
+			}
+
+		}
+
+		.croset-mat-resizer {
+			position: absolute;;
+			right: 0;
+			bottom: 0;
+			padding: 10;
+		}
+
+	}
+	&[croset-component-in-list] {
+		.mat-wrapper {
+			min-height: 25px;
+		}
+	}
+
+
+	croset-component-property {
+		&>span {
+			align-items: center;
+		}
+
+		croset-component-property-modify-icon {
+			margin: -5px -10px -7px 5px;
+			align-items: center;
+			z-index: 0;
+			background-color: map-get(map-get($colors, white), block);
+			color: map-get(map-get($colors, white), blockWord);
+			width: 25px;
+		}
+		croset-component-property-modified {
+			margin: -5px -10px -7px 10px;
+
+			&>croset-component-in-code {
+				position: relative;
+				height: auto;
+			}
+		}
+	}
+
+	.croset-component-body {
+		font-size: 12px;
+		min-height: 45px;
+		position: relative;
+		@extend .shadow1;
+		@include material-single-transition(box-shadow, 0.15s);
+
+		& > * {
+			display: flex;
+		}
+
+		& > .input-border {
+			border: 2px solid $ac;
+		}
+
+		croset-component-input {
+			display: flex;
+			align-items: center;
+
+			&>*:nth-child(2) {
+				display: none;
+			}
+
+			croset-component-in-code {
+				position: relative;
+				height: auto;
+			}
+
+			croset-component-input-text {
+				span {
+					align-items: center;
+					white-space: nowrap;
+			   	}
+			}
+			croset-component-input-textbox, croset-component-input-expbox {
+				font-family: 'メイリオ';
+				md-input-container { padding-bottom: 0 }
+				input {
+					text-align: center;
+					margin: 0px 3px;
+					padding: 10px 5px;
+					border: 0;
+				}
+				span {
+					visibility: hidden;
+					white-space:nowrap;
+					position: absolute;
+				}
+			}
+		}
+	}
+	@each $colorName, $map in $colors {
+		croset-component-#{map-get($map, type)} {
+			background-color: map-get($map, block);
+			color: map-get($map, blockWord);
+
+			&>croset-component-input, &>.croset-mat-flex>croset-component-input {
+				&>croset-component-input-expbox input, &>croset-component-input-textbox input {
+					background-color: map-get($map, input);
+					color: map-get($map, inputWord);
+
+					&:focused {
+						outline: none;
+					}
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,58 @@
+
+<div id="design-zone" layout="row">
+  <div id="hierarchy-zone" flex="50" ng-controller="HierarchyController">
+    <div id="hierarchy-body">
+      <md-list ng-cloak="ng-cloak">
+        <md-list-item croset-hierarchy-item="croset-hierarchy-item" ng-repeat="(uuid, element) in screenElements" ng-click="onclick(element)" ng-class="{'hierarchy-item-selected' : uuid === selectedElementUUID}">
+          <md-icon md-font-icon="menu"><span ng-class="'icomoon-' + elementDatas[element.type].icon" class="hierarchy-icon"></span></md-icon>
+          <p class="hierarcy-text">{{element.name}}</p>
+          <md-icon ng-click="showConfirmDelete($event)" class="md-secondary">
+            <ng-md-icon icon="delete" style="fill: #000" size="20" class="hierarchy-delete"></ng-md-icon>
+          </md-icon>
+          <div class="hierarchy-children md-secondary"></div>
+        </md-list-item>
+      </md-list>
+      <div id="hierarchy-help"></div>
+      <!--
+      #hierarchy-help-icon(md-ink-ripple ng-click="animationTriggers.showNewElements=true" ng-show="screenElements.length == 0")
+      	ng-md-icon(icon="playlist_add" style="fill:#fff" size="40")
+      
+      
+      -->
+      <md-button id="add-element" ng-click="animationTriggers.showNewElements=true" class="md-fab md-accent"> 
+        <ng-md-icon icon="add" style="fill: white" size="30"></ng-md-icon>
+      </md-button>
+    </div>
+    <div id="new-elements" ng-class="{animationOn: animationTriggers.showNewElements}">
+      <div id="new-element-title" ng-click="animationTriggers.showNewElements=false">
+        <div id="new-element-title-ripple" style="overflow: hidden; position:relative">
+          <md-icon-button><span md-ink-ripple="md-ink-ripple" class="icomoon-cross2"></span></md-icon-button>
+        </div>
+      </div>
+      <div id="new-element-body" class="container">
+        <div class="row">
+          <div ng-repeat="(id, data) in settings.elementDatas" class="col span_12">
+            <md-card style="overflow: hidden; position:relative" add-element-card="{{id}}" ng-click="onclick()">
+              <div md-ink-ripple="md-ink-ripple" class="new-element-card-preview"></div>
+              <div md-ink-ripple="md-ink-ripple" class="new-element-card-title"><span ng-class="'icomoon-' + data.icon"></span><span class="new-element-card-title-text">{{ data.name }}</span></div>
+            </md-card>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="property-zone" flex="50" ng-controller="PropertyController">
+    <div id="property-body">
+      <md-card ng-repeat="card in visiblePropertyCards track by $index" ng-class="{'property-card-open': !cardToggle}" class="property-card">
+        <div layout="row" ng-click="cardToggle=!cardToggle" md-ink-ripple="md-ink-ripple" class="property-card-title">
+          <ng-md-icon icon="{{ card.icon }}" size="25" class="top-left-icon"></ng-md-icon><span>{{ card.title }}</span>
+        </div>
+        <div class="property-card-body">
+          <div layout="row" ng-repeat="row in card.propertyInputs track by $index">
+            <croset-dynamic-input layout="column" layout-align="center" tag="'croset-' +  input.type" flex="flex" ng-class="'flex-'+input.size" options="input.options" ng-repeat="input in row track by $index" croset-selected-element="croset-selected-element"></croset-dynamic-input>
+          </div>
+        </div>
+      </md-card>
+    </div>
+  </div>
+</div>

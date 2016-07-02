@@ -1,0 +1,191 @@
+/* line 5, ../../sass/commonClass.scss */
+.bg-mc {
+  background-color: #2196F3;
+  color: white;
+}
+
+/* line 10, ../../sass/commonClass.scss */
+.bg-ac {
+  background-color: #FF5722;
+  color: white;
+}
+
+/* line 15, ../../sass/commonClass.scss */
+.bg-white {
+  background-color: white;
+  color: black;
+}
+
+/* line 20, ../../sass/commonClass.scss */
+.bg-disabled {
+  background-color: #E0E0E0;
+}
+
+/* line 24, ../../sass/commonClass.scss */
+.max-height {
+  height: 100%;
+}
+
+/* line 28, ../../sass/commonClass.scss */
+.max-width {
+  width: 100%;
+}
+
+/* line 32, ../../sass/commonClass.scss */
+.vertical-line {
+  height: 100%;
+  border-left: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* line 37, ../../sass/commonClass.scss */
+.shadow1, .ui-resizable-handle {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+/* line 41, ../../sass/commonClass.scss */
+.shadow2, .hover-float:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+/* line 45, ../../sass/commonClass.scss */
+.shadow3 {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+/* line 49, ../../sass/commonClass.scss */
+.shadow4 {
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+}
+
+/* line 53, ../../sass/commonClass.scss */
+.shadow5 {
+  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);
+}
+
+/* line 59, ../../sass/commonClass.scss */
+.hover-float {
+  -moz-transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+  -o-transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+  -webkit-transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+  transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+}
+
+/* line 69, ../../sass/commonClass.scss */
+.hover-gray {
+  -moz-transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+  -o-transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+  -webkit-transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+  transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+}
+/* line 72, ../../sass/commonClass.scss */
+.hover-gray:hover {
+  background-color: #eee;
+}
+
+/* line 79, ../../sass/commonClass.scss */
+.ui-view-fade.ng-enter {
+  opacity: 0;
+  -moz-transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  -o-transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  -webkit-transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+}
+/* line 83, ../../sass/commonClass.scss */
+.ui-view-fade.ng-enter-active, .ui-view-fade.ng-leave {
+  opacity: 1;
+}
+
+/* line 7, ../../sass/editor.scss */
+#editor {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding: 30px;
+  background-color: #EEEEEE;
+}
+/* line 15, ../../sass/editor.scss */
+#editor #progress {
+  z-index: 10000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #EEEEEE;
+  align-items: center;
+  justify-content: center;
+}
+/* line 23, ../../sass/editor.scss */
+#editor #progress img {
+  margin-bottom: 80px;
+}
+/* line 27, ../../sass/editor.scss */
+#editor #progress md-progress-linear {
+  width: 30%;
+}
+/* line 34, ../../sass/editor.scss */
+#editor #mode-changer md-icon.selected {
+  color: #2196F3;
+}
+/* line 39, ../../sass/editor.scss */
+#editor #screen-zone {
+  transform-origin: top left;
+}
+/* line 41, ../../sass/editor.scss */
+#editor #screen-zone:before, #editor #screen-zone:after {
+  pointer-events: none;
+}
+/* line 46, ../../sass/editor.scss */
+#editor #screen {
+  background-color: white;
+  overflow: hidden;
+}
+/* line 50, ../../sass/editor.scss */
+#editor #screen .croset-element {
+  transform-origin: 0 0;
+  position: absolute !important;
+  top: 50%;
+  left: 50%;
+}
+/* line 58, ../../sass/editor.scss */
+#editor #left-zone > div {
+  transition-delay: .5s;
+  order: 0;
+}
+/* line 62, ../../sass/editor.scss */
+#editor #right-zone > div {
+  transition-delay: .5s;
+  order: 2;
+  overflow-y: scroll;
+}
+/* line 68, ../../sass/editor.scss */
+#editor #left-zone, #editor #right-zone {
+  -moz-transition: flex 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  -o-transition: flex 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  -webkit-transition: flex 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  transition: flex 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+}
+/* line 72, ../../sass/editor.scss */
+#editor .editor-card {
+  position: relative;
+  height: 100%;
+  flex: 1;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+/* line 84, ../../sass/editor.scss */
+.ui-resizable-handle {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #EEE;
+  border: 1px solid #00CCFF;
+  z-index: 101;
+}
+
+/* line 95, ../../sass/editor.scss */
+.ui-resizable-se {
+  right: -5px;
+  bottom: -5px;
+}

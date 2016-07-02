@@ -1,0 +1,7 @@
+@mixin material-transition($time: 1s) {
+    @include transition($time, cubic-bezier(.55,0,.1,1));
+}
+
+@mixin material-single-transition($property: all, $time: 1s) {
+    @include single-transition($property, $time, cubic-bezier(.55,0,.1,1));
+}

@@ -1,0 +1,12 @@
+div.croset-mat-flex
+	span {{elementName}}
+	croset-component-input(ng-repeat="input in data.appearance track by $index")
+
+md-divider
+.mat-wrapper
+	.croset-component-input-mat-card.croset-mat
+		croset-component-in-code(ng-repeat="card in cardData.matContents")
+		
+.croset-mat-resizer(ng-mousedown="startResizing($event)")
+	md-icon(aria-label="Resizer" class="material-icons") zoom_out_map
+		

@@ -1,0 +1,75 @@
+{
+	text: 
+		name: "テキスト"
+		icon: "typography"
+
+	button: 
+		name: "ボタン"
+		icon: "checkbox-partial"
+		properties: [
+			{
+				title: "レイアウト"
+				icon: "settings"
+				propertyInputs: [
+					[	
+						{
+							type: "color-icon"
+							size: 6
+							options:						# このInput特有の設定。インプットに送られる
+								icon: "text_format"
+								defaultValue: "#000000"
+								result: "textColor"
+							# col: 24
+						}
+						{
+							type: "color_icon"
+							size: 6
+							options:
+								icon: "format_color_fill"
+								defaultValue: "#ffffff"
+								result: "bgColor"
+						}
+						{
+							type: "toggle-icon"
+							size: 6
+							options:
+								icon: "format_bold"
+								result: "formatBold"
+						}
+						{
+							type: "toggle-icon"
+							size: 6
+							options:
+								icon: "format_italic"
+								result: "formatItalic"
+						}
+					],
+					[
+						{
+							type: "number"
+							size:24
+							options:
+								defaultValue: 14 
+								step: 2
+								result: "fontSize"
+						}
+					]
+				]
+			}
+			{
+				title: "枠線"
+				icon: "border_all"
+
+			}
+		]
+
+	checkbox:
+		name: "チェックボックス"
+		icon: "checkmark-circle"
+		
+	switch:
+		name: "スイッチ"
+		icon: "toggle-off"
+}
+
+

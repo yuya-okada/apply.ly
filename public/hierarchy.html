@@ -1,0 +1,43 @@
+
+<md-card id="hierarchy-zone" ng-controller="HierarchyController">
+  <div id="hierarchy-body">
+    <md-list ng-cloak="ng-cloak">
+      <md-list-item croset-hierarchy-item="croset-hierarchy-item" ng-repeat="(uuid, element) in screenElements" ng-click="onclick(element)" ng-class="{'hierarchy-item-selected' : uuid === selectedElementUUID}">
+        <md-icon md-font-icon="menu" aria-label="Type">{{elementDatas[element.type].icon}}</md-icon>
+        <p class="hierarcy-text">{{element.name}}</p>
+        <md-icon ng-click="showConfirmDelete($event)" aria-label="Delete" class="md-secondary">delete
+        </md-icon>
+        <div class="hierarchy-children md-secondary"></div>
+      </md-list-item>
+    </md-list>
+    <div id="hierarchy-help"></div>
+    <!--
+    #hierarchy-help-icon(md-ink-ripple ng-click="animationTriggers.showNewElements=true" ng-show="screenElements.length == 0")
+    	ng-md-icon(icon="playlist_add" style="fill:#fff" size="40")
+    
+    
+    -->
+    <md-button id="add-element" ng-click="animationTriggers.showNewElements=true" class="md-fab md-accent"> 
+      <ng-md-icon icon="add" style="fill: white" size="30"></ng-md-icon>
+    </md-button>
+  </div>
+  <div id="new-elements" ng-class="{animationOn: animationTriggers.showNewElements}">
+    <div id="new-element-title" ng-click="animationTriggers.showNewElements=false">
+      <div id="new-element-title-ripple" style="overflow: hidden; position:relative">
+        <md-icon-button><span md-ink-ripple="md-ink-ripple" class="icomoon-cross2"></span></md-icon-button>
+      </div>
+    </div>
+    <div id="new-element-body" layout="row" layout-wrap="layout-wrap">
+      <div flex="50" ng-repeat="(id, data) in settings.elementDatas">
+        <md-card style="overflow: hidden; position:relative" add-element-card="{{id}}" ng-click="onclick()">
+          <md-card-header>
+            <md-card-avatar>
+              <md-icon aria-label="Menu" class="md-avatar-icon material-icons">{{data.icon}}</md-icon>
+            </md-card-avatar>
+            <md-card-header-text md-ink-ripple="md-ink-ripple"><span class="md-title">{{ data.name }}</span></md-card-header-text>
+          </md-card-header>
+        </md-card>
+      </div>
+    </div>
+  </div>
+</md-card>

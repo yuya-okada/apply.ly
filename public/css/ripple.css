@@ -1,0 +1,67 @@
+/* line 1, ../../sass/ripple.scss */
+.legitRipple {
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  z-index: 0;
+  	/*
+  	Example for different transition-durations:
+  
+  	&.longOpacity .legitRipple-ripple {
+  		transition-duration: .15s, .9s*4;
+  	}
+  	&.longDrop .legitRipple-ripple {
+  		transition-duration: .15s*5, .9s;
+  		transition-timing-function: linear, cubic-bezier(1, 0, 0.8, 0);
+  	}
+  	&.longOpacity.longDrop .legitRipple-ripple {
+  		transition-duration: .15s*5, .9s*4;
+  		transition-timing-function: linear, cubic-bezier(1, 0, 0.8, 0);
+  	}
+  	*/
+}
+
+/* line 28, ../../sass/ripple.scss */
+.legitRipple-ripple {
+  position: absolute;
+  z-index: -1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  will-change: transform, width, opacity;
+  transform: translate3d(0, 0, 0);
+  width: 0;
+  opacity: 1;
+  transition: width 0.15s linear, opacity 0.9s ease-out;
+}
+/* line 53, ../../sass/ripple.scss */
+.legitRipple-ripple:before {
+  content: "";
+  padding-top: 100%;
+  display: block;
+}
+
+/* line 61, ../../sass/ripple.scss */
+img ~ .legitRipple-ripple {
+  z-index: auto;
+}
+
+/* line 67, ../../sass/ripple.scss */
+.legitRipple-template {
+  display: none;
+}
+
+/* line 71, ../../sass/ripple.scss */
+.legitRipple-custom {
+  overflow: hidden;
+}
+/* line 73, ../../sass/ripple.scss */
+.legitRipple-custom > * {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  transform: translate(-50%, -50%);
+}

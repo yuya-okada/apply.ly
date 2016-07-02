@@ -1,0 +1,4 @@
+md-input-container.md-block
+	label {{options.label}}
+	md-select(ng-model="value" ng-change="onchange()")
+		md-option(ng-repeat="(text, result) in options.items" value="{{result}}") {{text}}

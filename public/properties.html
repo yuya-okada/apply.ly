@@ -1,0 +1,15 @@
+
+<div id="property-zone" ng-controller="PropertyController">
+  <div id="property-body">
+    <md-card ng-repeat="card in visiblePropertyCards track by $index" ng-class="{'property-card-open': !cardToggle}" class="property-card">
+      <div layout="row" ng-click="cardToggle=!cardToggle" md-ink-ripple="md-ink-ripple" class="property-card-title">
+        <ng-md-icon icon="{{ card.icon }}" size="25" class="top-left-icon"></ng-md-icon><span>{{ card.title }}</span>
+      </div>
+      <div class="property-card-body">
+        <div layout="row" ng-repeat="row in card.propertyInputs track by $index">
+          <croset-dynamic-input layout="column" layout-align="center" tag="'croset-' +  input.type" flex="flex" ng-class="'flex-'+input.size" options="input.options" ng-repeat="input in row track by $index" croset-selected-element="croset-selected-element"></croset-dynamic-input>
+        </div>
+      </div>
+    </md-card>
+  </div>
+</div>

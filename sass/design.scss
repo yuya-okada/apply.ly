@@ -1,0 +1,172 @@
+@import "compass";
+@import "valiables";
+@import "commonClass";
+@import "mixins";
+
+
+#left-zone {
+	flex: 1 !important;
+
+}
+
+#hierarchy-zone {
+	position: relative;
+	height: 100%;
+	overflow-x: visible;
+	overflow-y: hidden;
+
+	#hierarchy-body {
+		overflow-y: scroll;
+
+		@include flex(1);
+
+		.hierarchy-item-selected {
+			color: $mc
+		}
+
+		.hierarchy-children {
+			padding-left: 20px;
+		}
+
+
+		#add-element {
+			font-size: 23px;
+			position: absolute;
+			right: 15px;
+			bottom: 15px;
+
+		}
+	}
+
+	#new-elements {
+
+		overflow-y: scroll;
+		height: 100%;
+		width: 100%;
+		position: absolute;
+		background-color: white;
+		top:0;
+		z-index: 21; // FAB(z-index=20)より上に。
+		@include translateY(100%);
+		@include material-transition(.25s);
+
+		#new-element-title {
+
+			@extend .shadow2;
+			font-size: 16px;
+
+			#new-element-title-ripple {
+				width: 100%;
+				padding: 13px;
+			}
+		}
+
+		#new-element-body {
+			.md-avatar-icon {
+				width: 100%;
+				height: 100%;
+			}
+			.md-title {
+				line-height: 40px;
+				text-align: center;
+			}
+		}
+	}
+
+	#new-elements.animationOn {
+		@include translateY(0%);
+	}
+
+
+}
+
+#property-zone {
+
+	overflow-y: scroll;
+
+	#property-title {
+		@extend .bg-mc;
+
+		md-input-container {
+			padding: 0;
+
+			input {
+				text-align: center;
+				color: white;
+				border-color: white;
+			}
+		}
+	}
+
+	#property-preview {
+		width: 100%;
+		height: 200px;
+		margin-bottom: 10px;
+
+	}
+
+	#property-body {
+		@include flex(1);
+		padding: 0px 30px 20px 30px;
+		overflow-y: scroll;
+
+		.property-card {
+			position: relative;
+			padding: 10px 5px 10px 5px;
+			@include material-transition(.25s);
+
+
+			.property-card-title {
+				padding: 5px 0px 5px 8px;
+
+				&:focus {
+					outline: none;
+				}
+
+				ng-md-icon {
+					fill: #666;
+					margin-right: 15px;
+				}
+
+				span {
+					font-size: 18px;
+					color: #666;
+					// font-weight: bold;
+				}
+			}
+
+			.property-card-body {
+				display: none;
+				margin-top: 20px;
+				padding: 0 20px;
+			}
+
+			croset-text {
+				span {
+					font-size: 13px;
+				}
+			}
+
+			croset-headline {
+				span {
+					font-size: 15px;
+					font-weight: bold;
+				}
+			}
+
+		}
+
+		.property-card-open {
+			margin: 20px -10px;
+
+			.property-card-body {
+				display: block;
+			}
+		}
+
+		.property-card:not(.property-card-open) {
+			@extend .hover-float;
+		}
+
+	}
+}

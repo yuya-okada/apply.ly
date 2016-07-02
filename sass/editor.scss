@@ -1,0 +1,99 @@
+@import "compass";
+@import "valiables";
+@import "commonClass";
+@import "mixins";
+
+
+#editor {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+	padding: 30px;
+    background-color: #EEEEEE;
+
+
+	#progress {
+		z-index: 10000;
+		position: absolute;
+		top: 0; left: 0; right: 0; bottom: 0;
+		background: #EEEEEE;
+		align-items: center;
+		justify-content: center;
+
+		img {
+			margin-bottom: 80px;
+		}
+
+		md-progress-linear {
+			width: 30%;
+		}
+	}
+
+
+	#mode-changer {
+		md-icon.selected {
+			color: $mc;
+		}
+	}
+
+	#screen-zone {
+        transform-origin: top left;
+		&:before, &:after {
+			pointer-events: none;
+		}
+    }
+
+	#screen {
+        background-color: white;
+		overflow: hidden;
+
+        .croset-element {
+			transform-origin: 0 0;
+            position: absolute !important;
+            top: 50%;
+            left: 50%;
+        }
+    }
+
+	#left-zone > div {
+		transition-delay: .5s;
+		order: 0;
+	}
+	#right-zone > div {
+		transition-delay: .5s;
+		order: 2;
+		overflow-y: scroll;
+	}
+
+	#left-zone, #right-zone {
+		@include material-single-transition(flex, .5s);
+	}
+
+    .editor-card {
+        position: relative;
+        height: 100%;
+        flex: 1;
+		padding-left: 30px;
+		padding-right: 30px;
+
+
+	}
+}
+
+
+.ui-resizable-handle
+{
+
+    width: 10px;
+    height: 10px;
+	border-radius: 5px;
+	background-color: #EEE;
+	border: 1px solid #00CCFF;
+    z-index: 101;
+	@extend .shadow1;
+}
+.ui-resizable-se
+{
+    right: -5px;
+    bottom: -5px;
+}

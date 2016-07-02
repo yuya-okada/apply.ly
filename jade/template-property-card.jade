@@ -1,0 +1,4 @@
+md-cardo.property-card(ng-class="{'property-card-open': cardToggle}")
+    div.property-card-title(layout="row" ng-click="cardToggle=!cardToggle" md-ink-ripple)
+        ng-md-icon.top-left-icon(icon="border_all" size="25")
+        span {{title}}

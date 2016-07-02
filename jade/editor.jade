@@ -1,0 +1,36 @@
+#editor(layout="row")
+	
+	#progress(layout="column" ng-show="progress.isLoading")
+		img(src="http://assets.materialup.com/uploads/d0b393f6-3975-48dd-b7ca-bf0289187c6e/preview")
+		md-progress-linear(md-mode="determinate" value="{{progress.determinateValue}}")
+		
+	
+	#mode-changer(layout="column")
+		md-button.selected.md-icon-button(ng-repeat="(name, modeObj) in modeList" ng-click="changeMode(name)" ng-class="{'mode-icon-active': name==mode}" aria-label="ModeIcon")
+			md-icon.material-icons {{modeObj.icon}}
+			p {{mode}}
+
+	#left-zone.editor-card.flex
+		.ui-view-fade(ui-view="left")
+
+	//- #screen-zone-wrapper(ng-style="{marginRight: marginRight}" ng-controller="ScreenController")
+	//- 	#screen-zone(ng-style = "{transform: 'scale(' + screenScaleRatio + ')'}")
+	//- 		#screen-frame
+	//- 			#screen
+					
+
+					
+	#screen-zone.marvel-device.iphone6.silver(ng-controller="ScreenController" ng-style="{transform: 'scale(' + screenScaleRatio + ')', marginRight: marginRight}")
+		.top-bar
+		.sleep
+		.volume
+		.camera
+		.sensor
+		.speaker
+		#screen.screen
+			resizer
+		.home
+		.bottom-bar
+
+	#right-zone.editor-card.flex
+		.ui-view-fade(ui-view="right")

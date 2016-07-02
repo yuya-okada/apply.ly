@@ -1,0 +1,51 @@
+//- #design-zone(layout="row")
+md-card#hierarchy-zone(ng-controller="HierarchyController")
+	//- #hierarchy-title 配置済みのアイテム
+	#hierarchy-body
+		md-list(ng-cloak)
+			md-list-item(croset-hierarchy-item ng-repeat="(uuid, element) in screenElements" ng-click="onclick(element)" ng-class="{'hierarchy-item-selected' : uuid === selectedElementUUID}")
+				
+				md-icon(md-font-icon="menu" aria-label="Type") {{elementDatas[element.type].icon}}
+				p.hierarcy-text {{element.name}}
+				md-icon.md-secondary(ng-click="showConfirmDelete($event)" aria-label="Delete") delete
+					//- ng-md-icon.hierarchy-delete(icon="delete" style="fill: #000" size="20")
+				//- span.icomoon-delete
+				.hierarchy-children.md-secondary
+			
+		
+		#hierarchy-help
+		//
+			#hierarchy-help-icon(md-ink-ripple ng-click="animationTriggers.showNewElements=true" ng-show="screenElements.length == 0")
+				ng-md-icon(icon="playlist_add" style="fill:#fff" size="40")
+
+
+		//- 要素を追加
+		//- クリックされたとき、「新しい要素」を表示するトリガーをONにしている
+		md-button#add-element.md-fab.md-accent(ng-click="animationTriggers.showNewElements=true") 
+			ng-md-icon(icon="add" style="fill: white" size="30")
+			//- span.icomoon-plus3
+		
+	
+
+	
+	//- #add-elementがクリックされたら表示
+	#new-elements(ng-class="{animationOn: animationTriggers.showNewElements}")
+		#new-element-title(ng-click="animationTriggers.showNewElements=false")
+			#new-element-title-ripple(style="overflow: hidden; position:relative")
+				md-icon-button
+					span.icomoon-cross2(md-ink-ripple)
+				
+		#new-element-body(layout="row" layout-wrap)
+
+			//-  リピートして要素追加ボタンを作る
+			div(flex="50" ng-repeat="(id, data) in settings.elementDatas")
+				md-card(style="overflow: hidden; position:relative" add-element-card="{{id}}" ng-click="onclick()")
+					//- .new-element-card-preview(md-ink-ripple)
+					md-card-header
+						md-card-avatar
+							md-icon.md-avatar-icon(aria-label="Menu" class="material-icons") {{data.icon}}
+						md-card-header-text(md-ink-ripple)
+							span.md-title {{ data.name }}
+							
+		
+	

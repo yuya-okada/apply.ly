@@ -1,0 +1,43 @@
+$mc: #2196F3;       // メインカラー
+$ac: #FF5722;       // アクセントカラー
+
+$colors: (
+	white: (
+		type: "literal",
+		block: #fff,
+		blockWord: #000,
+		input: #E6E6E6,
+		inputWord: #444444
+	),
+
+	red: (
+		type: "function",
+		block: rgba(219, 68, 55, 0.95),
+		blockWord: #fff,
+		input: #E06055,
+		inputWord: #fff,
+	),
+
+	blue: (
+		type: "property",
+		block: #03A9F4,
+		blockWord: #fff,
+		input: #29B6F6,
+		inputWord: #C9EDFD,
+	),
+
+	green: (
+		block: rgba(219, 68, 55, 0.95),
+		blockWord: #fff,
+		input: #E06055,
+		inputWord: #fff,
+	),
+
+	gray: (
+		type: "mat",
+		block: #455A64,
+		blockWord: #fff,
+		input: #61737B,
+		inputWord: #fff,
+	),
+)

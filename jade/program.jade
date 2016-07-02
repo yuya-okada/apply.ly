@@ -1,0 +1,22 @@
+//- ドラッグによる選択をjsでキャンセルしている
+#program-zone(layout="row") 
+
+	#program-component-list(ng-controller="ComponentListController")
+		md-tabs(md-dynamic-height md-border-bottom)
+				md-tab(label="基本")
+					md-content.md-padding
+						md-list(ng-cloak)
+							md-item(add-component-button ng-click="addComponent(componentId)" ng-repeat="(componentId, data) in generalComponents")
+								croset-component(md-ink-ripple data="data" croset-component-in-list)
+						
+						
+				md-tab(label="アイテム")
+					md-content.md-padding
+						md-list(ng-cloak)
+							md-item(add-component-button ng-click="addElementComponent(componentId)" ng-repeat="(componentId, data) in elementComponents")
+								croset-component(md-ink-ripple data="data" croset-component-in-list croset-element-component-in-list)
+	
+	
+	#program-code-wrapper.mat-wrapper(class="flex")
+		#program-code.croset-mat(flex ng-controller="CodeController")
+			//- (card="card" ng-repeat="card in cards")

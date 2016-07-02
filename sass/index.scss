@@ -1,0 +1,107 @@
+@import "compass";
+@import "valiables";
+@import "commonClass";
+
+//  linear progress の背景色
+md-progress-linear.md-default-theme .md-container, md-progress-linear .md-container {
+    background-color: rgba(138, 158, 255, 0.58) !important;
+}
+
+
+html, body {
+    position: relative;
+    width: 100%;
+    margin: 0;
+	font-size: 14px;
+
+    @include display-flex;
+    @include flex-direction(column);
+}
+md-backdrop {
+	display: none;
+}
+
+md-sidenav {
+    min-width: 250px !important;
+    width: 250px !important;
+    max-width: 250px !important;
+	z-index: 51;
+	background-color: $mc !important;
+	position: static !important;
+
+	.md-toolbar-tools {
+		justify-content: center;
+		font-weight: bold;
+		font-size: 22px;
+		color: white;
+	}
+
+	#user-cover-img {
+		height: 140px;
+		background-color: black;
+		background-image: url("https://wallpaperspal.com/wp-content/uploads/Blue-Color-Scheme-Material-Design-Wallpaper.jpg");
+		background-size: cover;
+		position: relative;
+		justify-content: center;
+		align-items: center;
+
+		&:before {
+			z-index: 51;
+			content: "";
+			display: block;
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color:rgba(0,0,0,0.4);
+		}
+
+		.md-layout-row {
+			z-index: 52;
+
+
+			#user-icon {
+				width: 50px;
+				height: 50px;
+				border-radius: 50%;
+			}
+
+			.md-layout-column {
+				margin-left: 15px;
+				justify-content: center;
+
+				span {
+					color: white;
+				}
+			}
+		}
+	}
+	md-list {
+		button:hover {
+			background-color: #1976D2 !important;
+		}
+		p {
+			font-size: 14px;
+			color: white !important;
+		}
+		md-icon {
+			font-size: 20px !important;
+			color: white !important;
+		}
+	}
+}
+
+#header {
+	@extend .bg-white;
+	.material-icons {
+		color: black;
+	}
+}
+
+
+main {
+	height: calc(100% - 64px);
+    position: relative;
+    @include flex(1);
+}

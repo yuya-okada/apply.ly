@@ -1,0 +1,96 @@
+/* line 5, ../../sass/commonClass.scss */
+.bg-mc {
+  background-color: #2196F3;
+  color: white;
+}
+
+/* line 10, ../../sass/commonClass.scss */
+.bg-ac {
+  background-color: #FF5722;
+  color: white;
+}
+
+/* line 15, ../../sass/commonClass.scss */
+.bg-white {
+  background-color: white;
+  color: black;
+}
+
+/* line 20, ../../sass/commonClass.scss */
+.bg-disabled {
+  background-color: #E0E0E0;
+}
+
+/* line 24, ../../sass/commonClass.scss */
+.max-height {
+  height: 100%;
+}
+
+/* line 28, ../../sass/commonClass.scss */
+.max-width {
+  width: 100%;
+}
+
+/* line 32, ../../sass/commonClass.scss */
+.vertical-line {
+  height: 100%;
+  border-left: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* line 37, ../../sass/commonClass.scss */
+.shadow1 {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+/* line 41, ../../sass/commonClass.scss */
+.shadow2, .hover-float:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+/* line 45, ../../sass/commonClass.scss */
+.shadow3 {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+/* line 49, ../../sass/commonClass.scss */
+.shadow4 {
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+}
+
+/* line 53, ../../sass/commonClass.scss */
+.shadow5 {
+  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);
+}
+
+/* line 59, ../../sass/commonClass.scss */
+.hover-float {
+  -moz-transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+  -o-transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+  -webkit-transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+  transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+}
+
+/* line 69, ../../sass/commonClass.scss */
+.hover-gray {
+  -moz-transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+  -o-transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+  -webkit-transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+  transition: box-shadow 0.25s cubic-bezier(0.55, 0, 0.1, 1);
+}
+/* line 72, ../../sass/commonClass.scss */
+.hover-gray:hover {
+  background-color: #eee;
+}
+
+/* line 79, ../../sass/commonClass.scss */
+.ui-view-fade.ng-enter {
+  opacity: 0;
+  -moz-transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  -o-transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  -webkit-transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+}
+/* line 83, ../../sass/commonClass.scss */
+.ui-view-fade.ng-enter-active, .ui-view-fade.ng-leave {
+  opacity: 1;
+}

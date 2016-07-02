@@ -1,0 +1,7 @@
+
+<div layout="row">
+  <md-slider flex="grow" ng-model="value" step="{{options.step}}" min="{{options.min}}" max="{{options.max}}" ng-change="onchange()"></md-slider>
+  <div flex="initial" layout="layout" layout-align="center center" style="width: 100px">
+    <input flex="flex" type="number" ng-model="value" style="width: 100%; text-align: center; padding-left: 10px"/>
+  </div>
+</div>
