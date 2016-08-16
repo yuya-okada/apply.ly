@@ -11,7 +11,7 @@
 }
 
 /* line 15, ../../sass/commonClass.scss */
-.bg-white, #header {
+.bg-white {
   background-color: white;
   color: black;
 }
@@ -85,10 +85,10 @@
 /* line 79, ../../sass/commonClass.scss */
 .ui-view-fade.ng-enter {
   opacity: 0;
-  -moz-transition: opacity 1s cubic-bezier(0.55, 0, 0.1, 1);
-  -o-transition: opacity 1s cubic-bezier(0.55, 0, 0.1, 1);
-  -webkit-transition: opacity 1s cubic-bezier(0.55, 0, 0.1, 1);
-  transition: opacity 1s cubic-bezier(0.55, 0, 0.1, 1);
+  -moz-transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  -o-transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  -webkit-transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
 }
 /* line 83, ../../sass/commonClass.scss */
 .ui-view-fade.ng-enter-active, .ui-view-fade.ng-leave {
@@ -102,6 +102,7 @@ md-progress-linear.md-default-theme .md-container, md-progress-linear .md-contai
 
 /* line 11, ../../sass/index.scss */
 html, body {
+  font-family: 'Roboto', sans-serif;
   position: relative;
   width: 100%;
   margin: 0;
@@ -112,12 +113,12 @@ html, body {
   flex-direction: column;
 }
 
-/* line 20, ../../sass/index.scss */
+/* line 21, ../../sass/index.scss */
 md-backdrop {
   display: none;
 }
 
-/* line 24, ../../sass/index.scss */
+/* line 25, ../../sass/index.scss */
 md-sidenav {
   min-width: 250px !important;
   width: 250px !important;
@@ -126,14 +127,14 @@ md-sidenav {
   background-color: #2196F3 !important;
   position: static !important;
 }
-/* line 32, ../../sass/index.scss */
+/* line 33, ../../sass/index.scss */
 md-sidenav .md-toolbar-tools {
   justify-content: center;
   font-weight: bold;
   font-size: 22px;
   color: white;
 }
-/* line 39, ../../sass/index.scss */
+/* line 40, ../../sass/index.scss */
 md-sidenav #user-cover-img {
   height: 140px;
   background-color: black;
@@ -143,7 +144,7 @@ md-sidenav #user-cover-img {
   justify-content: center;
   align-items: center;
 }
-/* line 48, ../../sass/index.scss */
+/* line 49, ../../sass/index.scss */
 md-sidenav #user-cover-img:before {
   z-index: 51;
   content: "";
@@ -155,48 +156,43 @@ md-sidenav #user-cover-img:before {
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.4);
 }
-/* line 60, ../../sass/index.scss */
+/* line 61, ../../sass/index.scss */
 md-sidenav #user-cover-img .md-layout-row {
   z-index: 52;
 }
-/* line 64, ../../sass/index.scss */
+/* line 65, ../../sass/index.scss */
 md-sidenav #user-cover-img .md-layout-row #user-icon {
   width: 50px;
   height: 50px;
   border-radius: 50%;
 }
-/* line 70, ../../sass/index.scss */
+/* line 71, ../../sass/index.scss */
 md-sidenav #user-cover-img .md-layout-row .md-layout-column {
   margin-left: 15px;
   justify-content: center;
 }
-/* line 74, ../../sass/index.scss */
+/* line 75, ../../sass/index.scss */
 md-sidenav #user-cover-img .md-layout-row .md-layout-column span {
   color: white;
 }
-/* line 81, ../../sass/index.scss */
+/* line 82, ../../sass/index.scss */
 md-sidenav md-list button:hover {
   background-color: #1976D2 !important;
 }
-/* line 84, ../../sass/index.scss */
+/* line 85, ../../sass/index.scss */
 md-sidenav md-list p {
   font-size: 14px;
   color: white !important;
 }
-/* line 88, ../../sass/index.scss */
+/* line 89, ../../sass/index.scss */
 md-sidenav md-list md-icon {
   font-size: 20px !important;
   color: white !important;
 }
 
-/* line 97, ../../sass/index.scss */
-#header .material-icons {
-  color: black;
-}
-
-/* line 103, ../../sass/index.scss */
+/* line 99, ../../sass/index.scss */
 main {
-  height: calc(100% - 64px);
+  height: calc(100% - 60px);
   position: relative;
   -webkit-flex: 1;
   flex: 1;

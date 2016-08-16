@@ -39,7 +39,7 @@ module.exports = (grunt) =>
         shell:
             start:
                  command: 'nodemon server.js'
-      
+              
         esteWatch:
             options:
                 dirs: [

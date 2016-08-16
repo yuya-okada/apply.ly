@@ -4,6 +4,23 @@
 @import "mixins";
 
 
+#header {
+	@extend .bg-white;
+	.material-icons {
+		color: black;
+	}
+
+	#run-fab {
+		position: relative;
+	    top: 25px;
+	    right: 20px;
+
+		md-icon {
+			color: white
+		}
+	}
+}
+
 #editor {
     position: absolute;
     width: 100%;
@@ -14,7 +31,7 @@
 
 	#progress {
 		z-index: 10000;
-		position: absolute;
+		position: fixed;
 		top: 0; left: 0; right: 0; bottom: 0;
 		background: #EEEEEE;
 		align-items: center;
@@ -55,14 +72,19 @@
         }
     }
 
-	#left-zone > div {
-		transition-delay: .5s;
-		order: 0;
+	#left-zone {
+		&>div {
+			transition-delay: .5s;
+			order: 0;
+		}
 	}
-	#right-zone > div {
-		transition-delay: .5s;
-		order: 2;
-		overflow-y: scroll;
+
+	#right-zone {
+		&>div {
+			transition-delay: .5s;
+			order: 2;
+			overflow-y: scroll;
+		}
 	}
 
 	#left-zone, #right-zone {

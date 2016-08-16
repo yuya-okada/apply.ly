@@ -9,6 +9,13 @@
 
 }
 
+#right-zone {
+	height: calc(100% + 60px) !important;
+	margin-top: -30px;
+	margin-bottom: -30px;
+	overflow-y: scroll;
+}
+
 #hierarchy-zone {
 	position: relative;
 	height: 100%;

@@ -2,69 +2,53 @@ crosetModule = angular.module "Croset"
 
 crosetModule
 
-# エディタ画面のコントローラー
-.controller "EditorController", ["$scope", "ElementDatas", "$stateParams", "$injector", "ProjectData", "$interval", "$rootScope"
-($scope, ElementDatas, $stateParams, $injector, ProjectData, $interval, $rootScope) ->
-	ProjectData.projectName = $stateParams.projectname
-
-	$scope.settings = {
-		elementDatas: ElementDatas
+# アカウントごとのサービスの設定
+.service "ServiceConfig", [() ->
+	config = {
+		componentScale: 1							# カードのサイズ
 	}
 
-	$scope.mode = ""
+	this.get = () ->
+		return config
 
-	$scope.designMode = () -> $scope.mode = "design"
-	$scope.programMode = () -> $scope.mode = "program"
-	dataStore = new Firebase "https://apply-backend.firebaseio.com/"
-	dataStore.child("projects").child(ProjectData.projectName).once "value", (dataSnapshot)->
-		ScreenElements = $injector.get "ScreenElements"
+	this.update = (key, value) ->
+		config[key] = value
 
-		result = dataSnapshot.val()
-		ProjectData.projectData = result
-		elementDatas = JSON.parse decodeURIComponent result.html;
-		angular.forEach elementDatas, (data, uuid) ->
-			ScreenElements.addFromDataEditor data, uuid
-
-
-	# Mode Change
-	$scope.modeList = {
-		design:
-			icon: "create"
-		program:
-			icon: "code"
-	}
-
-	$scope.changeMode = (name) ->
-
-
-	# Progress bar
-	$scope.progress = {
-		determinateValue: 0
-		isLoading: true
-	}
-	$interval () ->
-		$scope.progress.determinateValue += 34
-
-		if $scope.progress.determinateValue > 130
-			$scope.progress.isLoading = false;
-
-	, 700, 4
+	return
 
 ]
 
+.service "ProjectData", ["$http", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", ($http, ScreenCards, ScreenElements, Build, ServiceConfig) ->
+	this.name = ""
 
-.service "ProjectData", () ->
-	this.projectName = ""
-	this.projectData = {}
+	this.get = () ->
 
-.factory "Elements", () ->
-	return {
-		screen: do ->
-			console.log angular.element "#screen"
-			angular.element "#screen"
-		propertyBody: angular.element "#property-body"
+		return {
+			name: this.name
+			elements: ScreenElements.get()
+			cards: ScreenCards.get()
+			config: ServiceConfig.get()
+			sourceCode: Build.compile ScreenCards.get()
+		}
+
+	return
+]
+
+
+
+.service "Elements", [() ->
+	elements = {
+		screen: null # プロジェクトのデータをダウンロードしたあとで、ロードされる
 	}
 
+	this.get = () ->
+		return elements
+
+	this.set = (key, value) ->
+		elements[key] = value
+
+	return
+]
 # 現在選択されている要素のUUID
 .service "SelectedElementUUID", ["Elements", "SetElementProperty", "ScreenElements", (Elements, SetElementProperty, ScreenElements) ->
 	uuid = null
@@ -80,18 +64,164 @@ crosetModule
 
 		uuid = val
 		SetElementProperty val
-		console.log ScreenElements.get()[uuid].element, "ｲｪｱ"
-		$ ScreenElements.get()[uuid].element							# 選択
+
+		element = ScreenElements.get()[uuid].element
+
+		onResizedOrDraged = (ev, ui) ->
+			console.log element
+			ScreenElements.set uuid, "top", element.css "top"
+			ScreenElements.set uuid, "left", element.css "left"
+			ScreenElements.set uuid, "width", element.width()
+			ScreenElements.set uuid, "height", element.height()
+
+			return
+
+		$ element															# 選択
 			.resizable {
 				handles: "ne, se, sw, nw"
 				minHeight: 3
 				minWidth: 3
+				stop: onResizedOrDraged
 			}
 			.draggable {
 				cancel: null
+				stop: () ->
+					console.log "あああああ"
+					onResizedOrDraged()
 			}
 
+
 	return
+]
+
+
+.controller "HeaderController", ["$scope", "$http", "$mdDialog", "$mdSidenav", "$injector", "ProjectData", ($scope, $http, $mdDialog, $mdSidenav, $injector, ProjectData) ->
+	$scope.toggleSideNav = () ->
+		$mdSidenav "side-menu"
+			.toggle()
+			.then () ->
+				# $log.debug "toggle " + navID + " is done"
+
+	$scope.run = () ->
+		console.log "------------実行結果--------------"
+		$http {
+			method : 'POST'
+			url : '/project'
+			data: ProjectData.get()
+		}
+		.success (data, status, headers, config) ->
+			console.log "Saved", data
+		.error (data, status, headers, config) ->
+			console.log "Failed", data
+
+		# for key, value of elements													# 必要な情報や不要な情報などを調整
+		# 	value.top = value.element.css "top"
+		# 	value.left = value.element.css "left"
+		# 	value.width = value.element.width()
+		# 	value.height = value.element.height()
+		# 	elementsToPush[key] = value
+
+
+
+		#
+		# $http {
+		# 	method : 'POST'
+		# 	url : '/login'
+		# 	data: ProjectData.get()
+		# }
+		# .success (data, status, headers, config) ->
+		# 	console.log "Saved", data
+		# .error (data, status, headers, config) ->
+		# 	console.log "Failed", data
+
+
+]
+
+
+
+# エディタ画面のコントローラー
+.controller "EditorController", ["$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "ScreenElements", "ScreenCards", "Elements"
+($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, ScreenElements, ScreenCards, Elements) ->
+
+	$scope.settings = {
+		elementDatas: ElementDatas
+	}
+
+	$scope.mode = ""
+
+	$scope.designMode = () -> $scope.mode = "design"
+	$scope.programMode = () -> $scope.mode = "program"
+
+	# Mode Change
+	$scope.modeList = {
+		design:
+			icon: "create"
+		program:
+			icon: "code"
+	}
+
+	$scope.changeMode = (name) ->
+		console.log name
+		$state.go "editor." + name
+
+	# Progress bar
+	$scope.progress = {
+		determinateValue: 0
+		isLoading: true
+	}
+
+	$http {
+		method : 'GET'
+		url : '/project'
+		params: {
+			_id: $stateParams.projectId
+		}
+	}
+	.success (data, status, headers, config) ->
+		Elements.set "screen", angular.element "#screen"
+
+		angular.forEach data.elements, (data, uuid) ->
+			ScreenElements.addFromDataEditor data, uuid
+
+		console.log "GET", data.cards
+		ScreenCards.list = data.cards || []
+		ScreenCards.parsedCards = data.parsedCards || []
+
+		console.log data.cards
+
+		ProjectData.name = data.name
+
+		$scope.progress.isLoading = false
+		$scope.progress.determinateValue += 100
+
+		return
+
+	.error (data, status, headers, config) ->
+		console.log "Failed", data
+
+
+]
+
+
+
+
+# 画面
+.controller "ScreenController", ["$scope", "$timeout", ($scope, $timeout) ->
+
+	$scope.screenScaleRatio = 1
+	editor = $ "#editor"
+	screenZone = $  "#screen-zone"
+	screenDefaultWidth = screenZone.width()
+	screenDefaultHeight = screenZone.outerHeight()
+	$(window).on("resize", () ->
+		$timeout () ->
+			height = editor.height() - 20
+			$scope.screenScaleRatio = height / screenDefaultHeight
+			console.log height, screenDefaultHeight
+			$scope.marginRight = -1 * (screenDefaultWidth * (1 - $scope.screenScaleRatio))
+		, 0
+	).trigger("resize")
+
 ]
 
 
@@ -110,6 +240,8 @@ crosetModule
 				return
 
 			SelectedElementUUID.set $attrs.uuid						# 追加した要素を選択された状態
+
+
 		]
 
 	}

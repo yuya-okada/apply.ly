@@ -2,10 +2,13 @@ html(ng-app="Croset" ng-controller="CrosetController")
 	head
 		title Croset
 		
+		
+		
 		//- ルートによって切り替えるcss
 		link(rel="stylesheet" ng-repeat="path in cssPaths track by $index" ng-href="{{path}}.css")
 		
 		
+		link(href="https://fonts.googleapis.com/css?family=Roboto:400,300" rel='stylesheet' type='text/css')
 		
 		//- Material Icons
 		link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
@@ -28,6 +31,9 @@ html(ng-app="Croset" ng-controller="CrosetController")
 		link(rel="stylesheet" type="text/css" href="css/editor.css")
 		//- アプリコンパイル時に含まれるCSS
 		link(rel="stylesheet" type="text/css" href="css/screen.css")
+		//- ログインのダイアログのCSS
+		//- link(rel="stylesheet" href="css/login.css")
+		
 		//- Angular Material
 		link(rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.7/angular-material.min.css")
 		//- MdColorPicker(https://github.com/brianpkelley/md-color-picker)
@@ -65,10 +71,7 @@ html(ng-app="Croset" ng-controller="CrosetController")
 
 		//- ドラッグ＆ドロップモジュール (https://github.com/codef0rmer/angular-dragdrop)
 		script(src="js/ng-dragdrop/angular-dragdrop.js")
-
-		//- Fire Base
-		script(src="https://cdn.firebase.com/js/client/2.2.1/firebase.js")
-
+		
 		//- メインのJS
 		script(src="js/app.js")
 		//- エディタ画面のJS
@@ -79,9 +82,17 @@ html(ng-app="Croset" ng-controller="CrosetController")
 		script(src="js/design.js")
 		//- プログラム画面のJS
 		script(src="js/program.js")
+		//- ダッシュボードのJS
+		script(src="js/dashboard.js")
+
+
 		
 		
 	body
+				//- 	//- md-icon(md-svg-icon="call:dialpad" md-menu-align-target)
+				//- 	Redial
+			
+
 		div(layout="row" role="main" flex)
 			//- サイドメニュー
 			md-sidenav.md-sidenav-left(md-component-id="side-menu" md-disable-backdrop="")
@@ -100,30 +111,9 @@ html(ng-app="Croset" ng-controller="CrosetController")
 						md-list-item(ng-click="navigateTo(sideLink.sref)" ng-repeat="sideLink in sideLinks track by $index" ng-class="{sideLinkChild: sideLink.isChild}")
 							md-icon(aria-label="Menu" class="material-icons") {{sideLink.icon}}
 							p {{sideLink.text}}
-
+						
 
 
 			div.max-height.max-width
-
-				//- ヘッダー
-				md-toolbar#header(ng-controller="HeaderController")
-					.md-toolbar-tools
-						//- サイドメニューを開くボタン
-						md-button#toggle-side-nav.md-icon-button(ng-click="toggleSideNav()" ng-hide="isOpenRight()" aria-label="Menu")
-							md-icon.material-icons menu
-						//- サービス名。ロゴ
-						h2
-							span デザイン
-							
-						//- span.vertical-line
-						//- タイトル
-						h2
-							span Project名
-						
-						span(flex)
-						//- 実行
-						md-button.md-icon-button(ng-click="run()")
-							md-icon.material-icons play_arrow
-		
 			
 				main(ui-view="")

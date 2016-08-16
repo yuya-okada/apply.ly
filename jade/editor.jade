@@ -1,3 +1,25 @@
+
+//- ヘッダー
+md-toolbar#header(ng-controller="HeaderController")
+	.md-toolbar-tools
+		//- サイドメニューを開くボタン
+		md-button#toggle-side-nav.md-icon-button(ng-click="toggleSideNav()" ng-hide="isOpenRight()" aria-label="Menu")
+			md-icon.material-icons menu
+		//- サービス名。ロゴ
+		h2
+			span デザイン
+			
+		//- span.vertical-line
+		//- タイトル
+		h2
+			span Project名
+		
+		span(flex)
+		
+		//- 実行
+		md-button#run-fab(class="md-fab md-primary" aria-label="Run" ng-click="run()") 
+			md-icon.material-icons play_arrow
+			
 #editor(layout="row")
 	
 	#progress(layout="column" ng-show="progress.isLoading")
@@ -8,7 +30,6 @@
 	#mode-changer(layout="column")
 		md-button.selected.md-icon-button(ng-repeat="(name, modeObj) in modeList" ng-click="changeMode(name)" ng-class="{'mode-icon-active': name==mode}" aria-label="ModeIcon")
 			md-icon.material-icons {{modeObj.icon}}
-			p {{mode}}
 
 	#left-zone.editor-card.flex
 		.ui-view-fade(ui-view="left")

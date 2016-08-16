@@ -1,0 +1,30 @@
+
+<div id="dashboard" layout="column">
+  <div id="fixing-header" layout="row">
+    <h2 ng-style="{opacity: titleOpacity }">DASHBOARD</h2>
+  </div>
+  <md-button id="new-project" class="md-fab md-accent">
+    <md-icon aria-label="Menu" class="material-icons">add</md-icon>
+  </md-button>
+  <md-tabs id="tabs" md-dynamic-height="" md-border-bottom="" dashboard-tabs="dashboard-tabs">
+    <md-tab label="ダッシュボード">
+      <md-content layout="row" class="md-padding">
+        <md-card id="project-card" ng-repeat="a in [1, 2, 3, 4, 5, 6, 7]"><img ng-src="img/black_flat_bg.png" alt="Washed Out" class="md-card-image"/>
+          <div id="project-preview"></div>
+          <md-card-title>
+            <md-card-title-text><span class="md-headline">Action buttons</span></md-card-title-text>
+          </md-card-title>
+        </md-card>
+      </md-content>
+    </md-tab>
+    <md-tab label="設定">
+      <md-content class="md-padding"></md-content>
+    </md-tab>
+    <md-tab label="three">
+      <md-content class="md-padding">
+        <h1 class="md-display-2">Tab Three</h1>
+        <p>Integer turpis erat, porttitor vitae mi faucibus, laoreet interdum tellus. Curabitur posuere molestie dictum. Morbi eget congue risus, quis rhoncus quam. Suspendisse vitae hendrerit erat, at posuere mi. Cras eu fermentum nunc. Sed id ante eu orci commodo volutpat non ac est. Praesent ligula diam, congue eu enim scelerisque, finibus commodo lectus.</p>
+      </md-content>
+    </md-tab>
+  </md-tabs>
+</div>

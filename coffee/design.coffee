@@ -1,6 +1,6 @@
 crosetModule = angular.module "Croset"
 
-crosetModule
+
 
 # 画面に追加されている要素
 crosetModule.service "VisiblePropertyCards", () ->
@@ -42,24 +42,6 @@ crosetModule.service "VisiblePropertyCards", () ->
 
 
 
-# 画面
-.controller "ScreenController", ["$scope", "$timeout", ($scope, $timeout) ->
-
-	$scope.screenScaleRatio = 1
-	editor = $ "#editor"
-	screenZone = $  "#screen-zone"
-	screenDefaultWidth = screenZone.width()
-	screenDefaultHeight = screenZone.outerHeight()
-	$(window).on("resize", () ->
-		$timeout () ->
-			height = editor.height() - 20
-			$scope.screenScaleRatio = height / screenDefaultHeight
-			console.log height, screenDefaultHeight
-			$scope.marginRight = -1 * (screenDefaultWidth * (1 - $scope.screenScaleRatio))
-		, 0
-	).trigger("resize")
-
-]
 
 
 

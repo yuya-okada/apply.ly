@@ -2,8 +2,6 @@ var crosetModule;
 
 crosetModule = angular.module("Croset");
 
-crosetModule;
-
 crosetModule.service("VisiblePropertyCards", function() {
   var callback, callbacks, list;
   list = [];
@@ -54,24 +52,6 @@ crosetModule.service("VisiblePropertyCards", function() {
       }
       return VisiblePropertyCards.set(defaultData);
     };
-  }
-]).controller("ScreenController", [
-  "$scope", "$timeout", function($scope, $timeout) {
-    var editor, screenDefaultHeight, screenDefaultWidth, screenZone;
-    $scope.screenScaleRatio = 1;
-    editor = $("#editor");
-    screenZone = $("#screen-zone");
-    screenDefaultWidth = screenZone.width();
-    screenDefaultHeight = screenZone.outerHeight();
-    return $(window).on("resize", function() {
-      return $timeout(function() {
-        var height;
-        height = editor.height() - 20;
-        $scope.screenScaleRatio = height / screenDefaultHeight;
-        console.log(height, screenDefaultHeight);
-        return $scope.marginRight = -1 * (screenDefaultWidth * (1 - $scope.screenScaleRatio));
-      }, 0);
-    }).trigger("resize");
   }
 ]).controller("HierarchyController", [
   "$scope", "ScreenElements", "ElementDatas", "SelectedElementUUID", function($scope, ScreenElements, ElementDatas, SelectedElementUUID) {

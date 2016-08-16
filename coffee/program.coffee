@@ -214,7 +214,7 @@ crosetModule
 						text: "がクリックされたとき、"
 				}
 			]
-			compile: "${jquery}.click(function() { $timeout(function() { ${mat} });  })"
+			compile: "${scope}.click = function() { $timeout(function() { ${mat} });  }"
 		}
 		"text": {
 			type: "property"
@@ -224,29 +224,22 @@ crosetModule
 	}
 }
 
-.factory "ScreenCards", ()->
-	return {
-		get: () -> return this.list
-		list: [
-			{
-				blockId: "equal"
-				cardOptions:
-					exp1:
-						blockId: "exp"
-						cardOptions: {}
-						elementId: undefined
-						offset:
-							left: 0
-							top: 0
-				options: {}
-				elementId: undefined
-				offset:
-					left: 100
-					top: 100
-				options: {}
-			}
-		]
-	}
+.service "ScreenCards", ["$interval", ($interval) ->
+	this.get = () ->
+		return this.list
+	this.set = (li) ->
+		return this.list = li
+	this.getParsed = () ->
+		return this.parsedCards
+
+	this.list = []
+	this.parsedCards = []
+
+	# window.parsedCards = this.parsedCards
+	# window.getParsed = () -> return this.parsedCards
+
+	return
+]
 
 .factory "GetCardTemplate", ["$http", ($http) ->
 	fncs = []
@@ -272,8 +265,8 @@ crosetModule
 			fncs.push fnc
 ]
 
-.service "Build", ["GeneralComponents", "ElementComponents", "ScreenElements", (GeneralComponents, ElementComponents, ScreenElements) ->
-	window.build = () =>
+.service "Build", ["GeneralComponents", "ElementComponents", "ScreenElements", "ScreenCards", (GeneralComponents, ElementComponents, ScreenElements, ScreenCards) ->
+	this.build = () ->
 		return this.compile this.parse()
 
 	this.parse = () ->
@@ -284,6 +277,8 @@ crosetModule
 																	# parse関数は、croset-component-in-codeの子要素のcroset-component内で定義されている
 
 		console.log program
+		ScreenCards.parsedCards = program
+
 		return program
 
 
@@ -292,8 +287,7 @@ crosetModule
 
 		compileBlock = (block) ->
 			compileFunction = () ->
-				if !block.options
-					return ""
+
 				compiledFunction = blockData.compile
 				for optionName, optionValue of block.options
 					cardOptionValue = block.cardOptions?[optionName]		# 引数がカードならここにデータが入る
@@ -303,9 +297,11 @@ crosetModule
 
 					compiledFunction = compiledFunction.replace "${" + optionName + "}", optionValue
 
+				console.log compiledFunction, block
+
 				if block.elementId
 					compiledFunction = compiledFunction.replace "${jquery}", "$('#" + block.elementId + "')"
-					compiledFunction = compiledFunction.replace "${uuid}", "'" + block.elementId + "'"
+					compiledFunction = compiledFunction.replace "${scope}", "angular.element('#" + block.elementId + "').scope()"
 
 				return compiledFunction
 			# }
@@ -319,12 +315,13 @@ crosetModule
 			else
 				blockData = GeneralComponents[block.blockId]
 
-			console.log blockData, block
 			switch blockData.type
 				when "function"
 					compiledBlock = compileFunction()
 				when "mat"
 					compiledBlock = compileFunction()
+					console.log block
+					console.log compiledBlock
 					compiledBlock = compiledBlock.replace "${mat}", "\n" + compileMat(block.matContents) + "\n"
 				when "property"
 					compiledBlock = blockData.compile
@@ -405,10 +402,6 @@ crosetModule
 
 .controller "CodeController", ["$scope", "$element", "$compile", "ScreenCards", "ProjectData", "GenerateElement"
 ($scope, $element, $compile, ScreenCards, ProjectData, GenerateElement) ->
-	if ProjectData.projectData?.cards
-		ScreenCards.list = JSON.parse decodeURIComponent(ProjectData.projectData.cards)
-
-	console.log ScreenCards.list
 
 	window.a = ()->
 		return ScreenCards
@@ -456,29 +449,29 @@ crosetModule
 		scope: true
 
 		link: (scope, element, attrs) ->
+			scope.elementName = ""
+
 			if scope.card.elementId
-				scope.data = ElementComponents[scope.card.type][scope.card.blockId]
+				console.log ScreenElements.get()[scope.card.elementId], "かーど"
+				type = ScreenElements.get()[scope.card.elementId].type
+				scope.data = ElementComponents[type][scope.card.blockId]
+
+
 				scope.$watch () ->
 					return ScreenElements.get()[scope.card.elementId].name
 				, (newVal, oldVal) ->
 					scope.elementName = newVal
-					console.log scope.elementName
+					console.log scope.elementName, "ネーム", scope
 				, true
 
 
 			else
 				scope.data = GeneralComponents[scope.card.blockId]
 
-			element.on "contextmenu", (e)->
-				scope.$apply ()->
-					element.remove()
-					e.stopPropagation()
-
 			# console.log template
 			GetCardTemplate (template) ->
 				element.empty()
 				GenerateElement template, scope, element
-
 
 
 				bodyBottomLeftPoints = []
@@ -494,6 +487,9 @@ crosetModule
 					appendTo: "body"
 					cancel: ".croset-mat-resizer, input"
 					start: (ev, ui) ->
+						bodyBottomLeftPoints = []
+						propertyTopRightPoints = []
+						inputTopLeftPoints = []
 
 						$(".croset-component-body").each (i, e) ->
 
@@ -524,10 +520,9 @@ crosetModule
 											element: $ input
 										}
 
-						console.log inputTopLeftPoints
-
+						console.log propertyTopRightPoints
 					drag: (ev, ui) ->
-						snapDistance = 20 * ServiceConfig.componentScale					# 要素同士が吸着する距離
+						snapDistance = 20 * ServiceConfig.get().componentScale					# 要素同士が吸着する距離
 
 						pos = component.offset()
 
@@ -554,7 +549,6 @@ crosetModule
 						targetInput?.addClass "target-input"
 
 					stop: (ev, ui) ->
-
 						if bottomBorder
 							element.appendTo bottomBorder.closest "croset-component"
 							component.css {top:0, left:0}
@@ -597,6 +591,14 @@ crosetModule
 
 
 				}
+
+			scope._contextmenu = {
+				delete: () ->
+					console.log "deleting"
+					element.remove()
+					ScreenCards.list = Build.parse()
+					return
+			}
 
 	}
 ]
@@ -641,7 +643,8 @@ crosetModule
 				}
 
 				cardOptions = {}																					#　カードの引数
-				options = {}																				# 引数のカードの裏にあるインプット
+				options = {}																						# インプットの結果
+				inputOptions = {}																					# インプットの入力されたままの値
 
 				inputs = $(element).children(".croset-component-body").children("croset-component-input")
 				if !inputs[0]
@@ -655,12 +658,14 @@ crosetModule
 
 					if key
 						options[key] = inputScope.value
+						inputOptions[key] = inputScope.inputValue
 
 						if inputCard[0]															# カード
 							cardOptions[key] = inputCard.scope().parse()
 
 				data.cardOptions = cardOptions
 				data.options = options
+				data.inputOptions = inputOptions
 
 
 
@@ -700,7 +705,6 @@ crosetModule
 		scope: true
 		templateUrl: "component-function.html"
 		link: (scope, element, attrs) ->
-
 	}
 ]
 
@@ -801,10 +805,10 @@ crosetModule
 
 
 			# initialValue = scope.card?.cardOptions?[scope.input.cardOptions?.result]			# 設定データに書いてあった値
-			inputData = scope.$parent.card?.options?[scope.input?.result]
-			scope.inputValue = inputData || scope.input?.defaultValue
+			value = scope.$parent.card?.options?[scope.input?.result]
+			inputValue = scope.$parent.card?.inputOptions?[scope.input?.result]
 
-			scope.value = ""
+			scope.inputValue = inputValue || scope.input?.defaultValue
 
 	}
 ]
@@ -837,18 +841,17 @@ crosetModule
 		scope: false
 		templateUrl: "component-input-textbox.html"
 		link: (scope, element, attrs) ->
-			scope.value = "'#{scope.inputValue}'"
-
+			scope.value = "'" + scope.inputValue + "'"
 			scope.onblur = () ->
-				scope.value = "'#{newVal}'"
+				scope.value = "'" + scope.inputValue + "'"
 				ScreenCards.list = Build.parse()
+				console.log scope.value, scope.inputValue
 				return
 
 			scope.onchange = () ->
 				width = element.children("span")[0].offsetWidth;
 				element.find("input").css "width", calculateWidth(width)
 				return
-
 
 			$timeout () ->										# timeoutは、バインドされたdomのrenderが終わったタイミングで呼ばれる
 				scope.onchange()
@@ -894,5 +897,11 @@ crosetModule
 		scope: true
 		link: (scope, element, attrs) ->
 
+	}
+]
+
+.directive "componentMenu", [() ->
+	return {
+		scope: true
 	}
 ]

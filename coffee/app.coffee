@@ -1,3 +1,4 @@
+
 crosetModule = angular.module "Croset", [
 	"ui.router"				# ルーティング
 	"uiRouterStyles"				# - スタイルをつけられるようにする奴
@@ -18,11 +19,7 @@ crosetModule = angular.module "Croset", [
 #	 }
 # ]
 
-# アカウントごとのサービスの設定
-crosetModule.factory "ServiceConfig", () ->
-	return {
-		componentScale: 1							# カードのサイズ
-	}
+
 
 crosetModule.factory "getUUID", () ->
 	return () ->
@@ -50,501 +47,6 @@ crosetModule.factory "IsInDiv", () ->
 			return true
 		else
 			return false
-
-
-crosetModule.factory "ElementDatas", () ->
-	return {
-		text:
-			name: "テキスト"
-			icon: "title"
-			width: 160
-			height: 60
-			properties: [
-				{
-					title: "テキスト"
-					icon: "settings"
-					propertyInputs: [
-						[
-							{
-								type: "textarea"
-								size: 100
-								options:
-									label: "テキスト（改行可）"
-									defaultValue: "テキストを\n入力"
-									result: "text"
-							}
-						]
-						[
-							{
-								type: "color-icon"
-								size: 30
-								options:						# このInput特有の設定。インプットに送られる
-									icon: "text_format"
-									defaultValue: "#000000"
-									result: "textColor"
-								# col: 24
-							}
-							{
-								type: "toggle-icon"
-								size: 30
-								options:
-									icon: "format_bold"
-									result: "formatBold"
-							}
-							{
-								type: "toggle-icon"
-								size: 30
-								options:
-									icon: "format_italic"
-									result: "formatItalic"
-							}
-						]
-						[
-							{
-								type: "number"
-								size: 100
-								options:
-									defaultValue: 14
-									label: "フォントサイズ"
-									step: 2
-									result: "fontSize"
-							}
-						]
-						[
-							{
-								type: "select"
-								size: 50
-								options:
-									defaultValue: "left"
-									label: "文字揃え"
-									items: {
-										"左揃え" : "left"
-										"中央揃え" : "center"
-										"右揃え" : "right"
-									}
-									result: "textAlign"
-							}
-							{
-								type: "select"
-								size: 50
-								options:
-									defaultValue: "top"
-									label: "文字揃え(縦)"
-									items: {
-										"上揃え" : "top"
-										"中央揃え" : "middle"
-										"下揃え" : "bottom"
-									}
-									result: "verticalAlign"
-							}
-						]
-					]
-				}
-			]
-
-		button:
-			name: "ボタン"
-			icon: "touch_app"
-			width: 120
-			height: 40
-			properties: [
-				{
-					title: "テキスト"
-					icon: "settings"
-					propertyInputs: [
-						[
-							{
-								type: "textbox"
-								size: 100
-								options:
-									label: "テキスト"
-									defaultValue: "ボタン"
-									result: "text"
-							}
-						]
-						[
-							{
-								type: "color-icon"
-								size: 30
-								options:						# このInput特有の設定。インプットに送られる
-									icon: "text_format"
-									defaultValue: "#000000"
-									result: "textColor"
-								# col: 24
-							}
-							# {
-							# 	type: "toggle-icon"
-							# 	size: 30
-							# 	options:
-							# 		icon: "format_bold"
-							# 		result: "formatBold"
-							# }
-							{
-								type: "toggle-icon"
-								size: 30
-								options:
-									icon: "format_italic"
-									result: "formatItalic"
-							}
-						]
-						[
-							{
-								type: "number"
-								size: 100
-								options:
-									defaultValue: 14
-									label: "フォントサイズ"
-									step: 2
-									result: "fontSize"
-							}
-						]
-					]
-				}
-				{
-					title: "図形"
-					icon: "border_all"
-					propertyInputs: [
-						[
-							{
-								type: "color_icon"
-								size: 30
-								options:
-									icon: "format_color_fill"
-									defaultValue: "#ffffff"
-									result: "bgColor"
-							}
-						]
-						[
-							{
-								type: "text"
-								size: 20
-								options:
-									text: "角丸"
-							}
-							{
-								type: "slider"
-								size: 80
-								options:
-									defaultValue: 3
-									min: 0
-									max: 150
-									step: 1
-									result: "borderRadius"
-							}
-						]
-						[
-							{
-								type: "headline"
-								size: 100
-								options:
-									text: "影"
-									marginTop: 15
-							}
-						]
-						[
-							{
-								type: "text"
-								size: 20
-								options:
-									text: "透明度"
-							}
-							{
-								type: "slider"
-								size: 80
-								options:
-									defaultValue: 74
-									min: 0
-									max: 99
-									step: 1
-									result: "shadowOpacity"
-							}
-						]
-
-						[
-							{
-								type: "text"
-								size: 20
-								options:
-									text: "位置(横)"
-							}
-							{
-								type: "slider"
-								size: 80
-								options:
-									defaultValue: 0
-									min: -20
-									max: 20
-									step: 1
-									result: "shadowX"
-							}
-						]
-						[
-							{
-								type: "text"
-								size: 20
-								options:
-									text: "位置(縦)"
-							}
-							{
-								type: "slider"
-								size: 80
-								options:
-									defaultValue: 2
-									min: -20
-									max: 20
-									step: 1
-									result: "shadowY"
-							}
-						]
-						[
-							{
-								type: "text"
-								size: 20
-								options:
-									text: "ぼかし"
-							}
-							{
-								type: "slider"
-								size: 80
-								options:
-									defaultValue: 5
-									min: 0
-									max: 80
-									step: 1
-									result: "shadowGradation"
-							}
-						]
-						[
-							{
-								type: "headline"
-								size: 100
-								options:
-									text: "枠線"
-									marginTop: 15
-							}
-						]
-						[
-							{
-								type: "color_icon"
-								size: 30
-								options:
-									icon: "format_color_fill"
-									defaultValue: "#000000"
-									result: "borderColor"
-							}
-						]
-						[
-							{
-								type: "slider"
-								size: 100
-								options:
-									defaultValue: 0
-									min: 0
-									max: 20
-									step: 1
-									result: "borderWidth"
-							}
-						]
-					]
-				}
-			]
-
-		square:
-			name: "四角系"
-			icon: "crop_square"
-			width: 150
-			height: 150
-			properties: [
-				{
-					title: "図形"
-					icon: "border_all"
-					propertyInputs: [
-						[
-							{
-								type: "color_icon"
-								size: 30
-								options:
-									icon: "format_color_fill"
-									defaultValue: "#ffffff"
-									result: "bgColor"
-							}
-						]
-						[
-							{
-								type: "text"
-								size: 20
-								options:
-									text: "角丸"
-							}
-							{
-								type: "slider"
-								size: 80
-								options:
-									defaultValue: 3
-									min: 0
-									max: 150
-									step: 1
-									result: "borderRadius"
-							}
-						]
-						[
-							{
-								type: "headline"
-								size: 100
-								options	:
-									text: "影"
-									marginTop: 15
-							}
-						]
-						[
-							{
-								type: "text"
-								size: 20
-								options:
-									text: "透明度"
-							}
-							{
-								type: "slider"
-								size: 80
-								options:
-									defaultValue: 74
-									min: 0
-									max: 99
-									step: 1
-									result: "shadowOpacity"
-							}
-						]
-
-						[
-							{
-								type: "text"
-								size: 20
-								options:
-									text: "位置(横)"
-							}
-							{
-								type: "slider"
-								size: 80
-								options:
-									defaultValue: 0
-									min: -20
-									max: 20
-									step: 1
-									result: "shadowX"
-							}
-						]
-						[
-							{
-								type: "text"
-								size: 20
-								options:
-									text: "位置(縦)"
-							}
-							{
-								type: "slider"
-								size: 80
-								options:
-									defaultValue: 1
-									min: -20
-									max: 20
-									step: 1
-									result: "shadowY"
-							}
-						]
-						[
-							{
-								type: "text"
-								size: 20
-								options:
-									text: "ぼかし"
-							}
-							{
-								type: "slider"
-								size: 80
-								options:
-									defaultValue: 5
-									min: 0
-									max: 80
-									step: 1
-									result: "shadowGradation"
-							}
-						]
-						[
-							{
-								type: "headline"
-								size: 100
-								options:
-									text: "枠線"
-									marginTop: 15
-							}
-						]
-						[
-							{
-								type: "color_icon"
-								size: 30
-								options:
-									icon: "format_color_fill"
-									defaultValue: "#000000"
-									result: "borderColor"
-							}
-						]
-						[
-							{
-								type: "slider"
-								size: 100
-								options:
-									defaultValue: 0
-									min: 0
-									max: 20
-									step: 1
-									result: "borderWidth"
-							}
-						]
-					]
-				}
-			]
-
-		textbox:
-			name: "入力ボックス"
-			icon: "create"
-			width: 150
-			properties: [
-				{
-					title: "入力"
-					icon: "mode_edit"
-					propertyInputs: [
-						[
-							{
-								type: "textbox"
-								size: 100
-								options:
-									defaultValue: "入力ボックス"
-									result: "default"
-							}
-						]
-						[
-							{
-								type: "number"
-								size: 100
-								options:
-									label: "フォントサイズ"
-									defaultValue: 14
-									result: "fontSize"
-							}
-						]
-					]
-				}
-			]
-
-		checkbox:
-			name: "チェック"
-			icon: "check_box"
-
-		switch:
-			name: "スイッチ"
-			icon: "swap_horizon"
-	}
-
 
 
 .value "ColorPallet", {
@@ -636,7 +138,7 @@ crosetModule.config ["$stateProvider", "$urlRouterProvider", "$mdThemingProvider
 
 		$stateProvider
 			.state "editor", {
-				url: "/editor/:projectname"
+				url: "/editor/:projectId"
 				controller: "EditorController"
 				templateUrl: "editor.html"
 			}
@@ -656,10 +158,48 @@ crosetModule.config ["$stateProvider", "$urlRouterProvider", "$mdThemingProvider
 					right:
 						templateUrl: "program.html"
 			}
+			.state "login", {
+				url: "/login"
+				css: "css/login"
+				templateUrl: "login.html"
+				controller: "LoginController"
+			}
+			.state "dashboard", {
+				url: "/dashboard"
+				css: "css/dashboard"
+				templateUrl: "dashboard.html"
+				controller: "DashboardController"
+			}
 
 		# $urlRouterProvider.otherwise "editor"
 	]
 
+crosetModule.controller "LoginController", ["$scope", ($scope) ->
+	$('.form-control').on 'focus blur', (e) ->
+		$(this).parents '.form-group'
+			.toggleClass 'focused', (e.type == 'focus' || this.value.length > 0)
+
+	.trigger 'blur'
+
+	$('#moveleft').click () ->
+		$('#textbox').animate {
+			marginLeft: "0" #moves left
+		}
+
+		$('.toplam').animate {
+			marginLeft: "100%" #moves right
+		}
+
+	$('#moveright').click () ->
+		$('#textbox').animate {
+			marginLeft: "50%" #moves right
+		}
+
+		$('.toplam').animate {
+			marginLeft: "0" #moves right
+		}
+
+]
 
 
 crosetModule.controller "CrosetController", ["$scope", "$rootScope", ($scope, $rootScope) ->
@@ -674,42 +214,6 @@ crosetModule.controller "CrosetController", ["$scope", "$rootScope", ($scope, $r
 ]
 
 
-crosetModule.controller "HeaderController", ["$scope", "$mdSidenav", "$injector", ($scope, $mdSidenav, $injector) ->
-	$scope.toggleSideNav = () ->
-		$mdSidenav "side-menu"
-			.toggle()
-			.then () ->
-				# $log.debug "toggle " + navID + " is done"
-
-	dataStore = new Firebase "https://apply-backend.firebaseio.com/"
-
-
-	ScreenElements = null
-	ProjectData = null
-	$scope.run = () ->
-		ScreenElements ?= $injector.get("ScreenElements")
-		ProjectData ?= $injector.get("ProjectData")
-
-		elements = ScreenElements.get()
-		elementsToPush = {}
-		for key, value of elements													# 必要な情報や不要な情報などを調整
-			value.top = value.element.css "top"
-			value.left = value.element.css "left"
-			value.width = value.element.width()
-			value.height = value.element.height()
-			elementsToPush[key] = value
-
-
-		dataStore.child("projects").child(ProjectData.projectName).update {
-			title: "test"
-			html: encodeURIComponent JSON.stringify elementsToPush
-			js: encodeURIComponent window.build()
-			cards: encodeURIComponent JSON.stringify $injector.get("ScreenCards").get()
-
-		}
-
-]
-
 
 crosetModule.controller "SideMenuController", ["$scope", "$injector", "$state", "$mdSidenav", ($scope, $injector, $state, $mdSidenav) ->
 	$scope.toggleSideNav = () ->
@@ -717,9 +221,6 @@ crosetModule.controller "SideMenuController", ["$scope", "$injector", "$state", 
 			.toggle()
 			.then () ->
 
-	$scope.changeMode = () ->
-		ProjectData = $injector.get "ProjectData"
-		$scope.projectname = ProjectData.projectName
 
 	$scope.navigateTo = (sref) ->
 		$state.go sref
@@ -756,4 +257,51 @@ crosetModule.controller "SideMenuController", ["$scope", "$injector", "$state", 
 					result.push child
 
 		return result
+]
+
+# 右クリックイベントを実装
+.directive "ngRightClick", ["$parse", ($parse) ->
+	return (scope, element, attrs) ->
+		fn = $parse attrs.ngRightClick
+		element.bind 'contextmenu', (event) ->
+			scope.$apply () ->
+				event.preventDefault()
+				fn scope, {$event:event}
+
+			return
+]
+
+### コンテキストメニュー
+ 	.e(ng-context-menu="#menu")   の場合、
+	#menuを.eのコンテキストメニューとして使用し、.eのスコープの_contextmenuプロパティの中身をすべて#menuのスコープに展開する
+###
+crosetModule.directive "ngContextMenu", ["$parse", "$compile", ($parse, $compile) ->
+	return (scope, element, attrs) ->
+
+		# コンテキストメニュー要素の初期化
+		menu = angular.element attrs.ngContextMenu
+		menu.appendTo $("body")
+			.hide()
+
+		element.bind "contextmenu", (event) ->
+			scope.$apply () ->
+				menu.show()
+					.offset {
+						top: event.pageY
+						left: event.pageX
+					}
+
+				angular.forEach element.scope()._contextmenu, (value, key) ->		# プロパティ展開
+					menu.scope()[key] = value
+
+			return false
+
+		# 削除処理
+		$(window).bind "mouseup", (e) ->
+			if e.which != 1
+				return false    				# 右クリック、中クリックは無効
+
+			menu.hide()
+
+			return
 ]

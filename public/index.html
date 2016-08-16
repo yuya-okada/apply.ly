@@ -3,6 +3,7 @@
   <head>
     <title>Croset</title>
     <link rel="stylesheet" ng-repeat="path in cssPaths track by $index" ng-href="{{path}}.css"/>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,300" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css"/>
     <link rel="stylesheet" type="text/css" href="css/responsive.gs.24col.css"/>
@@ -31,51 +32,36 @@
     <script src="js/md-color-picker/tiny-color.min.js"></script>
     <script src="js/md-color-picker/md-color-picker.js"></script>
     <script src="js/ng-dragdrop/angular-dragdrop.js"></script>
-    <script src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
     <script src="js/app.js"></script>
     <script src="js/editor.js"></script>
     <script src="js/built-in.js"></script>
     <script src="js/design.js"></script>
     <script src="js/program.js"></script>
-    <script type="text/ng-template" id="page.html">
-      <p>pageだよ</p>
-    </script>
+    <script src="js/dashboard.js"></script>
   </head>
   <body>
-    <div layout="row" role="main" flex="flex">
-      <md-sidenav md-component-id="side-menu" md-disable-backdrop="" class="md-sidenav-left">
-        <div ng-controller="SideMenuController">
-          <md-toolbar ng-click="toggleSideNav()">
-            <h1 class="md-toolbar-tools">Croset</h1>
-          </md-toolbar>
-          <div id="user-cover-img" layout="column" class="max-width">
-            <div layout="row"><img id="user-icon" src="img/icon.png"/>
-              <div layout="column"><span>Name</span></div>
-            </div>
-          </div>
-          <md-list ng-cloak="ng-cloak">
-            <md-list-item ng-click="navigateTo(sideLink.sref)" ng-repeat="sideLink in sideLinks track by $index" ng-class="{sideLinkChild: sideLink.isChild}">
-              <md-icon aria-label="Menu" class="material-icons">{{sideLink.icon}}</md-icon>
-              <p>{{sideLink.text}}</p>
-            </md-list-item>
-          </md-list>
-        </div>
-      </md-sidenav>
-      <div class="max-height max-width">
-        <md-toolbar id="header" ng-controller="HeaderController">
-          <div class="md-toolbar-tools">
-            <md-button id="toggle-side-nav" ng-click="toggleSideNav()" ng-hide="isOpenRight()" aria-label="Menu" class="md-icon-button">
-              <md-icon class="material-icons">menu</md-icon>
-            </md-button>
-            <h2><span>デザイン</span></h2>
-            <h2><span>Project名</span></h2><span flex="flex"></span>
-            <md-button ng-click="run()" class="md-icon-button">
-              <md-icon class="material-icons">play_arrow</md-icon>
-            </md-button>
-          </div>
-        </md-toolbar>
-        <main ui-view=""></main>
-      </div>
-    </div>
   </body>
+  <div layout="row" role="main" flex="flex">
+    <md-sidenav md-component-id="side-menu" md-disable-backdrop="" class="md-sidenav-left">
+      <div ng-controller="SideMenuController">
+        <md-toolbar ng-click="toggleSideNav()">
+          <h1 class="md-toolbar-tools">Croset</h1>
+        </md-toolbar>
+        <div id="user-cover-img" layout="column" class="max-width">
+          <div layout="row"><img id="user-icon" src="img/icon.png"/>
+            <div layout="column"><span>Name</span></div>
+          </div>
+        </div>
+        <md-list ng-cloak="ng-cloak">
+          <md-list-item ng-click="navigateTo(sideLink.sref)" ng-repeat="sideLink in sideLinks track by $index" ng-class="{sideLinkChild: sideLink.isChild}">
+            <md-icon aria-label="Menu" class="material-icons">{{sideLink.icon}}</md-icon>
+            <p>{{sideLink.text}}</p>
+          </md-list-item>
+        </md-list>
+      </div>
+    </md-sidenav>
+    <div class="max-height max-width">
+      <main ui-view=""></main>
+    </div>
+  </div>
 </html>

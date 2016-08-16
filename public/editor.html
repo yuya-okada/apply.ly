@@ -1,4 +1,16 @@
 
+<md-toolbar id="header" ng-controller="HeaderController">
+  <div class="md-toolbar-tools">
+    <md-button id="toggle-side-nav" ng-click="toggleSideNav()" ng-hide="isOpenRight()" aria-label="Menu" class="md-icon-button">
+      <md-icon class="material-icons">menu</md-icon>
+    </md-button>
+    <h2><span>デザイン</span></h2>
+    <h2><span>Project名</span></h2><span flex="flex"></span>
+    <md-button id="run-fab" aria-label="Run" ng-click="run()" class="md-fab md-primary"> 
+      <md-icon class="material-icons">play_arrow</md-icon>
+    </md-button>
+  </div>
+</md-toolbar>
 <div id="editor" layout="row">
   <div id="progress" layout="column" ng-show="progress.isLoading"><img src="http://assets.materialup.com/uploads/d0b393f6-3975-48dd-b7ca-bf0289187c6e/preview"/>
     <md-progress-linear md-mode="determinate" value="{{progress.determinateValue}}"></md-progress-linear>
@@ -6,7 +18,6 @@
   <div id="mode-changer" layout="column">
     <md-button ng-repeat="(name, modeObj) in modeList" ng-click="changeMode(name)" ng-class="{'mode-icon-active': name==mode}" aria-label="ModeIcon" class="selected md-icon-button">
       <md-icon class="material-icons">{{modeObj.icon}}</md-icon>
-      <p>{{mode}}</p>
     </md-button>
   </div>
   <div id="left-zone" class="editor-card flex">

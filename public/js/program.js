@@ -195,7 +195,7 @@ crosetModule.value("GeneralComponents", {
           }
         }
       ],
-      compile: "${jquery}.click(function() { $timeout(function() { ${mat} });  })"
+      compile: "${scope}.click = function() { $timeout(function() { ${mat} });  }"
     },
     "text": {
       type: "property",
@@ -203,36 +203,21 @@ crosetModule.value("GeneralComponents", {
       compile: "${scope}.options.text"
     }
   }
-}).factory("ScreenCards", function() {
-  return {
-    get: function() {
+}).service("ScreenCards", [
+  "$interval", function($interval) {
+    this.get = function() {
       return this.list;
-    },
-    list: [
-      {
-        blockId: "equal",
-        cardOptions: {
-          exp1: {
-            blockId: "exp",
-            cardOptions: {},
-            elementId: void 0,
-            offset: {
-              left: 0,
-              top: 0
-            }
-          }
-        },
-        options: {},
-        elementId: void 0,
-        offset: {
-          left: 100,
-          top: 100
-        },
-        options: {}
-      }
-    ]
-  };
-}).factory("GetCardTemplate", [
+    };
+    this.set = function(li) {
+      return this.list = li;
+    };
+    this.getParsed = function() {
+      return this.parsedCards;
+    };
+    this.list = [];
+    this.parsedCards = [];
+  }
+]).factory("GetCardTemplate", [
   "$http", function($http) {
     var fncs, template;
     fncs = [];
@@ -258,12 +243,10 @@ crosetModule.value("GeneralComponents", {
     };
   }
 ]).service("Build", [
-  "GeneralComponents", "ElementComponents", "ScreenElements", function(GeneralComponents, ElementComponents, ScreenElements) {
-    window.build = (function(_this) {
-      return function() {
-        return _this.compile(_this.parse());
-      };
-    })(this);
+  "GeneralComponents", "ElementComponents", "ScreenElements", "ScreenCards", function(GeneralComponents, ElementComponents, ScreenElements, ScreenCards) {
+    this.build = function() {
+      return this.compile(this.parse());
+    };
     this.parse = function() {
       var program;
       program = [];
@@ -273,6 +256,7 @@ crosetModule.value("GeneralComponents", {
         return program.push(childScope.parse());
       });
       console.log(program);
+      ScreenCards.parsedCards = program;
       return program;
     };
     this.compile = function(source) {
@@ -281,9 +265,6 @@ crosetModule.value("GeneralComponents", {
         var blockData, compileFunction, compiledBlock, elementData;
         compileFunction = function() {
           var cardOptionValue, compiledFunction, optionName, optionValue, ref, ref1;
-          if (!block.options) {
-            return "";
-          }
           compiledFunction = blockData.compile;
           ref = block.options;
           for (optionName in ref) {
@@ -294,9 +275,10 @@ crosetModule.value("GeneralComponents", {
             }
             compiledFunction = compiledFunction.replace("${" + optionName + "}", optionValue);
           }
+          console.log(compiledFunction, block);
           if (block.elementId) {
             compiledFunction = compiledFunction.replace("${jquery}", "$('#" + block.elementId + "')");
-            compiledFunction = compiledFunction.replace("${uuid}", "'" + block.elementId + "'");
+            compiledFunction = compiledFunction.replace("${scope}", "angular.element('#" + block.elementId + "').scope()");
           }
           return compiledFunction;
         };
@@ -307,13 +289,14 @@ crosetModule.value("GeneralComponents", {
         } else {
           blockData = GeneralComponents[block.blockId];
         }
-        console.log(blockData, block);
         switch (blockData.type) {
           case "function":
             compiledBlock = compileFunction();
             break;
           case "mat":
             compiledBlock = compileFunction();
+            console.log(block);
+            console.log(compiledBlock);
             compiledBlock = compiledBlock.replace("${mat}", "\n" + compileMat(block.matContents) + "\n");
             break;
           case "property":
@@ -393,25 +376,20 @@ crosetModule.value("GeneralComponents", {
   }
 ]).controller("CodeController", [
   "$scope", "$element", "$compile", "ScreenCards", "ProjectData", "GenerateElement", function($scope, $element, $compile, ScreenCards, ProjectData, GenerateElement) {
-    var ref;
-    if ((ref = ProjectData.projectData) != null ? ref.cards : void 0) {
-      ScreenCards.list = JSON.parse(decodeURIComponent(ProjectData.projectData.cards));
-    }
-    console.log(ScreenCards.list);
     window.a = function() {
       return ScreenCards;
     };
     return $scope.$watch(function() {
       return ScreenCards.get();
     }, function(newVal, oldVal) {
-      var card, j, len, ref1, results, scope;
+      var card, j, len, ref, results, scope;
       $scope.cards = ScreenCards.get();
       $($element).empty();
       console.log($scope.cards);
-      ref1 = ScreenCards.get();
+      ref = ScreenCards.get();
       results = [];
-      for (j = 0, len = ref1.length; j < len; j++) {
-        card = ref1[j];
+      for (j = 0, len = ref.length; j < len; j++) {
+        card = ref[j];
         scope = $scope.$new(true);
         scope.card = card;
         results.push(GenerateElement("<croset-component-in-code>", scope, $element));
@@ -451,24 +429,22 @@ crosetModule.value("GeneralComponents", {
       restrict: "E",
       scope: true,
       link: function(scope, element, attrs) {
+        var type;
+        scope.elementName = "";
         if (scope.card.elementId) {
-          scope.data = ElementComponents[scope.card.type][scope.card.blockId];
+          console.log(ScreenElements.get()[scope.card.elementId], "かーど");
+          type = ScreenElements.get()[scope.card.elementId].type;
+          scope.data = ElementComponents[type][scope.card.blockId];
           scope.$watch(function() {
             return ScreenElements.get()[scope.card.elementId].name;
           }, function(newVal, oldVal) {
             scope.elementName = newVal;
-            return console.log(scope.elementName);
+            return console.log(scope.elementName, "ネーム", scope);
           }, true);
         } else {
           scope.data = GeneralComponents[scope.card.blockId];
         }
-        element.on("contextmenu", function(e) {
-          return scope.$apply(function() {
-            element.remove();
-            return e.stopPropagation();
-          });
-        });
-        return GetCardTemplate(function(template) {
+        GetCardTemplate(function(template) {
           var bodyBottomLeftPoints, bottomBorder, component, inputTopLeftPoints, modifyIcon, propertyTopRightPoints, targetInput;
           element.empty();
           GenerateElement(template, scope, element);
@@ -483,6 +459,9 @@ crosetModule.value("GeneralComponents", {
             appendTo: "body",
             cancel: ".croset-mat-resizer, input",
             start: function(ev, ui) {
+              bodyBottomLeftPoints = [];
+              propertyTopRightPoints = [];
+              inputTopLeftPoints = [];
               $(".croset-component-body").each(function(i, e) {
                 var icon;
                 if (!$(e).closest(element)[0]) {
@@ -514,11 +493,11 @@ crosetModule.value("GeneralComponents", {
                   });
                 }
               });
-              return console.log(inputTopLeftPoints);
+              return console.log(propertyTopRightPoints);
             },
             drag: function(ev, ui) {
               var bodyBottomLeftPoint, inputTopLeftPoint, j, k, l, len, len1, len2, pos, propertyTopRightPoint, snapDistance;
-              snapDistance = 20 * ServiceConfig.componentScale;
+              snapDistance = 20 * ServiceConfig.get().componentScale;
               pos = component.offset();
               if (bottomBorder != null) {
                 bottomBorder.removeClass("bottom-border");
@@ -596,6 +575,13 @@ crosetModule.value("GeneralComponents", {
             }
           });
         });
+        return scope._contextmenu = {
+          "delete": function() {
+            console.log("deleting");
+            element.remove();
+            ScreenCards.list = Build.parse();
+          }
+        };
       }
     };
   }
@@ -626,7 +612,7 @@ crosetModule.value("GeneralComponents", {
           element.append(child);
         }
         return scope.parse = function() {
-          var cardOptions, data, inputs, matChildren, options, propertyChild;
+          var cardOptions, data, inputOptions, inputs, matChildren, options, propertyChild;
           data = {
             offset: {
               top: element.css("top"),
@@ -637,6 +623,7 @@ crosetModule.value("GeneralComponents", {
           };
           cardOptions = {};
           options = {};
+          inputOptions = {};
           inputs = $(element).children(".croset-component-body").children("croset-component-input");
           if (!inputs[0]) {
             inputs = $(element).children(".croset-component-body").children(".croset-mat-flex").children("croset-component-input");
@@ -648,6 +635,7 @@ crosetModule.value("GeneralComponents", {
             key = inputScope.input.result;
             if (key) {
               options[key] = inputScope.value;
+              inputOptions[key] = inputScope.inputValue;
               if (inputCard[0]) {
                 return cardOptions[key] = inputCard.scope().parse();
               }
@@ -655,6 +643,7 @@ crosetModule.value("GeneralComponents", {
           });
           data.cardOptions = cardOptions;
           data.options = options;
+          data.inputOptions = inputOptions;
           childScope = angular.element($(element).children("croset-component-in-code")).scope();
           if (childScope) {
             data.child = childScope.parse();
@@ -762,7 +751,7 @@ crosetModule.value("GeneralComponents", {
       restrict: "E",
       scope: true,
       link: function(scope, element, attrs) {
-        var cardData, cardScope, e, inputData, ref, ref1, ref2, ref3, ref4, ref5, ref6;
+        var cardData, cardScope, e, inputValue, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, value;
         element.empty();
         cardData = (ref = scope.$parent.card) != null ? (ref1 = ref.cardOptions) != null ? ref1[(ref2 = scope.input) != null ? ref2.result : void 0] : void 0 : void 0;
         if (cardData != null ? cardData.blockId : void 0) {
@@ -777,9 +766,9 @@ crosetModule.value("GeneralComponents", {
         e = angular.element("<croset-component-input-" + scope.input.type + ">");
         e = $compile(e)(scope);
         e.appendTo(element);
-        inputData = (ref3 = scope.$parent.card) != null ? (ref4 = ref3.options) != null ? ref4[(ref5 = scope.input) != null ? ref5.result : void 0] : void 0 : void 0;
-        scope.inputValue = inputData || ((ref6 = scope.input) != null ? ref6.defaultValue : void 0);
-        return scope.value = "";
+        value = (ref3 = scope.$parent.card) != null ? (ref4 = ref3.options) != null ? ref4[(ref5 = scope.input) != null ? ref5.result : void 0] : void 0 : void 0;
+        inputValue = (ref6 = scope.$parent.card) != null ? (ref7 = ref6.inputOptions) != null ? ref7[(ref8 = scope.input) != null ? ref8.result : void 0] : void 0 : void 0;
+        return scope.inputValue = inputValue || ((ref9 = scope.input) != null ? ref9.defaultValue : void 0);
       }
     };
   }
@@ -812,8 +801,9 @@ crosetModule.value("GeneralComponents", {
       link: function(scope, element, attrs) {
         scope.value = "'" + scope.inputValue + "'";
         scope.onblur = function() {
-          scope.value = "'" + newVal + "'";
+          scope.value = "'" + scope.inputValue + "'";
           ScreenCards.list = Build.parse();
+          console.log(scope.value, scope.inputValue);
         };
         scope.onchange = function() {
           var width;
@@ -866,6 +856,12 @@ crosetModule.value("GeneralComponents", {
       restrict: "C",
       scope: true,
       link: function(scope, element, attrs) {}
+    };
+  }
+]).directive("componentMenu", [
+  function() {
+    return {
+      scope: true
     };
   }
 ]);

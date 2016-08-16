@@ -5,6 +5,7 @@
 		md-tabs(md-dynamic-height md-border-bottom)
 				md-tab(label="基本")
 					md-content.md-padding
+
 						md-list(ng-cloak)
 							md-item(add-component-button ng-click="addComponent(componentId)" ng-repeat="(componentId, data) in generalComponents")
 								croset-component(md-ink-ripple data="data" croset-component-in-list)
@@ -18,5 +19,13 @@
 	
 	
 	#program-code-wrapper.mat-wrapper(class="flex")
+	
 		#program-code.croset-mat(flex ng-controller="CodeController")
 			//- (card="card" ng-repeat="card in cards")
+		
+//- カードを右クリックした時のメニュー
+md-menu-content#component-menu(component-menu)
+	md-menu-item
+		md-button(ng-click="delete()")
+			md-icon(md-menu-origin aria-label="Delete" class="material-icons") delete
+			| 削除

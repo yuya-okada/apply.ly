@@ -9,6 +9,7 @@ md-progress-linear.md-default-theme .md-container, md-progress-linear .md-contai
 
 
 html, body {
+	font-family: 'Roboto', sans-serif;
     position: relative;
     width: 100%;
     margin: 0;
@@ -92,16 +93,11 @@ md-sidenav {
 	}
 }
 
-#header {
-	@extend .bg-white;
-	.material-icons {
-		color: black;
-	}
-}
+
 
 
 main {
-	height: calc(100% - 64px);
+	height: calc(100% - 60px);
     position: relative;
     @include flex(1);
 }

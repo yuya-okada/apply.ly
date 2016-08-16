@@ -2,10 +2,104 @@ var crosetModule;
 
 crosetModule = angular.module("Croset");
 
-crosetModule.controller("EditorController", [
-  "$scope", "ElementDatas", "$stateParams", "$injector", "ProjectData", "$interval", "$rootScope", function($scope, ElementDatas, $stateParams, $injector, ProjectData, $interval, $rootScope) {
-    var dataStore;
-    ProjectData.projectName = $stateParams.projectname;
+crosetModule.service("ServiceConfig", [
+  function() {
+    var config;
+    config = {
+      componentScale: 1
+    };
+    this.get = function() {
+      return config;
+    };
+    this.update = function(key, value) {
+      return config[key] = value;
+    };
+  }
+]).service("ProjectData", [
+  "$http", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", function($http, ScreenCards, ScreenElements, Build, ServiceConfig) {
+    this.name = "";
+    this.get = function() {
+      return {
+        name: this.name,
+        elements: ScreenElements.get(),
+        cards: ScreenCards.get(),
+        config: ServiceConfig.get(),
+        sourceCode: Build.compile(ScreenCards.get())
+      };
+    };
+  }
+]).service("Elements", [
+  function() {
+    var elements;
+    elements = {
+      screen: null
+    };
+    this.get = function() {
+      return elements;
+    };
+    this.set = function(key, value) {
+      return elements[key] = value;
+    };
+  }
+]).service("SelectedElementUUID", [
+  "Elements", "SetElementProperty", "ScreenElements", function(Elements, SetElementProperty, ScreenElements) {
+    var uuid;
+    uuid = null;
+    this.get = function() {
+      return uuid;
+    };
+    this.set = function(val) {
+      var element, onResizedOrDraged;
+      if (val === uuid) {
+        return;
+      }
+      if (uuid && ScreenElements.get()[uuid]) {
+        $(ScreenElements.get()[uuid].element).resizable("destroy");
+      }
+      uuid = val;
+      SetElementProperty(val);
+      element = ScreenElements.get()[uuid].element;
+      onResizedOrDraged = function(ev, ui) {
+        console.log(element);
+        ScreenElements.set(uuid, "top", element.css("top"));
+        ScreenElements.set(uuid, "left", element.css("left"));
+        ScreenElements.set(uuid, "width", element.width());
+        ScreenElements.set(uuid, "height", element.height());
+      };
+      return $(element).resizable({
+        handles: "ne, se, sw, nw",
+        minHeight: 3,
+        minWidth: 3,
+        stop: onResizedOrDraged
+      }).draggable({
+        cancel: null,
+        stop: function() {
+          console.log("あああああ");
+          return onResizedOrDraged();
+        }
+      });
+    };
+  }
+]).controller("HeaderController", [
+  "$scope", "$http", "$mdDialog", "$mdSidenav", "$injector", "ProjectData", function($scope, $http, $mdDialog, $mdSidenav, $injector, ProjectData) {
+    $scope.toggleSideNav = function() {
+      return $mdSidenav("side-menu").toggle().then(function() {});
+    };
+    return $scope.run = function() {
+      console.log("------------実行結果--------------");
+      return $http({
+        method: 'POST',
+        url: '/project',
+        data: ProjectData.get()
+      }).success(function(data, status, headers, config) {
+        return console.log("Saved", data);
+      }).error(function(data, status, headers, config) {
+        return console.log("Failed", data);
+      });
+    };
+  }
+]).controller("EditorController", [
+  "$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "ScreenElements", "ScreenCards", "Elements", function($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, ScreenElements, ScreenCards, Elements) {
     $scope.settings = {
       elementDatas: ElementDatas
     };
@@ -16,17 +110,6 @@ crosetModule.controller("EditorController", [
     $scope.programMode = function() {
       return $scope.mode = "program";
     };
-    dataStore = new Firebase("https://apply-backend.firebaseio.com/");
-    dataStore.child("projects").child(ProjectData.projectName).once("value", function(dataSnapshot) {
-      var ScreenElements, elementDatas, result;
-      ScreenElements = $injector.get("ScreenElements");
-      result = dataSnapshot.val();
-      ProjectData.projectData = result;
-      elementDatas = JSON.parse(decodeURIComponent(result.html));
-      return angular.forEach(elementDatas, function(data, uuid) {
-        return ScreenElements.addFromDataEditor(data, uuid);
-      });
-    });
     $scope.modeList = {
       design: {
         icon: "create"
@@ -35,54 +118,53 @@ crosetModule.controller("EditorController", [
         icon: "code"
       }
     };
-    $scope.changeMode = function(name) {};
+    $scope.changeMode = function(name) {
+      console.log(name);
+      return $state.go("editor." + name);
+    };
     $scope.progress = {
       determinateValue: 0,
       isLoading: true
     };
-    return $interval(function() {
-      $scope.progress.determinateValue += 34;
-      if ($scope.progress.determinateValue > 130) {
-        return $scope.progress.isLoading = false;
+    return $http({
+      method: 'GET',
+      url: '/project',
+      params: {
+        _id: $stateParams.projectId
       }
-    }, 700, 4);
-  }
-]).service("ProjectData", function() {
-  this.projectName = "";
-  return this.projectData = {};
-}).factory("Elements", function() {
-  return {
-    screen: (function() {
-      console.log(angular.element("#screen"));
-      return angular.element("#screen");
-    })(),
-    propertyBody: angular.element("#property-body")
-  };
-}).service("SelectedElementUUID", [
-  "Elements", "SetElementProperty", "ScreenElements", function(Elements, SetElementProperty, ScreenElements) {
-    var uuid;
-    uuid = null;
-    this.get = function() {
-      return uuid;
-    };
-    this.set = function(val) {
-      if (val === uuid) {
-        return;
-      }
-      if (uuid && ScreenElements.get()[uuid]) {
-        $(ScreenElements.get()[uuid].element).resizable("destroy");
-      }
-      uuid = val;
-      SetElementProperty(val);
-      console.log(ScreenElements.get()[uuid].element, "ｲｪｱ");
-      return $(ScreenElements.get()[uuid].element).resizable({
-        handles: "ne, se, sw, nw",
-        minHeight: 3,
-        minWidth: 3
-      }).draggable({
-        cancel: null
+    }).success(function(data, status, headers, config) {
+      Elements.set("screen", angular.element("#screen"));
+      angular.forEach(data.elements, function(data, uuid) {
+        return ScreenElements.addFromDataEditor(data, uuid);
       });
-    };
+      console.log("GET", data.cards);
+      ScreenCards.list = data.cards || [];
+      ScreenCards.parsedCards = data.parsedCards || [];
+      console.log(data.cards);
+      ProjectData.name = data.name;
+      $scope.progress.isLoading = false;
+      $scope.progress.determinateValue += 100;
+    }).error(function(data, status, headers, config) {
+      return console.log("Failed", data);
+    });
+  }
+]).controller("ScreenController", [
+  "$scope", "$timeout", function($scope, $timeout) {
+    var editor, screenDefaultHeight, screenDefaultWidth, screenZone;
+    $scope.screenScaleRatio = 1;
+    editor = $("#editor");
+    screenZone = $("#screen-zone");
+    screenDefaultWidth = screenZone.width();
+    screenDefaultHeight = screenZone.outerHeight();
+    return $(window).on("resize", function() {
+      return $timeout(function() {
+        var height;
+        height = editor.height() - 20;
+        $scope.screenScaleRatio = height / screenDefaultHeight;
+        console.log(height, screenDefaultHeight);
+        return $scope.marginRight = -1 * (screenDefaultWidth * (1 - $scope.screenScaleRatio));
+      }, 0);
+    }).trigger("resize");
   }
 ]).directive("crosetElementEditor", function() {
   return {

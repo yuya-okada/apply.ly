@@ -1,0 +1,36 @@
+
+
+#dashboard(layout="column")
+	#fixing-header(layout="row")
+		h2(ng-style="{opacity: titleOpacity }") DASHBOARD
+	
+	md-button#new-project(class="md-fab md-accent")
+		md-icon(aria-label="Menu" class="material-icons") add
+	
+	md-tabs#tabs(md-dynamic-height='', md-border-bottom='' dashboard-tabs)
+		
+		md-tab(label='ダッシュボード')
+			md-content.md-padding(layout="row")
+			
+				md-card#project-card(ng-repeat="a in [1, 2, 3, 4, 5, 6, 7]")
+					img(ng-src="img/black_flat_bg.png" class="md-card-image" alt="Washed Out")
+					#project-preview
+						
+					md-card-title
+						md-card-title-text
+							span.md-headline Action buttons
+							
+					//- md-card-content
+					//- 	p aaaa
+						
+						
+		md-tab(label='設定')
+			md-content.md-padding
+				
+					
+					
+		md-tab(label='three')
+			md-content.md-padding
+				h1.md-display-2 Tab Three
+				p
+					| Integer turpis erat, porttitor vitae mi faucibus, laoreet interdum tellus. Curabitur posuere molestie dictum. Morbi eget congue risus, quis rhoncus quam. Suspendisse vitae hendrerit erat, at posuere mi. Cras eu fermentum nunc. Sed id ante eu orci commodo volutpat non ac est. Praesent ligula diam, congue eu enim scelerisque, finibus commodo lectus.
