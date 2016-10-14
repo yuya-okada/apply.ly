@@ -1,0 +1,45 @@
+/* line 1, ../../sass/screen.scss */
+.crosetBold {
+  font-weight: bold;
+}
+
+/* line 5, ../../sass/screen.scss */
+.crosetItalic {
+  font-style: italic !important;
+}
+
+/* line 9, ../../sass/screen.scss */
+.croset-element {
+  display: block;
+  position: absolute;
+}
+
+/* line 16, ../../sass/screen.scss */
+croset-element-button button {
+  width: 100%;
+  height: 100%;
+  margin: 0 !important;
+  min-width: 0px !important;
+  min-height: 0px !important;
+}
+
+/* line 26, ../../sass/screen.scss */
+croset-element-text {
+  display: table;
+}
+/* line 28, ../../sass/screen.scss */
+croset-element-text div {
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  overflow-y: hidden;
+  display: table-cell;
+}
+
+/* line 41, ../../sass/screen.scss */
+croset-element-square div {
+  width: 100%;
+  height: 100%;
+}

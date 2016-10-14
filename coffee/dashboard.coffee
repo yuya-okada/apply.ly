@@ -1,46 +1,84 @@
-crosetModule.controller "DashboardController", ["$scope", ($scope) ->
-	$("body").scrollTop 0
-]
+crosetModule
 
-.directive "dashboardTabs", ["$interval", ($interval) ->
+# ng-repeatが更新されたとき、DOM更新後に各要素についてイベントを着火する
+# 呼ばれるイベントは repeatFinishedEventFired (event, element)
+.directive "repeatFinished", ($timeout) ->
 	return (scope, element, attrs) ->
-		$body = angular.element("body")
-		$tabsWrapper = $(element).children("md-tabs-wrapper")
-		$tabContent = $(element).find("md-content")
+		# ループが最後であるときに呼ばれる
+		if scope.$last
+			$timeout () ->
+				scope.$emit "repeatFinishedEventFired", element  #イベント発火
 
 
-		shadowTopOfTab = false
-		shadowBottomOfTab = false
+.controller "DashboardController", ["$scope", "$http", "$mdDialog", "$mdSidenav", "$state", "$rootScope", "ScreenElements", "Elements" ,($scope, $http, $mdDialog, $mdSidenav, $state, $rootScope, ScreenElements, Elements) ->
 
-		$(document).on "scroll", ()->
-
-			scope.$apply ()->
-
-				scope.titleOpacity = 1 - $body.scrollTop() / 100
-
-				if $body.scrollTop() > 10
-					$(element).addClass "md-whiteframe-6dp"
-				else
-					$(element).removeClass "md-whiteframe-6dp"
+	$scope.toggleSideNav = () ->
+		$mdSidenav "side-menu"
+			.toggle()
+			.then () ->
+				# $log.debug "toggle " + navID + " is done"
 
 
-				if $body.scrollTop() >= 230
-					$body.scrollTop 230
-					$tabsWrapper.addClass "md-whiteframe-6dp"
-					$body.addClass "scrolled"
 
-				else
-					$tabsWrapper.removeClass "md-whiteframe-6dp"
-					$body.removeClass "scrolled"
+	profile = $rootScope.profile
+	console.log "プロフィール：", profile
+	projects = profile.projects
+
+	$scope.$on 'repeatFinishedEventFired', (ev, element) ->
+		Elements.set "screen", element.find ".project-preview"
+
+		for uuid, data of ev.targetScope.project.elements
+			ScreenElements.addFromData data, uuid
+
+	# ダッシュボードにプロジェクトを一覧表示する
+	$scope.projects = []
+	for project in projects
+		console.log project, "プロジェクトID"
+		$http {
+			method: "GET"
+			url: "/project"
+			params: {
+				_id: project
+			}
+		}
+		.success (data, status, headers, config) ->
+			$scope.projects.push data
+
+		.error (data, status, headers, config) ->
+			console.log "Failed:", data
 
 
-			if $tabContent.length == 0
-				$tabContent = $(element).children("md-tabs-content-wrapper").find("md-content")
 
-			else
-				$tabContent.scroll ()->
-					scope.$apply ()->
-						if $tabContent.scrollTop() == 0
-							$body.removeClass "scrolled"
+ 	# 新しいプロジェクトを作る
+	$scope.newProject = (ev) ->
+		# Appending dialog to document.body to cover sidenav in docs app
+		confirm = $mdDialog.prompt()
+			.title "プロジェクトを作成"
+			.textContent "新しいプロジェクトの名前を入力して下さい"
+			.placeholder "プロジェクト名"
+			.ariaLabel "Project Name"
+			.targetEvent ev
+			.ok "OK"
+			.cancel "キャンセル"
+
+		$mdDialog.show(confirm).then (result) ->
+			$http {
+				url: '/project'
+				method: "POST"
+				data: {
+					name: result
+				}
+			}
+			.success (data, status, headers, config) ->				# 成功したら作成しtプロジェクトの編集へ遷移
+				$state.go "editor.design", {projectId: result}
+			.error (data) ->
+				console.log "Filed: Create Project"
+			.catch (error) ->
+				console.log 'catch', error
+
+			return
+
+		, () ->
+			return
 
 ]

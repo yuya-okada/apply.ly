@@ -95,12 +95,22 @@
   opacity: 1;
 }
 
-/* line 6, ../../sass/index.scss */
+/* line 5, ../../sass/index.scss */
+md-list-item ._md-list-item-inner ._md-secondary-container, md-list-item ._md-secondary-container {
+  height: auto !important;
+}
+
+/* line 8, ../../sass/index.scss */
+md-list-item._md-button-wrap > div.md-button:first-child ._md-list-item-inner {
+  height: auto !important;
+}
+
+/* line 13, ../../sass/index.scss */
 md-progress-linear.md-default-theme .md-container, md-progress-linear .md-container {
   background-color: rgba(138, 158, 255, 0.58) !important;
 }
 
-/* line 11, ../../sass/index.scss */
+/* line 18, ../../sass/index.scss */
 html, body {
   font-family: 'Roboto', sans-serif;
   position: relative;
@@ -113,12 +123,12 @@ html, body {
   flex-direction: column;
 }
 
-/* line 21, ../../sass/index.scss */
+/* line 28, ../../sass/index.scss */
 md-backdrop {
   display: none;
 }
 
-/* line 25, ../../sass/index.scss */
+/* line 32, ../../sass/index.scss */
 md-sidenav {
   min-width: 250px !important;
   width: 250px !important;
@@ -127,14 +137,14 @@ md-sidenav {
   background-color: #2196F3 !important;
   position: static !important;
 }
-/* line 33, ../../sass/index.scss */
+/* line 40, ../../sass/index.scss */
 md-sidenav .md-toolbar-tools {
   justify-content: center;
   font-weight: bold;
   font-size: 22px;
   color: white;
 }
-/* line 40, ../../sass/index.scss */
+/* line 47, ../../sass/index.scss */
 md-sidenav #user-cover-img {
   height: 140px;
   background-color: black;
@@ -144,7 +154,7 @@ md-sidenav #user-cover-img {
   justify-content: center;
   align-items: center;
 }
-/* line 49, ../../sass/index.scss */
+/* line 56, ../../sass/index.scss */
 md-sidenav #user-cover-img:before {
   z-index: 51;
   content: "";
@@ -156,41 +166,41 @@ md-sidenav #user-cover-img:before {
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.4);
 }
-/* line 61, ../../sass/index.scss */
+/* line 68, ../../sass/index.scss */
 md-sidenav #user-cover-img .md-layout-row {
   z-index: 52;
 }
-/* line 65, ../../sass/index.scss */
+/* line 72, ../../sass/index.scss */
 md-sidenav #user-cover-img .md-layout-row #user-icon {
   width: 50px;
   height: 50px;
   border-radius: 50%;
 }
-/* line 71, ../../sass/index.scss */
+/* line 78, ../../sass/index.scss */
 md-sidenav #user-cover-img .md-layout-row .md-layout-column {
   margin-left: 15px;
   justify-content: center;
 }
-/* line 75, ../../sass/index.scss */
+/* line 82, ../../sass/index.scss */
 md-sidenav #user-cover-img .md-layout-row .md-layout-column span {
   color: white;
 }
-/* line 82, ../../sass/index.scss */
+/* line 89, ../../sass/index.scss */
 md-sidenav md-list button:hover {
   background-color: #1976D2 !important;
 }
-/* line 85, ../../sass/index.scss */
+/* line 92, ../../sass/index.scss */
 md-sidenav md-list p {
   font-size: 14px;
   color: white !important;
 }
-/* line 89, ../../sass/index.scss */
+/* line 96, ../../sass/index.scss */
 md-sidenav md-list md-icon {
   font-size: 20px !important;
   color: white !important;
 }
 
-/* line 99, ../../sass/index.scss */
+/* line 106, ../../sass/index.scss */
 main {
   height: calc(100% - 60px);
   position: relative;

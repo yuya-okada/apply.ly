@@ -16,29 +16,15 @@ crosetModule.service("ServiceConfig", [
     };
   }
 ]).service("ProjectData", [
-  "$http", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", function($http, ScreenCards, ScreenElements, Build, ServiceConfig) {
-    this.name = "";
+  "$http", "$stateParams", "$state", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", function($http, $stateParams, $state, ScreenCards, ScreenElements, Build, ServiceConfig) {
     this.get = function() {
       return {
-        name: this.name,
+        name: $stateParams.projectId,
         elements: ScreenElements.get(),
         cards: ScreenCards.get(),
         config: ServiceConfig.get(),
         sourceCode: Build.compile(ScreenCards.get())
       };
-    };
-  }
-]).service("Elements", [
-  function() {
-    var elements;
-    elements = {
-      screen: null
-    };
-    this.get = function() {
-      return elements;
-    };
-    this.set = function(key, value) {
-      return elements[key] = value;
     };
   }
 ]).service("SelectedElementUUID", [
@@ -81,15 +67,55 @@ crosetModule.service("ServiceConfig", [
     };
   }
 ]).controller("HeaderController", [
-  "$scope", "$http", "$mdDialog", "$mdSidenav", "$injector", "ProjectData", function($scope, $http, $mdDialog, $mdSidenav, $injector, ProjectData) {
+  "$scope", "$http", "$mdDialog", "$mdSidenav", "$interval", "$injector", "ProjectData", function($scope, $http, $mdDialog, $mdSidenav, $interval, $injector, ProjectData) {
     $scope.toggleSideNav = function() {
       return $mdSidenav("side-menu").toggle().then(function() {});
+    };
+    $scope.buildDownload = function(ev) {
+      $mdDialog.show({
+        controller: null,
+        templateUrl: 'templates/build-dialog.tmpl.html',
+        parent: angular.element(document.body),
+        targetEvent: ev,
+        clickOutsideToClose: true
+      }).then(function(answer) {
+        return $scope.status = 'You said the information was "' + answer + '".';
+      }, function() {
+        return $scope.status = 'You cancelled the dialog.';
+      });
+      return $http({
+        method: "GET",
+        url: "/build",
+        params: ProjectData.get()
+      }).success(function(data, status, headers, config) {
+        var checkBuilded;
+        console.log("ビルド");
+        checkBuilded = function() {
+          console.log("チェック");
+          return $http({
+            method: "GET",
+            url: "/builded-projects/" + ProjectData.get().name + ".zip",
+            params: ProjectData.get()
+          }).success(function(data, status, headers, config) {
+            console.log(data);
+            return window.open("/builded-projects/" + ProjectData.get().name + ".zip");
+          }).error(function(data, status, headers, config) {
+            console.log("Failed", data);
+            return $interval(function() {
+              return checkBuilded();
+            }, 2000);
+          });
+        };
+        return checkBuilded();
+      }).error(function(data, status, headers, config) {
+        return console.log("Failed", data);
+      });
     };
     return $scope.run = function() {
       console.log("------------実行結果--------------");
       return $http({
-        method: 'POST',
-        url: '/project',
+        method: "PUT",
+        url: "/project",
         data: ProjectData.get()
       }).success(function(data, status, headers, config) {
         return console.log("Saved", data);
@@ -127,21 +153,23 @@ crosetModule.service("ServiceConfig", [
       isLoading: true
     };
     return $http({
-      method: 'GET',
-      url: '/project',
+      method: "GET",
+      url: "/project",
       params: {
-        _id: $stateParams.projectId
+        name: $stateParams.projectId
       }
     }).success(function(data, status, headers, config) {
       Elements.set("screen", angular.element("#screen"));
+      if (data.elements == null) {
+        data.elements = {};
+      }
       angular.forEach(data.elements, function(data, uuid) {
         return ScreenElements.addFromDataEditor(data, uuid);
       });
       console.log("GET", data.cards);
       ScreenCards.list = data.cards || [];
-      ScreenCards.parsedCards = data.parsedCards || [];
       console.log(data.cards);
-      ProjectData.name = data.name;
+      ProjectData.name = data.name || "";
       $scope.progress.isLoading = false;
       $scope.progress.determinateValue += 100;
     }).error(function(data, status, headers, config) {
@@ -161,8 +189,8 @@ crosetModule.service("ServiceConfig", [
         var height;
         height = editor.height() - 20;
         $scope.screenScaleRatio = height / screenDefaultHeight;
-        console.log(height, screenDefaultHeight);
-        return $scope.marginRight = -1 * (screenDefaultWidth * (1 - $scope.screenScaleRatio));
+        $scope.marginRight = -1 * (screenDefaultWidth * (1 - $scope.screenScaleRatio));
+        return console.log($scope.screenScale);
       }, 0);
     }).trigger("resize");
   }

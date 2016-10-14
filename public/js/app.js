@@ -2,6 +2,21 @@ var crosetModule;
 
 crosetModule = angular.module("Croset", ["ui.router", "uiRouterStyles", "ngAria", "ngMaterial", "ngAnimate", "ngMessages", "ngMdIcons", "ngDragDrop", "mdColorPicker"]);
 
+crosetModule.service("Elements", [
+  function() {
+    var elements;
+    elements = {
+      screen: null
+    };
+    this.get = function() {
+      return elements;
+    };
+    this.set = function(key, value) {
+      return elements[key] = value;
+    };
+  }
+]);
+
 crosetModule.factory("getUUID", function() {
   return function() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -70,9 +85,34 @@ crosetModule.factory("IsInDiv", function() {
       }
     };
   }
-]);
-
-crosetModule.config([
+]).run([
+  "$http", "$rootScope", "$state", function($http, $rootScope, $state) {
+    var stateChangeBypass;
+    console.log("run");
+    stateChangeBypass = false;
+    return $rootScope.$on("$stateChangeStart", function(ev, toState, toParams, fromState, fromParams) {
+      if (stateChangeBypass || toState.name === "login") {
+        stateChangeBypass = false;
+        return;
+      }
+      ev.preventDefault();
+      console.log("Change");
+      return $http.get("/profile").success(function(data, status, headers, config) {
+        console.log(data);
+        if (data) {
+          stateChangeBypass = true;
+          $rootScope.profile = data;
+          return $state.go(toState, toParams);
+        } else {
+          ev.preventDefault();
+          return $state.go("login");
+        }
+      }).error(function(data, status, headers, config) {
+        return console.log("Failed", data);
+      });
+    });
+  }
+]).config([
   "$stateProvider", "$urlRouterProvider", "$mdThemingProvider", function($stateProvider, $urlRouterProvider, $mdThemingProvider) {
     $mdThemingProvider.definePalette('myBlue', {
       '50': '526FFF',
@@ -212,6 +252,7 @@ crosetModule.controller("SideMenuController", [
         }, {
           icon: "dashboard",
           text: "ダッシュボード",
+          sref: "dashboard",
           children: [
             {
               icon: "edit",

@@ -16,6 +16,10 @@ md-toolbar#header(ng-controller="HeaderController")
 		
 		span(flex)
 		
+		
+		md-button#build-download(class="md-primary" aria-label="Run" ng-click="buildDownload($event)") 
+			md-icon.material-icons file_download
+		
 		//- 実行
 		md-button#run-fab(class="md-fab md-primary" aria-label="Run" ng-click="run()") 
 			md-icon.material-icons play_arrow

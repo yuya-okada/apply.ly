@@ -18,13 +18,11 @@ crosetModule
 
 ]
 
-.service "ProjectData", ["$http", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", ($http, ScreenCards, ScreenElements, Build, ServiceConfig) ->
-	this.name = ""
+.service "ProjectData", ["$http", "$stateParams", "$state", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", ($http, $stateParams, $state, ScreenCards, ScreenElements, Build, ServiceConfig) ->
 
 	this.get = () ->
-
 		return {
-			name: this.name
+			name: $stateParams.projectId
 			elements: ScreenElements.get()
 			cards: ScreenCards.get()
 			config: ServiceConfig.get()
@@ -36,19 +34,6 @@ crosetModule
 
 
 
-.service "Elements", [() ->
-	elements = {
-		screen: null # プロジェクトのデータをダウンロードしたあとで、ロードされる
-	}
-
-	this.get = () ->
-		return elements
-
-	this.set = (key, value) ->
-		elements[key] = value
-
-	return
-]
 # 現在選択されている要素のUUID
 .service "SelectedElementUUID", ["Elements", "SetElementProperty", "ScreenElements", (Elements, SetElementProperty, ScreenElements) ->
 	uuid = null
@@ -95,18 +80,72 @@ crosetModule
 ]
 
 
-.controller "HeaderController", ["$scope", "$http", "$mdDialog", "$mdSidenav", "$injector", "ProjectData", ($scope, $http, $mdDialog, $mdSidenav, $injector, ProjectData) ->
+.controller "HeaderController", ["$scope", "$http", "$mdDialog", "$mdSidenav", "$interval", "$injector", "ProjectData", ($scope, $http, $mdDialog, $mdSidenav, $interval, $injector, ProjectData) ->
 	$scope.toggleSideNav = () ->
 		$mdSidenav "side-menu"
 			.toggle()
 			.then () ->
 				# $log.debug "toggle " + navID + " is done"
 
+	$scope.buildDownload = (ev) ->
+
+		$mdDialog.show {
+			controller: null
+			templateUrl: 'templates/build-dialog.tmpl.html'
+			parent: angular.element document.body
+			targetEvent: ev
+			clickOutsideToClose: true
+		}
+		.then (answer) ->
+			$scope.status = 'You said the information was "' + answer + '".'
+		, () ->
+			$scope.status = 'You cancelled the dialog.'
+
+
+		# ビルド
+		$http {
+			method : "GET"
+			url : "/build"
+			params: ProjectData.get()
+		}
+		.success (data, status, headers, config) ->
+			console.log "ビルド"
+
+			# ビルドが完了しているかを確認
+			checkBuilded = () ->
+				console.log "チェック"
+				$http {
+					method : "GET"
+					url : "/builded-projects/" + ProjectData.get().name + ".zip"
+					params: ProjectData.get()
+				}
+				.success (data, status, headers, config) ->
+					console.log data
+
+					window.open "/builded-projects/" + ProjectData.get().name + ".zip"
+
+				.error (data, status, headers, config) ->
+					console.log "Failed", data
+
+					$interval () ->
+						console.log "ウィス"
+						# checkBuilded()
+					, 2000
+
+
+			checkBuilded()
+
+
+		.error (data, status, headers, config) ->
+			console.log "Failed", data
+
+
+
 	$scope.run = () ->
 		console.log "------------実行結果--------------"
 		$http {
-			method : 'POST'
-			url : '/project'
+			method : "PUT"
+			url : "/project"
 			data: ProjectData.get()
 		}
 		.success (data, status, headers, config) ->
@@ -171,25 +210,25 @@ crosetModule
 	}
 
 	$http {
-		method : 'GET'
-		url : '/project'
+		method : "GET"
+		url: "/project"
 		params: {
-			_id: $stateParams.projectId
+			name: $stateParams.projectId
 		}
 	}
 	.success (data, status, headers, config) ->
 		Elements.set "screen", angular.element "#screen"
 
+		data.elements ?= {}
 		angular.forEach data.elements, (data, uuid) ->
 			ScreenElements.addFromDataEditor data, uuid
 
 		console.log "GET", data.cards
 		ScreenCards.list = data.cards || []
-		ScreenCards.parsedCards = data.parsedCards || []
 
 		console.log data.cards
 
-		ProjectData.name = data.name
+		ProjectData.name = data.name || ""
 
 		$scope.progress.isLoading = false
 		$scope.progress.determinateValue += 100
@@ -217,8 +256,8 @@ crosetModule
 		$timeout () ->
 			height = editor.height() - 20
 			$scope.screenScaleRatio = height / screenDefaultHeight
-			console.log height, screenDefaultHeight
 			$scope.marginRight = -1 * (screenDefaultWidth * (1 - $scope.screenScaleRatio))
+			console.log $scope.screenScale
 		, 0
 	).trigger("resize")
 

@@ -2,6 +2,13 @@
 @import "valiables";
 @import "commonClass";
 
+md-list-item ._md-list-item-inner ._md-secondary-container, md-list-item ._md-secondary-container {
+	height: auto !important;
+}
+md-list-item._md-button-wrap>div.md-button:first-child ._md-list-item-inner {
+	height: auto !important;
+}
+
 //  linear progress の背景色
 md-progress-linear.md-default-theme .md-container, md-progress-linear .md-container {
     background-color: rgba(138, 158, 255, 0.58) !important;

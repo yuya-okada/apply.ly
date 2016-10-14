@@ -20,6 +20,19 @@ crosetModule = angular.module "Croset", [
 # ]
 
 
+crosetModule.service "Elements", [() ->
+	elements = {
+		screen: null # プロジェクトのデータをダウンロードしたあとで、ロードされる
+	}
+
+	this.get = () ->
+		return elements
+
+	this.set = (key, value) ->
+		elements[key] = value
+
+	return
+]
 
 crosetModule.factory "getUUID", () ->
 	return () ->
@@ -87,7 +100,39 @@ crosetModule.factory "IsInDiv", () ->
 ]
 
 
-crosetModule.config ["$stateProvider", "$urlRouterProvider", "$mdThemingProvider", ($stateProvider, $urlRouterProvider, $mdThemingProvider) ->
+# ルート切り替え時にログイン確認をする
+.run ["$http", "$rootScope", "$state", ($http, $rootScope, $state) ->
+	console.log "run"
+
+	stateChangeBypass = false			# 遷移が無限ループするのを回避
+	$rootScope.$on "$stateChangeStart", (ev, toState, toParams, fromState, fromParams) ->
+
+		if stateChangeBypass || toState.name == "login"		# 無限ループ回避
+			stateChangeBypass = false;
+			return
+
+		ev.preventDefault() 			# 一時的に繊維をストップ
+
+		console.log "Change"
+		$http.get "/profile"
+		.success (data, status, headers, config) ->
+			console.log data
+			if data
+				stateChangeBypass = true;
+				$rootScope.profile = data
+				$state.go toState, toParams
+			else
+				ev.preventDefault()
+				$state.go "login"
+
+		.error (data, status, headers, config) ->
+			console.log "Failed", data
+
+
+]
+
+
+.config ["$stateProvider", "$urlRouterProvider", "$mdThemingProvider", ($stateProvider, $urlRouterProvider, $mdThemingProvider) ->
 		$mdThemingProvider.definePalette('myBlue', {
 			'50': '526FFF'
 			'100': '526FFF'
@@ -234,6 +279,8 @@ crosetModule.controller "SideMenuController", ["$scope", "$injector", "$state", 
 			{
 				icon: "dashboard"
 				text: "ダッシュボード"
+				sref: "dashboard"
+
 				children: [
 					{
 						icon: "edit"

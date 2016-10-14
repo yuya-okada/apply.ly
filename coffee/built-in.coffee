@@ -497,8 +497,6 @@ crosetModule
 	}
 
 
-
-
 .service "ScreenElements", ["Elements", "ElementDatas", "$compile", "$injector"
 (Elements, ElementDatas, $compile, $injector) ->
 	screenScope = null  				# ここで初期化処理をするとまだScreenControllerにscopeがinjectionされていない
@@ -539,7 +537,6 @@ crosetModule
 		e.scope().options = {}
 
 	this.addFromData = (data, uuid) ->
-
 		screenScope ?= Elements.get().screen.scope()		# 初期化されてない場合初期化
 
 		e = $ "<croset-element-#{data.type}>"

@@ -1,14 +1,32 @@
 /* line 5, ../../sass/dashboard.scss */
+body {
+  overflow-y: hidden;
+}
+
+/* line 9, ../../sass/dashboard.scss */
+#menu {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  z-index: 1;
+}
+/* line 14, ../../sass/dashboard.scss */
+#menu md-icon {
+  color: white;
+  font-size: 30px;
+}
+
+/* line 20, ../../sass/dashboard.scss */
 #fixing-header {
   width: 100%;
-  height: 278px;
-  padding: 0 250px 0 250px;
+  height: 240px;
+  padding: 0 250px 0 180px;
   background: url(https://blog.moove-it.com/wp-content/uploads/2016/02/Android-L-Material-Design-Wallpapers-5.png);
   position: fixed;
   z-index: 0;
   align-items: center;
 }
-/* line 14, ../../sass/dashboard.scss */
+/* line 29, ../../sass/dashboard.scss */
 #fixing-header:before {
   content: "";
   display: block;
@@ -25,31 +43,31 @@
   opacity: 0.6;
   z-index: 0;
 }
-/* line 24, ../../sass/dashboard.scss */
+/* line 39, ../../sass/dashboard.scss */
 #fixing-header h2 {
   color: white;
   font-weight: 300;
-  font-size: 40px;
+  font-size: 30px;
   z-index: 1;
 }
 
-/* line 32, ../../sass/dashboard.scss */
+/* line 47, ../../sass/dashboard.scss */
 #new-project {
   position: absolute;
   right: 210px;
-  top: 244px;
+  top: 210px;
 }
 
-/* line 38, ../../sass/dashboard.scss */
+/* line 53, ../../sass/dashboard.scss */
 #tabs {
   -moz-transition: box-shadow 0.2s cubic-bezier(0.55, 0, 0.1, 1);
   -o-transition: box-shadow 0.2s cubic-bezier(0.55, 0, 0.1, 1);
   -webkit-transition: box-shadow 0.2s cubic-bezier(0.55, 0, 0.1, 1);
   transition: box-shadow 0.2s cubic-bezier(0.55, 0, 0.1, 1);
-  margin-top: 230px;
+  margin-top: 190px;
   z-index: 1;
 }
-/* line 43, ../../sass/dashboard.scss */
+/* line 58, ../../sass/dashboard.scss */
 #tabs md-tabs-wrapper {
   -moz-transition: box-shadow 0.2s cubic-bezier(0.55, 0, 0.1, 1);
   -o-transition: box-shadow 0.2s cubic-bezier(0.55, 0, 0.1, 1);
@@ -57,61 +75,60 @@
   transition: box-shadow 0.2s cubic-bezier(0.55, 0, 0.1, 1);
   padding: 0 250px 0 250px;
   z-index: 1;
+  padding-left: 150px;
 }
-/* line 48, ../../sass/dashboard.scss */
+/* line 64, ../../sass/dashboard.scss */
 #tabs md-tabs-wrapper md-tab-item {
   color: white;
 }
-/* line 53, ../../sass/dashboard.scss */
+/* line 69, ../../sass/dashboard.scss */
 #tabs md-content {
   height: 1000px;
   padding: 100px 250px 0 250px;
   background-color: white;
   justify-content: space-around;
   flex-wrap: wrap;
-  overflow-y: hidden;
 }
-/* line 62, ../../sass/dashboard.scss */
-#tabs md-content #project-card {
+/* line 78, ../../sass/dashboard.scss */
+#tabs md-content .project-card {
   position: relative;
   width: 250px;
   height: 350px;
+  overflow: hidden;
+  background-color: white;
 }
-/* line 67, ../../sass/dashboard.scss */
-#tabs md-content #project-card md-card-title {
-  background-color: #FdFdFd;
+/* line 85, ../../sass/dashboard.scss */
+#tabs md-content .project-card .project-background {
+  height: auto !important;
 }
-/* line 70, ../../sass/dashboard.scss */
-#tabs md-content #project-card md-card-title .md-headline {
+/* line 89, ../../sass/dashboard.scss */
+#tabs md-content .project-card md-card-title {
+  border-top: 1px solid #E2E2E2;
+  z-index: 1;
+  background-color: #fdfdfd;
+}
+/* line 94, ../../sass/dashboard.scss */
+#tabs md-content .project-card md-card-title .md-headline {
   font-size: 15px;
 }
-/* line 75, ../../sass/dashboard.scss */
-#tabs md-content #project-card #project-preview {
-  border-radius: 4px 4px 0 0;
-  box-shadow: 0;
+/* line 99, ../../sass/dashboard.scss */
+#tabs md-content .project-card .project-preview {
+  width: 1000px;
+  height: 1000px;
   background-color: white;
+  box-shadow: 0;
   position: absolute;
-  width: 190px;
-  height: 240px;
-  top: 40px;
-  left: 30px;
-  right: 30px;
-  margin: 0;
+  transform: scale(0.666);
+  transform-origin: top left;
+  top: 0px;
+  left: 0px;
+  overflow: hidden;
 }
-/* line 92, ../../sass/dashboard.scss */
+/* line 116, ../../sass/dashboard.scss */
 #tabs.md-whiteframe-6dp md-tab-wrapper {
   background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuMCIgeTE9IjAuNSIgeDI9IjEuMCIgeTI9IjAuNSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzU2MWM5NiIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzRlODlkMiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==');
   background: -webkit-gradient(linear, 0% 50%, 100% 50%, color-stop(0%, #561c96), color-stop(100%, #4e89d2));
   background: -moz-linear-gradient(left, #561c96, #4e89d2);
   background: -webkit-linear-gradient(left, #561c96, #4e89d2);
   background: linear-gradient(to right, #561c96, #4e89d2);
-}
-
-/* line 100, ../../sass/dashboard.scss */
-body.scrolled {
-  overflow-y: hidden;
-}
-/* line 103, ../../sass/dashboard.scss */
-body.scrolled md-content {
-  overflow-y: scroll !important;
 }
