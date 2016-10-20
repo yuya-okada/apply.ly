@@ -3,6 +3,24 @@
 @import "commonClass";
 @import "mixins";
 
+// ダイアログ
+md-progress-linear {
+	._md-mode-indeterminate {
+		background-color: rgba(82,111,255, .3) !important;
+	}
+}
+.md-dialog-container {
+	background-color: rgba(0, 0, 0, .4) !important;
+}
+
+#run-project-id {
+	font-size: 50px;
+	color: $mc;
+	margin: 30px 0 30px 0;
+}
+
+
+// ここまでダイアログ
 
 #header {
 	@extend .bg-white;

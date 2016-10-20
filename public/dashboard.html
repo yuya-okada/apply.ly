@@ -14,7 +14,7 @@
   <md-tabs id="tabs" md-dynamic-height="" md-border-bottom="" dashboard-tabs="dashboard-tabs">
     <md-tab label="ダッシュボード">
       <md-content id="main-tab-content" layout="row" class="md-padding">
-        <md-card ng-repeat="project in projects" repeat-finished="repeat-finished" ui-sref="editor.design({projectId: project.name})" md-ink-ripple="md-ink-ripple" class="project-card"><img ng-src="img/black_flat_bg.png" alt="Washed Out" class="project-background md-card-image"/>
+        <md-card ng-repeat="project in projects track by $index" repeat-finished="repeat-finished" ui-sref="editor.design({projectId: project.projectId})" md-ink-ripple="md-ink-ripple" class="project-card"><img ng-src="img/black_flat_bg.png" alt="Washed Out" class="project-background md-card-image"/>
           <div class="project-preview-wrapper">
             <div class="project-preview"></div>
           </div>

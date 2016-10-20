@@ -34,7 +34,7 @@ crosetModule.directive("repeatFinished", function($timeout) {
         method: "GET",
         url: "/project",
         params: {
-          _id: project
+          projectId: project
         }
       }).success(function(data, status, headers, config) {
         return $scope.projects.push(data);
@@ -54,7 +54,7 @@ crosetModule.directive("repeatFinished", function($timeout) {
           }
         }).success(function(data, status, headers, config) {
           return $state.go("editor.design", {
-            projectId: result
+            projectId: data.projectId
           });
         }).error(function(data) {
           return console.log("Filed: Create Project");

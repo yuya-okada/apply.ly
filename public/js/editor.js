@@ -17,10 +17,13 @@ crosetModule.service("ServiceConfig", [
   }
 ]).service("ProjectData", [
   "$http", "$stateParams", "$state", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", function($http, $stateParams, $state, ScreenCards, ScreenElements, Build, ServiceConfig) {
+    this.projectId = null;
+    this.name = null;
     this.get = function() {
       return {
-        name: $stateParams.projectId,
+        name: this.name,
         elements: ScreenElements.get(),
+        projectId: this.projectId,
         cards: ScreenCards.get(),
         config: ServiceConfig.get(),
         sourceCode: Build.compile(ScreenCards.get())
@@ -67,58 +70,110 @@ crosetModule.service("ServiceConfig", [
     };
   }
 ]).controller("HeaderController", [
-  "$scope", "$http", "$mdDialog", "$mdSidenav", "$interval", "$injector", "ProjectData", function($scope, $http, $mdDialog, $mdSidenav, $interval, $injector, ProjectData) {
+  "$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$injector", "ProjectData", function($scope, $http, $mdDialog, $mdSidenav, $timeout, $injector, ProjectData) {
+    var saveProject;
     $scope.toggleSideNav = function() {
       return $mdSidenav("side-menu").toggle().then(function() {});
     };
     $scope.buildDownload = function(ev) {
-      $mdDialog.show({
-        controller: null,
+      var BuildDialogController;
+      BuildDialogController = [
+        "$scope", "$http", "$timeout", "$interval", "$window", function($scope, $http, $timeout, $interval, $window) {
+          $scope.download = function() {
+            var stop, win;
+            $mdDialog.hide();
+            win = $window.open("/builded-projects/" + ProjectData.get().name + ".zip");
+            console.log("データ", win.window);
+            return stop = $interval(function() {
+              if (win.closed) {
+                return $http({
+                  method: "DELETE",
+                  url: "/build",
+                  data: ProjectData.get(),
+                  headers: {
+                    "Content-Type": "application/json;charset=utf-8"
+                  }
+                }).success(function(data, status, headers, config) {
+                  console.log("deleted");
+                  return $interval.cancel(stop);
+                }).error(function(data, status, headers, config) {
+                  console.log(data);
+                  return $interval.cancel(stop);
+                });
+              }
+            }, 100);
+          };
+          return $http({
+            method: "GET",
+            url: "/build",
+            params: ProjectData.get()
+          }).success(function(data, status, headers, config) {
+            var checkBuilded;
+            checkBuilded = function() {
+              return $http({
+                method: "GET",
+                url: "/builded",
+                params: {
+                  projectId: ProjectData.get().name
+                }
+              }).success(function(data, status, headers, config) {
+                console.log(data);
+                if (data) {
+                  return $timeout(function() {
+                    return checkBuilded();
+                  }, 2000);
+                } else {
+                  return $scope.done = true;
+                }
+              }).error(function(data, status, headers, config) {
+                return console.log("Failed", data);
+              });
+            };
+            return checkBuilded();
+          }).error(function(data, status, headers, config) {
+            return console.log("Failed", data);
+          });
+        }
+      ];
+      return $mdDialog.show({
+        controller: BuildDialogController,
         templateUrl: 'templates/build-dialog.tmpl.html',
         parent: angular.element(document.body),
         targetEvent: ev,
-        clickOutsideToClose: true
-      }).then(function(answer) {
-        return $scope.status = 'You said the information was "' + answer + '".';
-      }, function() {
-        return $scope.status = 'You cancelled the dialog.';
-      });
-      return $http({
-        method: "GET",
-        url: "/build",
-        params: ProjectData.get()
-      }).success(function(data, status, headers, config) {
-        var checkBuilded;
-        console.log("ビルド");
-        checkBuilded = function() {
-          console.log("チェック");
-          return $http({
-            method: "GET",
-            url: "/builded-projects/" + ProjectData.get().name + ".zip",
-            params: ProjectData.get()
-          }).success(function(data, status, headers, config) {
-            console.log(data);
-            return window.open("/builded-projects/" + ProjectData.get().name + ".zip");
-          }).error(function(data, status, headers, config) {
-            console.log("Failed", data);
-            return $interval(function() {
-              return checkBuilded();
-            }, 2000);
-          });
-        };
-        return checkBuilded();
-      }).error(function(data, status, headers, config) {
-        return console.log("Failed", data);
-      });
+        clickOutsideToClose: false
+      }).then(function(answer) {}, function() {});
     };
-    return $scope.run = function() {
+    $scope.run = function(ev) {
+      var RunDialogController;
       console.log("------------実行結果--------------");
+      saveProject();
+      RunDialogController = [
+        "$scope", function($scope) {
+          console.log(ProjectData.get());
+          $scope.projectId = ProjectData.get().projectId;
+          return $scope.close = function() {
+            return $mdDialog.hide();
+          };
+        }
+      ];
+      return $mdDialog.show({
+        controller: RunDialogController,
+        templateUrl: 'templates/run-dialog.tmpl.html',
+        parent: angular.element(document.body),
+        targetEvent: ev,
+        clickOutsideToClose: false
+      }).then(function(answer) {}, function() {});
+    };
+    return saveProject = function(fnc) {
       return $http({
         method: "PUT",
         url: "/project",
         data: ProjectData.get()
       }).success(function(data, status, headers, config) {
-        return console.log("Saved", data);
+        console.log("Saved", data);
+        if (fnc) {
+          return fnc();
+        }
       }).error(function(data, status, headers, config) {
         return console.log("Failed", data);
       });
@@ -156,7 +211,7 @@ crosetModule.service("ServiceConfig", [
       method: "GET",
       url: "/project",
       params: {
-        name: $stateParams.projectId
+        projectId: $stateParams.projectId
       }
     }).success(function(data, status, headers, config) {
       Elements.set("screen", angular.element("#screen"));
@@ -169,7 +224,8 @@ crosetModule.service("ServiceConfig", [
       console.log("GET", data.cards);
       ScreenCards.list = data.cards || [];
       console.log(data.cards);
-      ProjectData.name = data.name || "";
+      ProjectData.name = data.name;
+      ProjectData.projectId = data.projectId;
       $scope.progress.isLoading = false;
       $scope.progress.determinateValue += 100;
     }).error(function(data, status, headers, config) {

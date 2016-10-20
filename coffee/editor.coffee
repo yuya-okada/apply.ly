@@ -19,11 +19,13 @@ crosetModule
 ]
 
 .service "ProjectData", ["$http", "$stateParams", "$state", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", ($http, $stateParams, $state, ScreenCards, ScreenElements, Build, ServiceConfig) ->
-
+	this.projectId = null
+	this.name = null
 	this.get = () ->
 		return {
-			name: $stateParams.projectId
+			name: this.name
 			elements: ScreenElements.get()
+			projectId: this.projectId
 			cards: ScreenCards.get()
 			config: ServiceConfig.get()
 			sourceCode: Build.compile ScreenCards.get()
@@ -80,7 +82,7 @@ crosetModule
 ]
 
 
-.controller "HeaderController", ["$scope", "$http", "$mdDialog", "$mdSidenav", "$interval", "$injector", "ProjectData", ($scope, $http, $mdDialog, $mdSidenav, $interval, $injector, ProjectData) ->
+.controller "HeaderController", ["$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$injector", "ProjectData", ($scope, $http, $mdDialog, $mdSidenav, $timeout, $injector, ProjectData) ->
 	$scope.toggleSideNav = () ->
 		$mdSidenav "side-menu"
 			.toggle()
@@ -89,60 +91,115 @@ crosetModule
 
 	$scope.buildDownload = (ev) ->
 
+		# ダイアログのController
+		BuildDialogController = ["$scope", "$http", "$timeout", "$interval", "$window", ($scope, $http, $timeout, $interval, $window) ->
+			# ビルド成功したプロジェクトをダウンロード
+			$scope.download = () ->
+				$mdDialog.hide()			# ダイアログを閉じる
+				win = $window.open "/builded-projects/" + ProjectData.get().name + ".zip"		# ダウンロード
+
+				console.log "データ", win.window
+
+				stop = $interval () ->				# windowが閉じていることを確認 (TODO:もうすこしスマートな方法がありそう)
+					if win.closed							# 閉じていたらサーバからプロジェクトファイルを削除
+
+						$http {
+							method : "DELETE"
+							url : "/build"
+							data: ProjectData.get()
+							headers: {"Content-Type": "application/json;charset=utf-8"}
+						}
+						.success (data, status, headers, config) ->
+							console.log "deleted"
+							$interval.cancel stop
+
+						.error (data, status, headers, config) ->
+							console.log data
+							$interval.cancel stop
+
+				, 100
+
+			# ビルド
+			$http {
+				method : "GET"
+				url : "/build"
+				params: ProjectData.get()
+			}
+			.success (data, status, headers, config) ->
+
+				# ビルドが完了しているかを確認
+				checkBuilded = () ->
+					$http {
+						method : "GET"
+						url : "/builded"
+						params: {
+							projectId: ProjectData.get().name
+						}
+					}
+					.success (data, status, headers, config) ->
+						console.log data
+						if data
+							$timeout () ->
+								checkBuilded()
+							, 2000
+
+						else
+							$scope.done = true
+
+
+					.error (data, status, headers, config) ->
+						console.log "Failed", data
+
+				checkBuilded()
+
+
+			.error (data, status, headers, config) ->
+				console.log "Failed", data
+
+		]
+
 		$mdDialog.show {
-			controller: null
+			controller: BuildDialogController
 			templateUrl: 'templates/build-dialog.tmpl.html'
 			parent: angular.element document.body
 			targetEvent: ev
-			clickOutsideToClose: true
+			clickOutsideToClose: false
 		}
 		.then (answer) ->
-			$scope.status = 'You said the information was "' + answer + '".'
+			return
 		, () ->
-			$scope.status = 'You cancelled the dialog.'
+			return
 
 
-		# ビルド
-		$http {
-			method : "GET"
-			url : "/build"
-			params: ProjectData.get()
-		}
-		.success (data, status, headers, config) ->
-			console.log "ビルド"
-
-			# ビルドが完了しているかを確認
-			checkBuilded = () ->
-				console.log "チェック"
-				$http {
-					method : "GET"
-					url : "/builded-projects/" + ProjectData.get().name + ".zip"
-					params: ProjectData.get()
-				}
-				.success (data, status, headers, config) ->
-					console.log data
-
-					window.open "/builded-projects/" + ProjectData.get().name + ".zip"
-
-				.error (data, status, headers, config) ->
-					console.log "Failed", data
-
-					$interval () ->
-						console.log "ウィス"
-						# checkBuilded()
-					, 2000
-
-
-			checkBuilded()
-
-
-		.error (data, status, headers, config) ->
-			console.log "Failed", data
-
-
-
-	$scope.run = () ->
+	$scope.run = (ev) ->
 		console.log "------------実行結果--------------"
+		saveProject()
+
+		RunDialogController = ["$scope", ($scope) ->
+			console.log ProjectData.get()
+			$scope.projectId = ProjectData.get().projectId
+
+			$scope.close = () ->
+				$mdDialog.hide()
+		]
+
+		$mdDialog.show {
+			controller: RunDialogController
+			templateUrl: 'templates/run-dialog.tmpl.html'
+			parent: angular.element document.body
+			targetEvent: ev
+			clickOutsideToClose: false
+		}
+		.then (answer) ->
+			return
+		, () ->
+			return
+
+
+
+
+	# プロジェクトを保存。関数を渡すと保存時に呼び出す
+	saveProject = (fnc)->
 		$http {
 			method : "PUT"
 			url : "/project"
@@ -150,29 +207,11 @@ crosetModule
 		}
 		.success (data, status, headers, config) ->
 			console.log "Saved", data
+			if fnc
+				fnc()
+
 		.error (data, status, headers, config) ->
 			console.log "Failed", data
-
-		# for key, value of elements													# 必要な情報や不要な情報などを調整
-		# 	value.top = value.element.css "top"
-		# 	value.left = value.element.css "left"
-		# 	value.width = value.element.width()
-		# 	value.height = value.element.height()
-		# 	elementsToPush[key] = value
-
-
-
-		#
-		# $http {
-		# 	method : 'POST'
-		# 	url : '/login'
-		# 	data: ProjectData.get()
-		# }
-		# .success (data, status, headers, config) ->
-		# 	console.log "Saved", data
-		# .error (data, status, headers, config) ->
-		# 	console.log "Failed", data
-
 
 ]
 
@@ -213,7 +252,7 @@ crosetModule
 		method : "GET"
 		url: "/project"
 		params: {
-			name: $stateParams.projectId
+			projectId: $stateParams.projectId
 		}
 	}
 	.success (data, status, headers, config) ->
@@ -228,7 +267,8 @@ crosetModule
 
 		console.log data.cards
 
-		ProjectData.name = data.name || ""
+		ProjectData.name = data.name
+		ProjectData.projectId = data.projectId
 
 		$scope.progress.isLoading = false
 		$scope.progress.determinateValue += 100
@@ -307,9 +347,9 @@ crosetModule
 		($scope, $attrs, ScreenElements, SelectedElementUUID) ->
 
 			this.onchange = (value) ->
-				ScreenElements.set(SelectedElementUUID.get(), $scope.options.result, value)
+				ScreenElements.set SelectedElementUUID.get(), $scope.options.result, value
 
-			this.onchange($scope.options.defaultValue)
+			this.onchange $scope.options.defaultValue
 			return
 		]
 	}

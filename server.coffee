@@ -38,7 +38,7 @@ Schema   = mongoose.Schema
 UserSchema = new Schema {
 	username:  String
 	password: String
-	projects: [Schema.Types.Mixed]					# 型を指定しない
+	projects: [Number]					# 型を指定しない
 }, {strict: false}
 
 ProjectSchema = new Schema {
@@ -48,6 +48,7 @@ ProjectSchema = new Schema {
 	cards: Schema.Types.Mixed
 	config: Schema.Types.Mixed
 	sourceCode: String
+	projectId: Number
 
 
 }, {strict: false}
@@ -60,10 +61,40 @@ BuildingTaskSchema = new Schema {
 
 }, {strict: false}
 
+CounterSchema = new Schema {
+	count: Number
+	name: String
+}
 
-User = mongoose.model "User", UserSchema
-Project = mongoose.model 'Project', ProjectSchema
-BuildingTask = mongoose.model 'BuildingTask', BuildingTaskSchema
+
+User         = mongoose.model "User", UserSchema
+Project      = mongoose.model "Project", ProjectSchema
+BuildingTask = mongoose.model "BuildingTask", BuildingTaskSchema
+Counter      = mongoose.model "Counter", CounterSchema
+
+# プロジェクトのオートインクリメント処理
+ProjectSchema.pre 'save', (next)->
+	this.wayway = "11111111111111111111111111111"
+	self = this
+	if self.projectId
+		next()
+
+	else
+		Counter.findOne {name: "project"}, (err, counter) ->
+			if err
+				next err
+
+			else
+				console.log "プロジェクトid", self
+				self.projectId = counter.count
+
+				counter.count++
+				counter.save (err) ->
+					if err
+						console.log "Failed", err
+
+					next()
+
 
 # LOcalStrategyを使う設定
 passport.use new LocalStrategy {usernameField: "username", passwordField: "password", passReqToCallback: true},
@@ -125,14 +156,14 @@ app.post "/project", (req, res) ->
 					if err
 						console.log err
 					else
-						user.projects.push proj._id
+						user.projects.push proj.projectId
 						user.save (err, us)->
 							console.log us
-							res.send "OK"
+							res.send proj
 
 app.put "/project", (req, res) ->
 	project = new Project()
-	Project.update {name: req.body.name}, req.body, {},
+	Project.update {projectId: req.body.projectId}, req.body, {},
 	(err) ->
 		console.log "PUT PROJ:", req.body
 		if err
@@ -148,11 +179,6 @@ app.get "/project", (req, res) ->
 		res.send project
 
 
-# 条件に合致するプロジェクトをすべて返す
-app.get "/projects", (req, res) ->
-	Project.find req.query.name, (err, docs) ->
-		res.send docs
-		console.log "multi"
 
 
 app.post "/signup", (req, res, next) ->
@@ -183,10 +209,12 @@ app.get "/logout", (req, res) ->
 	req.logout()
 	res.redirect "/"
 
+# プロジェクトをビルドする。
+# res.query: ビルドするプロジェクトのデータ
 app.get "/build", (req, res) ->
 
 	buildingTask = new BuildingTask {			# ビルド状況をタスクに登録
-		projectId: res.query.name
+		projectId: req.query.name
 		target: "zip"
 	}
 	buildingTask.save (err, buildingTask) ->			# 保存
@@ -203,10 +231,38 @@ app.get "/build", (req, res) ->
 					console.log "StdErr" + stderr
 
 				if stdout						# 成功した場合
-
+					buildingTask.remove (err, buildingTask) ->
+						if err
+							console.log err
 
 
 	res.send "ok"
+
+
+# 条件に一致するプロジェクトを削除する。
+# req.body: {name: プロジェクト名}
+app.delete "/build", (req, res) ->
+	exec "rm ./public/builded-projects/" + req.body.name + ".zip" , {maxBuffer: 1024 * 10000},  (err, stdout, stderr) ->
+		if err != null
+			console.log "Error:" + err
+
+		if stderr
+			console.log "StdErr" + stderr
+
+		if stdout						# 成功した場合
+			console.log stdout
+	res.send "OK"
+
+
+# そのプロジェクトがビルド中かどうかを調べる。ビルド中タスクを検索してヒットしたら返す
+# res.query: 検索条件
+app.get "/builded", (req, res) ->
+	BuildingTask.findOne req.query, (err, buildingTask) ->
+		if err
+			console.log err
+
+		res.send buildingTask
+
 
 
 app.listen 3000, () ->
