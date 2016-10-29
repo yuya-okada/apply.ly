@@ -98,7 +98,7 @@ html(ng-app="Croset" ng-controller="CrosetController")
 
 		div(layout="row" role="main" flex)
 			//- サイドメニュー
-			md-sidenav.md-sidenav-left(md-component-id="side-menu" md-disable-backdrop="")
+			md-sidenav#main-sidenav.md-sidenav-left(md-component-id="side-menu" md-disable-backdrop="")
 				div(ng-controller="SideMenuController")
 					md-toolbar(ng-click="toggleSideNav()")
 						h1.md-toolbar-tools inLay
@@ -115,7 +115,19 @@ html(ng-app="Croset" ng-controller="CrosetController")
 							md-icon(aria-label="Menu" class="material-icons") {{sideLink.icon}}
 							p {{sideLink.text}}
 						
-
+			
+							
+			md-sidenav#select-screen-sidenav(md-component-id="select-screen")
+				div(ng-controller="SelectScreenController")
+					md-toolbar(ng-click = "close()")
+						h1.md-toolbar-tools(md-ink-ripple)
+							md-icon#select-screen-close.material-icons arrow_back
+							div#select-screen-title 画面を選択
+					
+					div(layout="row" layout-align="center start")
+						div#select-screen(ng-repeat="(name, screen) in screens track by $index")
+							md-card a
+							span {{name}}
 
 			div.max-height.max-width
 			

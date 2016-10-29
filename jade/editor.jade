@@ -7,12 +7,13 @@ md-toolbar#header(ng-controller="HeaderController")
 			md-icon.material-icons menu
 		//- サービス名。ロゴ
 		h2
-			span デザイン
+			span {{projectName}}
 			
+		h2 >
 		//- span.vertical-line
 		//- タイトル
 		h2
-			span Project名
+			span {{screenName}}
 		
 		span(flex)
 		
@@ -32,6 +33,10 @@ md-toolbar#header(ng-controller="HeaderController")
 		
 	
 	#mode-changer(layout="column")
+		
+		md-button#changeScreen.md-icon-button.md-primary(ng-click="changeScreen()")
+			md-icon.material-icons content_copy
+	
 		md-button.selected.md-icon-button(ng-repeat="(name, modeObj) in modeList" ng-click="changeMode(name)" ng-class="{'mode-icon-active': name==mode}" aria-label="ModeIcon")
 			md-icon.material-icons {{modeObj.icon}}
 
@@ -59,3 +64,8 @@ md-toolbar#header(ng-controller="HeaderController")
 
 	#right-zone.editor-card.flex
 		.ui-view-fade(ui-view="right")
+		
+		
+		
+		
+			

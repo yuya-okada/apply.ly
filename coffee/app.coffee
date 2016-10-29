@@ -186,22 +186,42 @@ crosetModule.factory "IsInDiv", () ->
 				url: "/editor/:projectId"
 				controller: "EditorController"
 				templateUrl: "editor.html"
+
+				resolve:
+					# あらかじめプロジェクトのデータを取得してcontrollerにinjectする
+					projectDataRes: ["$http", "$stateParams", ($http, $stateParams) ->
+						# プロジェクトダウンロード
+						return $http {
+							method : "GET"
+							url: "/project"
+							params: {
+								projectId: $stateParams.projectId
+							}
+						}
+					]
 			}
 			.state "editor.design", {
-				url: "/design"
+				url: "/design/:screenName"
 				css: "css/design"
 				views:
 					left:
 						templateUrl: "hierarchy.html"
+						controller: "ChildEditorController"
+
+
 					right:
 						templateUrl: "properties.html"
+
+
 			}
 			.state "editor.program", {
-				url: "/program"
+				url: "/program/:screenName"
 				css: "css/program"
 				views:
 					right:
 						templateUrl: "program.html"
+
+				controller: "ChildEditorController"
 			}
 			.state "login", {
 				url: "/login"

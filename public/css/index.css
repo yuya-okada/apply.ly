@@ -27,7 +27,7 @@
 }
 
 /* line 28, ../../sass/commonClass.scss */
-.max-width {
+.max-width, #select-screen-sidenav #select-screen div {
   width: 100%;
 }
 
@@ -128,8 +128,8 @@ md-backdrop {
   display: none;
 }
 
-/* line 32, ../../sass/index.scss */
-md-sidenav {
+/* line 33, ../../sass/index.scss */
+#main-sidenav {
   min-width: 250px !important;
   width: 250px !important;
   max-width: 250px !important;
@@ -137,15 +137,15 @@ md-sidenav {
   background-color: #2196F3 !important;
   position: static !important;
 }
-/* line 40, ../../sass/index.scss */
-md-sidenav .md-toolbar-tools {
+/* line 41, ../../sass/index.scss */
+#main-sidenav .md-toolbar-tools {
   justify-content: center;
   font-weight: bold;
   font-size: 22px;
   color: white;
 }
-/* line 47, ../../sass/index.scss */
-md-sidenav #user-cover-img {
+/* line 48, ../../sass/index.scss */
+#main-sidenav #user-cover-img {
   height: 140px;
   background-color: black;
   background-image: url("https://wallpaperspal.com/wp-content/uploads/Blue-Color-Scheme-Material-Design-Wallpaper.jpg");
@@ -154,8 +154,8 @@ md-sidenav #user-cover-img {
   justify-content: center;
   align-items: center;
 }
-/* line 56, ../../sass/index.scss */
-md-sidenav #user-cover-img:before {
+/* line 57, ../../sass/index.scss */
+#main-sidenav #user-cover-img:before {
   z-index: 51;
   content: "";
   display: block;
@@ -166,41 +166,72 @@ md-sidenav #user-cover-img:before {
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.4);
 }
-/* line 68, ../../sass/index.scss */
-md-sidenav #user-cover-img .md-layout-row {
+/* line 69, ../../sass/index.scss */
+#main-sidenav #user-cover-img .md-layout-row {
   z-index: 52;
 }
-/* line 72, ../../sass/index.scss */
-md-sidenav #user-cover-img .md-layout-row #user-icon {
+/* line 73, ../../sass/index.scss */
+#main-sidenav #user-cover-img .md-layout-row #user-icon {
   width: 50px;
   height: 50px;
   border-radius: 50%;
 }
-/* line 78, ../../sass/index.scss */
-md-sidenav #user-cover-img .md-layout-row .md-layout-column {
+/* line 79, ../../sass/index.scss */
+#main-sidenav #user-cover-img .md-layout-row .md-layout-column {
   margin-left: 15px;
   justify-content: center;
 }
-/* line 82, ../../sass/index.scss */
-md-sidenav #user-cover-img .md-layout-row .md-layout-column span {
+/* line 83, ../../sass/index.scss */
+#main-sidenav #user-cover-img .md-layout-row .md-layout-column span {
   color: white;
 }
-/* line 89, ../../sass/index.scss */
-md-sidenav md-list button:hover {
+/* line 90, ../../sass/index.scss */
+#main-sidenav md-list button:hover {
   background-color: #1976D2 !important;
 }
-/* line 92, ../../sass/index.scss */
-md-sidenav md-list p {
+/* line 93, ../../sass/index.scss */
+#main-sidenav md-list p {
   font-size: 14px;
   color: white !important;
 }
-/* line 96, ../../sass/index.scss */
-md-sidenav md-list md-icon {
+/* line 97, ../../sass/index.scss */
+#main-sidenav md-list md-icon {
   font-size: 20px !important;
   color: white !important;
 }
 
-/* line 106, ../../sass/index.scss */
+/* line 105, ../../sass/index.scss */
+#select-screen-sidenav {
+  background-color: #2196F3 !important;
+  color: white;
+  width: calc(100% - 200px);
+  max-width: none;
+}
+/* line 111, ../../sass/index.scss */
+#select-screen-sidenav #select-screen-close {
+  margin: 15px;
+}
+/* line 114, ../../sass/index.scss */
+#select-screen-sidenav #select-screen-title {
+  color: white;
+}
+/* line 118, ../../sass/index.scss */
+#select-screen-sidenav #select-screen {
+  width: 250px;
+  padding: 25px;
+  margin: 25px;
+}
+/* line 122, ../../sass/index.scss */
+#select-screen-sidenav #select-screen md-card {
+  width: 200px;
+  height: 355.6px;
+}
+/* line 127, ../../sass/index.scss */
+#select-screen-sidenav #select-screen div {
+  text-align: center;
+}
+
+/* line 135, ../../sass/index.scss */
 main {
   height: calc(100% - 60px);
   position: relative;

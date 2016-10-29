@@ -29,10 +29,11 @@ md-backdrop {
 	display: none;
 }
 
-md-sidenav {
-    min-width: 250px !important;
-    width: 250px !important;
-    max-width: 250px !important;
+
+#main-sidenav {
+  min-width: 250px !important;
+  width: 250px !important;
+  max-width: 250px !important;
 	z-index: 51;
 	background-color: $mc !important;
 	position: static !important;
@@ -101,6 +102,35 @@ md-sidenav {
 }
 
 
+#select-screen-sidenav {
+	background-color: $mc !important;
+	color: white;
+	width: calc(100% - 200px);
+  max-width: none;
+
+	#select-screen-close {
+			margin: 15px;
+	}
+	#select-screen-title {
+		color: white;
+	}
+
+	#select-screen {
+		width: 250px;
+		padding: 25px;
+		margin: 25px;
+		md-card {
+			box-shadow: none !important;
+			width: 200px;				// 16:9
+			height: 355.6px;		// 16:9
+
+		}
+		div {
+			text-align: center;
+			@extend .max-width;
+		}
+	}
+}
 
 
 main {

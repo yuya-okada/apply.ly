@@ -161,26 +161,41 @@ crosetModule.factory("IsInDiv", function() {
     return $stateProvider.state("editor", {
       url: "/editor/:projectId",
       controller: "EditorController",
-      templateUrl: "editor.html"
+      templateUrl: "editor.html",
+      resolve: {
+        projectDataRes: [
+          "$http", "$stateParams", function($http, $stateParams) {
+            return $http({
+              method: "GET",
+              url: "/project",
+              params: {
+                projectId: $stateParams.projectId
+              }
+            });
+          }
+        ]
+      }
     }).state("editor.design", {
-      url: "/design",
+      url: "/design/:screenName",
       css: "css/design",
       views: {
         left: {
-          templateUrl: "hierarchy.html"
+          templateUrl: "hierarchy.html",
+          controller: "ChildEditorController"
         },
         right: {
           templateUrl: "properties.html"
         }
       }
     }).state("editor.program", {
-      url: "/program",
+      url: "/program/:screenName",
       css: "css/program",
       views: {
         right: {
           templateUrl: "program.html"
         }
-      }
+      },
+      controller: "ChildEditorController"
     }).state("login", {
       url: "/login",
       css: "css/login",

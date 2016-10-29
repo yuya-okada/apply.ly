@@ -44,10 +44,19 @@ UserSchema = new Schema {
 ProjectSchema = new Schema {
 	name:  String
 	owner: String
-	element: Schema.Types.Mixed					# 型を指定しない
-	cards: Schema.Types.Mixed
+	screens:
+		type: Schema.Types.Mixed					# 型を指定しない
+		default:　{
+			"トップ": {
+			 	elements: {}
+				cards: []
+				sourceCode: ""
+			}
+		}
+	defaultScreen:
+		type: String
+		default: "トップ"
 	config: Schema.Types.Mixed
-	sourceCode: String
 	projectId: Number
 
 
@@ -146,12 +155,11 @@ app.post "/project", (req, res) ->
 	if id
 		User = mongoose.model "User", UserSchema
 		User.findById id, (err, user) ->
-			console.log "user", user
+
 			if err
 				console.log err
 			if user
 				project = new Project req.body
-				console.log "SAVING", req
 				project.save (err, proj) ->
 					if err
 						console.log err

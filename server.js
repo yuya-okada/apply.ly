@@ -59,10 +59,21 @@
   ProjectSchema = new Schema({
     name: String,
     owner: String,
-    element: Schema.Types.Mixed,
-    cards: Schema.Types.Mixed,
+    screens: {
+      type: Schema.Types.Mixed,
+      "default": {
+        "トップ": {
+          elements: {},
+          cards: [],
+          sourceCode: ""
+        }
+      }
+    },
+    defaultScreen: {
+      type: String,
+      "default": "トップ"
+    },
     config: Schema.Types.Mixed,
-    sourceCode: String,
     projectId: Number
   }, {
     strict: false
@@ -176,13 +187,11 @@
       User = mongoose.model("User", UserSchema);
       return User.findById(id, function(err, user) {
         var project;
-        console.log("user", user);
         if (err) {
           console.log(err);
         }
         if (user) {
           project = new Project(req.body);
-          console.log("SAVING", req);
           return project.save(function(err, proj) {
             if (err) {
               return console.log(err);

@@ -18,18 +18,41 @@ crosetModule
 
 ]
 
-.service "ProjectData", ["$http", "$stateParams", "$state", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", ($http, $stateParams, $state, ScreenCards, ScreenElements, Build, ServiceConfig) ->
+.service "ProjectData", ["$http", "$rootScope", "$stateParams", "$state", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", ($http, $rootScope, $stateParams, $state, ScreenCards, ScreenElements, Build, ServiceConfig) ->
 	this.projectId = null
 	this.name = null
-	this.get = () ->
-		return {
-			name: this.name
+	this.screens = {}
+	this.getScreens = () ->
+		return this.screens
+
+	currentScreenName = ""
+	$rootScope.$on "onChangedScreen", (ev, screenName) ->		# ChildEditorControllerから呼ばれる
+		currentScreenName = screenName
+
+	$rootScope.$on "$stateChangeStart", (event, toState, toParams, fromState, fromParams) ->
+		console.log toState
+		if toState.name.match(/editor/)
+			saveCurrentScreen()
+
+	that = this
+	saveCurrentScreen = () ->
+		that.screens[currentScreenName] = {
 			elements: ScreenElements.get()
-			projectId: this.projectId
 			cards: ScreenCards.get()
-			config: ServiceConfig.get()
 			sourceCode: Build.compile ScreenCards.get()
 		}
+
+	this.get = () ->
+		saveCurrentScreen()
+		return {
+			name: this.name
+			projectId: this.projectId
+			screens: this.screens
+			defaultScreen: "トップ"
+			config: ServiceConfig.get()
+
+		}
+
 
 	return
 ]
@@ -82,13 +105,26 @@ crosetModule
 ]
 
 
-.controller "HeaderController", ["$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$injector", "ProjectData", ($scope, $http, $mdDialog, $mdSidenav, $timeout, $injector, ProjectData) ->
+.controller "HeaderController", ["$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$interval", "$injector", "$stateParams", "ProjectData", ($scope, $http, $mdDialog, $mdSidenav, $timeout, $interval, $injector, $stateParams, ProjectData) ->
+
+	# プロジェクト名と画面名を設定
+	$scope.projectName = null
+	$scope.screenName = $stateParams.screenName
+	cancel = $interval () ->
+		$scope.projectName = ProjectData.name
+		if $scope.projectName
+		 	console.log $scope.projectName
+		 	$interval.cancel cancel
+	, 50
+
+	#サイドメニュー切り替え
 	$scope.toggleSideNav = () ->
 		$mdSidenav "side-menu"
 			.toggle()
 			.then () ->
 				# $log.debug "toggle " + navID + " is done"
 
+	# ビルドしてzipでダウンロード
 	$scope.buildDownload = (ev) ->
 
 		# ダイアログのController
@@ -98,7 +134,6 @@ crosetModule
 				$mdDialog.hide()			# ダイアログを閉じる
 				win = $window.open "/builded-projects/" + ProjectData.get().name + ".zip"		# ダウンロード
 
-				console.log "データ", win.window
 
 				stop = $interval () ->				# windowが閉じていることを確認 (TODO:もうすこしスマートな方法がありそう)
 					if win.closed							# 閉じていたらサーバからプロジェクトファイルを削除
@@ -171,6 +206,7 @@ crosetModule
 			return
 
 
+	# 実行
 	$scope.run = (ev) ->
 		console.log "------------実行結果--------------"
 		saveProject()
@@ -215,11 +251,19 @@ crosetModule
 
 ]
 
+.controller "SelectScreenController", ["$scope", "$mdSidenav", "ProjectData", ($scope, $mdSidenav, ProjectData) ->
+	$scope.screens = {}
+	$scope.$on "onSelectScreen", () ->		# EditorController内でトリガー
+		$scope.screens = ProjectData.getScreens()
 
+	$scope.close = ()	->
+		$mdSidenav("select-screen").close()
+]
 
 # エディタ画面のコントローラー
-.controller "EditorController", ["$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "ScreenElements", "ScreenCards", "Elements"
-($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, ScreenElements, ScreenCards, Elements) ->
+# projectDataResはresolveからinjectされる
+.controller "EditorController", ["$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElements", "ScreenCards", "Elements",　"projectDataRes",
+($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElements, ScreenCards, Elements, projectDataRes) ->
 
 	$scope.settings = {
 		elementDatas: ElementDatas
@@ -229,6 +273,15 @@ crosetModule
 
 	$scope.designMode = () -> $scope.mode = "design"
 	$scope.programMode = () -> $scope.mode = "program"
+
+	# スクリーン選択画面を開く時
+	$scope.changeScreen = () ->
+		console.log "toggle"
+		$rootScope.$broadcast("onSelectScreen");		# SelectScreenController内で受け取り
+		$mdSidenav "select-screen"
+			.toggle()
+			.then () ->
+				console.log "toggled"
 
 	# Mode Change
 	$scope.modeList = {
@@ -248,40 +301,44 @@ crosetModule
 		isLoading: true
 	}
 
-	$http {
-		method : "GET"
-		url: "/project"
-		params: {
-			projectId: $stateParams.projectId
-		}
-	}
-	.success (data, status, headers, config) ->
-		Elements.set "screen", angular.element "#screen"
+	Elements.set "screen", angular.element "#screen"
 
-		data.elements ?= {}
-		angular.forEach data.elements, (data, uuid) ->
-			ScreenElements.addFromDataEditor data, uuid
+	projectData = projectDataRes.data
 
-		console.log "GET", data.cards
-		ScreenCards.list = data.cards || []
+	console.log projectData
+	ProjectData.screens = projectData.screens
+	ProjectData.name = projectData.name
+	ProjectData.projectId = projectData.projectId
+	ProjectData.defaultScreen = projectData.defaultScreen
 
-		console.log data.cards
+	# 子stateが読み込まれたらプロジェクトをロード
+	$rootScope.$on "onChangedScreen", (ev, screenName) ->		# ChildEditorControllerから呼ばれる
+		console.log ProjectData, screenName
+		nextScreen = ProjectData.getScreens()[screenName]
+		nextScreen.elements ?= {}
+		nextScreen.card ?= []
+		changeScreen nextScreen.elements, nextScreen.cards
 
-		ProjectData.name = data.name
-		ProjectData.projectId = data.projectId
-
+		# 読み込みのプログレスバー削除
 		$scope.progress.isLoading = false
 		$scope.progress.determinateValue += 100
 
-		return
 
-	.error (data, status, headers, config) ->
-		console.log "Failed", data
+	# 表示されている画面を変更
+	changeScreen = (elements, cards) ->
+		angular.forEach elements, (data, uuid) ->
+			ScreenElements.addFromDataEditor data, uuid
+
+		ScreenCards.list = cards
 
 
 ]
 
+.controller "ChildEditorController", ["$scope", "$rootScope", "$stateParams", ($scope, $rootScope, $stateParams) ->
+	console.log "child"
+	$rootScope.$broadcast "onChangedScreen", $stateParams.screenName
 
+]
 
 
 # 画面

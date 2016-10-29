@@ -43,7 +43,7 @@
   <body>
   </body>
   <div layout="row" role="main" flex="flex">
-    <md-sidenav md-component-id="side-menu" md-disable-backdrop="" class="md-sidenav-left">
+    <md-sidenav id="main-sidenav" md-component-id="side-menu" md-disable-backdrop="" class="md-sidenav-left">
       <div ng-controller="SideMenuController">
         <md-toolbar ng-click="toggleSideNav()">
           <h1 class="md-toolbar-tools">inLay</h1>
@@ -59,6 +59,21 @@
             <p>{{sideLink.text}}</p>
           </md-list-item>
         </md-list>
+      </div>
+    </md-sidenav>
+    <md-sidenav id="select-screen-sidenav" md-component-id="select-screen">
+      <div ng-controller="SelectScreenController">
+        <md-toolbar ng-click="close()">
+          <h1 md-ink-ripple="md-ink-ripple" class="md-toolbar-tools">
+            <md-icon id="select-screen-close" class="material-icons">arrow_back</md-icon>
+            <div id="select-screen-title">画面を選択</div>
+          </h1>
+        </md-toolbar>
+        <div layout="row" layout-align="center start">
+          <div id="select-screen" ng-repeat="(name, screen) in screens track by $index">
+            <md-card>a</md-card><span>{{name}}</span>
+          </div>
+        </div>
       </div>
     </md-sidenav>
     <div class="max-height max-width">

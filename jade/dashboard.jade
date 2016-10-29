@@ -18,7 +18,7 @@
 		md-tab(label='ダッシュボード')
 			md-content#main-tab-content.md-padding(layout="row")
 			
-				md-card.project-card(ng-repeat="project in projects track by $index" repeat-finished ui-sref="editor.design({projectId: project.projectId})" md-ink-ripple)
+				md-card.project-card(ng-repeat="project in projects track by $index" repeat-finished ui-sref="editor.design({projectId: project.projectId, screenName: 'トップ'})" md-ink-ripple)
 					img.project-background(ng-src="img/black_flat_bg.png" class="md-card-image" alt="Washed Out")
 					.project-preview-wrapper
 						.project-preview

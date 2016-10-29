@@ -16,17 +16,41 @@ crosetModule.service("ServiceConfig", [
     };
   }
 ]).service("ProjectData", [
-  "$http", "$stateParams", "$state", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", function($http, $stateParams, $state, ScreenCards, ScreenElements, Build, ServiceConfig) {
+  "$http", "$rootScope", "$stateParams", "$state", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", function($http, $rootScope, $stateParams, $state, ScreenCards, ScreenElements, Build, ServiceConfig) {
+    var currentScreenName, saveCurrentScreen, that;
     this.projectId = null;
     this.name = null;
+    this.screens = {};
+    this.getScreens = function() {
+      return this.screens;
+    };
+    currentScreenName = "";
+    $rootScope.$on("onChangedScreen", function(ev, screenName) {
+      return currentScreenName = screenName;
+    });
+    $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams) {
+      console.log(toState);
+      if (toState.name.match(/editor/)) {
+        return saveCurrentScreen();
+      }
+    });
+    that = this;
+    saveCurrentScreen = function() {
+      console.log(that);
+      that.screens[currentScreenName] = {
+        elements: ScreenElements.get(),
+        cards: ScreenCards.get(),
+        sourceCode: Build.compile(ScreenCards.get())
+      };
+      return console.log("saved", that.get());
+    };
     this.get = function() {
       return {
         name: this.name,
-        elements: ScreenElements.get(),
         projectId: this.projectId,
-        cards: ScreenCards.get(),
-        config: ServiceConfig.get(),
-        sourceCode: Build.compile(ScreenCards.get())
+        screens: this.screens,
+        defaultScreen: "トップ",
+        config: ServiceConfig.get()
       };
     };
   }
@@ -70,8 +94,17 @@ crosetModule.service("ServiceConfig", [
     };
   }
 ]).controller("HeaderController", [
-  "$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$injector", "ProjectData", function($scope, $http, $mdDialog, $mdSidenav, $timeout, $injector, ProjectData) {
-    var saveProject;
+  "$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$interval", "$injector", "$stateParams", "ProjectData", function($scope, $http, $mdDialog, $mdSidenav, $timeout, $interval, $injector, $stateParams, ProjectData) {
+    var cancel, saveProject;
+    $scope.projectName = null;
+    $scope.screenName = $stateParams.screenName;
+    cancel = $interval(function() {
+      $scope.projectName = ProjectData.name;
+      if ($scope.projectName) {
+        console.log($scope.projectName);
+        return $interval.cancel(cancel);
+      }
+    }, 50);
     $scope.toggleSideNav = function() {
       return $mdSidenav("side-menu").toggle().then(function() {});
     };
@@ -83,7 +116,6 @@ crosetModule.service("ServiceConfig", [
             var stop, win;
             $mdDialog.hide();
             win = $window.open("/builded-projects/" + ProjectData.get().name + ".zip");
-            console.log("データ", win.window);
             return stop = $interval(function() {
               if (win.closed) {
                 return $http({
@@ -179,8 +211,19 @@ crosetModule.service("ServiceConfig", [
       });
     };
   }
+]).controller("SelectScreenController", [
+  "$scope", "$mdSidenav", "ProjectData", function($scope, $mdSidenav, ProjectData) {
+    $scope.screens = {};
+    $scope.$on("onSelectScreen", function() {
+      return $scope.screens = ProjectData.getScreens();
+    });
+    return $scope.close = function() {
+      return $mdSidenav("select-screen").close();
+    };
+  }
 ]).controller("EditorController", [
-  "$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "ScreenElements", "ScreenCards", "Elements", function($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, ScreenElements, ScreenCards, Elements) {
+  "$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElements", "ScreenCards", "Elements", "projectDataRes", function($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElements, ScreenCards, Elements, projectDataRes) {
+    var changeScreen, projectData;
     $scope.settings = {
       elementDatas: ElementDatas
     };
@@ -190,6 +233,13 @@ crosetModule.service("ServiceConfig", [
     };
     $scope.programMode = function() {
       return $scope.mode = "program";
+    };
+    $scope.changeScreen = function() {
+      console.log("toggle");
+      $rootScope.$broadcast("onSelectScreen");
+      return $mdSidenav("select-screen").toggle().then(function() {
+        return console.log("toggled");
+      });
     };
     $scope.modeList = {
       design: {
@@ -207,30 +257,38 @@ crosetModule.service("ServiceConfig", [
       determinateValue: 0,
       isLoading: true
     };
-    return $http({
-      method: "GET",
-      url: "/project",
-      params: {
-        projectId: $stateParams.projectId
+    Elements.set("screen", angular.element("#screen"));
+    projectData = projectDataRes.data;
+    console.log(projectData);
+    ProjectData.screens = projectData.screens;
+    ProjectData.name = projectData.name;
+    ProjectData.projectId = projectData.projectId;
+    ProjectData.defaultScreen = projectData.defaultScreen;
+    $rootScope.$on("onChangedScreen", function(ev, screenName) {
+      var nextScreen;
+      console.log(ProjectData, screenName);
+      nextScreen = ProjectData.getScreens()[screenName];
+      if (nextScreen.elements == null) {
+        nextScreen.elements = {};
       }
-    }).success(function(data, status, headers, config) {
-      Elements.set("screen", angular.element("#screen"));
-      if (data.elements == null) {
-        data.elements = {};
+      if (nextScreen.card == null) {
+        nextScreen.card = [];
       }
-      angular.forEach(data.elements, function(data, uuid) {
+      changeScreen(nextScreen.elements, nextScreen.cards);
+      $scope.progress.isLoading = false;
+      return $scope.progress.determinateValue += 100;
+    });
+    return changeScreen = function(elements, cards) {
+      angular.forEach(elements, function(data, uuid) {
         return ScreenElements.addFromDataEditor(data, uuid);
       });
-      console.log("GET", data.cards);
-      ScreenCards.list = data.cards || [];
-      console.log(data.cards);
-      ProjectData.name = data.name;
-      ProjectData.projectId = data.projectId;
-      $scope.progress.isLoading = false;
-      $scope.progress.determinateValue += 100;
-    }).error(function(data, status, headers, config) {
-      return console.log("Failed", data);
-    });
+      return ScreenCards.list = cards;
+    };
+  }
+]).controller("ChildEditorController", [
+  "$scope", "$rootScope", "$stateParams", function($scope, $rootScope, $stateParams) {
+    console.log("child");
+    return $rootScope.$broadcast("onChangedScreen", $stateParams.screenName);
   }
 ]).controller("ScreenController", [
   "$scope", "$timeout", function($scope, $timeout) {
