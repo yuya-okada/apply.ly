@@ -10,6 +10,8 @@ md-toolbar#header(ng-controller="HeaderController")
 			span {{projectName}}
 			
 		h2 >
+		
+		img(src="img/logo.png" height="47px" style="left: 50%;position: absolute;transform: translateX(-50%)")
 		//- span.vertical-line
 		//- タイトル
 		h2
@@ -22,8 +24,12 @@ md-toolbar#header(ng-controller="HeaderController")
 			md-icon.material-icons file_download
 		
 		//- 実行
-		md-button#run-fab(class="md-fab md-primary" aria-label="Run" ng-click="run($event)") 
+		md-button#run-fab(class="md-primary" aria-label="Run" ng-click="run($event)") 
 			md-icon.material-icons play_arrow
+			
+		//- 保存
+		md-button#save-fab(class="md-fab md-primary" aria-label="Run" ng-click="save($event)") 
+			md-icon.material-icons save
 			
 #editor(layout="row")
 	
@@ -58,7 +64,6 @@ md-toolbar#header(ng-controller="HeaderController")
 		.sensor
 		.speaker
 		#screen.screen
-			resizer
 		.home
 		.bottom-bar
 

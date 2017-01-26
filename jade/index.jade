@@ -124,10 +124,44 @@ html(ng-app="Croset" ng-controller="CrosetController")
 							md-icon#select-screen-close.material-icons arrow_back
 							div#select-screen-title 画面を選択
 					
-					div(layout="row" layout-align="center start")
-						div#select-screen(ng-repeat="(name, screen) in screens track by $index")
-							md-card a
-							span {{name}}
+					div(layout="row" layout-align="center start" layout-wrap)
+						.select-screen(ng-repeat="(id, screen) in screens track by $index" repeat-finished)
+							md-card.select-screen-card(layout="column") 
+								.select-screen-body(ng-click="onclick(id)" )
+									.select-screen-preview
+								.select-screen-separater
+								.select-screen-name(layout="row" layout-align="start center" ng-class="{selectScreenDefault: id == defaultScreen}")
+									span(flex ng-click="onclick(id)") {{screen.name}}
+									
+									md-menu
+										md-button.md-icon-button(ng-click="openMore($mdOpenMenu, $event)")
+											md-icon(aria-label="More" class="material-icons" md-menu-origin) more_vert
+										
+										md-menu-content(width="4")
+											md-menu-item
+												md-button(ng-click="setAsTop(id)")
+													md-icon(aria-label="More" class="material-icons" md-menu-align-target) star_border
+													span トップ画面に設定
+													
+											md-menu-divider
+
+											md-menu-item
+												md-button(ng-click="rename($event, id)")
+													md-icon(aria-label="More" class="material-icons") edit
+													span 名前を変更
+											
+											md-menu-divider
+					
+											md-menu-item
+												md-button(ng-click="remove($event, id)")
+													md-icon(aria-label="More" class="material-icons") delete
+													span 削除
+					
+					
+
+					md-button#new-screen.md-fab(aria-label="New Screen" ng-click="create($event)")
+						md-icon(aria-label="New Screen" class="material-icons") add
+								
 
 			div.max-height.max-width
 			

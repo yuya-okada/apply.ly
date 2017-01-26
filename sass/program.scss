@@ -89,7 +89,7 @@ croset-component {
 		border-right: 2px solid $mc;
 	}
 
-	croset-component-function, croset-component-property, croset-component-literal {
+	croset-component-function, croset-component-property, croset-component-literal, croset-component-valiable {
 		display: flex;
 		flex-wrap: nowrap;
 		padding: 5px 10px 7px 10px;
@@ -135,7 +135,7 @@ croset-component {
 	}
 
 
-	croset-component-property {
+	croset-component-property, croset-component-valiable {
 		&>span {
 			align-items: center;
 		}
@@ -155,6 +155,12 @@ croset-component {
 				position: relative;
 				height: auto;
 			}
+		}
+	}
+
+	croset-component-valiable {
+		md-select {
+			margin: 5px 3px !important;
 		}
 	}
 
@@ -206,6 +212,10 @@ croset-component {
 					white-space:nowrap;
 					position: absolute;
 				}
+			}
+
+			croset-component-input-screen > md-select{
+				margin: 5px 3px !important;
 			}
 		}
 	}

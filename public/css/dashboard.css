@@ -1,22 +1,22 @@
-/* line 5, ../../sass/dashboard.scss */
+/* line 6, ../../sass/dashboard.scss */
 body {
   overflow-y: hidden;
 }
 
-/* line 9, ../../sass/dashboard.scss */
+/* line 10, ../../sass/dashboard.scss */
 #menu {
   position: absolute;
   top: 10px;
   left: 20px;
   z-index: 1;
 }
-/* line 14, ../../sass/dashboard.scss */
+/* line 15, ../../sass/dashboard.scss */
 #menu md-icon {
   color: white;
   font-size: 30px;
 }
 
-/* line 20, ../../sass/dashboard.scss */
+/* line 21, ../../sass/dashboard.scss */
 #fixing-header {
   width: 100%;
   height: 240px;
@@ -26,7 +26,7 @@ body {
   z-index: 0;
   align-items: center;
 }
-/* line 29, ../../sass/dashboard.scss */
+/* line 30, ../../sass/dashboard.scss */
 #fixing-header:before {
   content: "";
   display: block;
@@ -43,7 +43,7 @@ body {
   opacity: 0.6;
   z-index: 0;
 }
-/* line 39, ../../sass/dashboard.scss */
+/* line 40, ../../sass/dashboard.scss */
 #fixing-header h2 {
   color: white;
   font-weight: 300;
@@ -51,14 +51,14 @@ body {
   z-index: 1;
 }
 
-/* line 47, ../../sass/dashboard.scss */
+/* line 48, ../../sass/dashboard.scss */
 #new-project {
   position: absolute;
   right: 210px;
   top: 210px;
 }
 
-/* line 53, ../../sass/dashboard.scss */
+/* line 54, ../../sass/dashboard.scss */
 #tabs {
   -moz-transition: box-shadow 0.2s cubic-bezier(0.55, 0, 0.1, 1);
   -o-transition: box-shadow 0.2s cubic-bezier(0.55, 0, 0.1, 1);
@@ -67,7 +67,7 @@ body {
   margin-top: 190px;
   z-index: 1;
 }
-/* line 58, ../../sass/dashboard.scss */
+/* line 59, ../../sass/dashboard.scss */
 #tabs md-tabs-wrapper {
   -moz-transition: box-shadow 0.2s cubic-bezier(0.55, 0, 0.1, 1);
   -o-transition: box-shadow 0.2s cubic-bezier(0.55, 0, 0.1, 1);
@@ -77,11 +77,11 @@ body {
   z-index: 1;
   padding-left: 150px;
 }
-/* line 64, ../../sass/dashboard.scss */
+/* line 65, ../../sass/dashboard.scss */
 #tabs md-tabs-wrapper md-tab-item {
   color: white;
 }
-/* line 69, ../../sass/dashboard.scss */
+/* line 70, ../../sass/dashboard.scss */
 #tabs md-content {
   height: 1000px;
   padding: 100px 250px 0 250px;
@@ -89,7 +89,7 @@ body {
   justify-content: space-around;
   flex-wrap: wrap;
 }
-/* line 78, ../../sass/dashboard.scss */
+/* line 79, ../../sass/dashboard.scss */
 #tabs md-content .project-card {
   position: relative;
   width: 250px;
@@ -97,21 +97,28 @@ body {
   overflow: hidden;
   background-color: white;
 }
-/* line 85, ../../sass/dashboard.scss */
+/* line 86, ../../sass/dashboard.scss */
 #tabs md-content .project-card .project-background {
   height: auto !important;
 }
-/* line 89, ../../sass/dashboard.scss */
-#tabs md-content .project-card md-card-title {
-  border-top: 1px solid #E2E2E2;
+/* line 90, ../../sass/dashboard.scss */
+#tabs md-content .project-card .project-card-title {
+  border-top: 4px solid #FF5722;
   z-index: 1;
   background-color: #fdfdfd;
+  color: black;
+  text-align: center;
+  height: 50px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
 }
-/* line 94, ../../sass/dashboard.scss */
-#tabs md-content .project-card md-card-title .md-headline {
-  font-size: 15px;
+/* line 102, ../../sass/dashboard.scss */
+#tabs md-content .project-card .project-card-title span {
+  font-size: 14px !important;
 }
-/* line 99, ../../sass/dashboard.scss */
+/* line 107, ../../sass/dashboard.scss */
 #tabs md-content .project-card .project-preview {
   width: 1000px;
   height: 1000px;
@@ -124,7 +131,7 @@ body {
   left: 0px;
   overflow: hidden;
 }
-/* line 116, ../../sass/dashboard.scss */
+/* line 124, ../../sass/dashboard.scss */
 #tabs.md-whiteframe-6dp md-tab-wrapper {
   background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuMCIgeTE9IjAuNSIgeDI9IjEuMCIgeTI9IjAuNSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzU2MWM5NiIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzRlODlkMiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==');
   background: -webkit-gradient(linear, 0% 50%, 100% 50%, color-stop(0%, #561c96), color-stop(100%, #4e89d2));

@@ -63,5 +63,14 @@
         },
         "is_top_level": false,
         "variables": {}
+    },
+    "cordova-plugin-spinner-dialog": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/Paldom/SpinnerDialog.git",
+            "subdir": "."
+        },
+        "is_top_level": true,
+        "variables": {}
     }
 }

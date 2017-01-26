@@ -183,7 +183,7 @@ croset-component.right-border {
   border-right: 2px solid #2196F3;
 }
 /* line 92, ../../sass/program.scss */
-croset-component croset-component-function, croset-component croset-component-property, croset-component croset-component-literal {
+croset-component croset-component-function, croset-component croset-component-property, croset-component croset-component-literal, croset-component croset-component-valiable {
   display: flex;
   flex-wrap: nowrap;
   padding: 5px 10px 7px 10px;
@@ -228,11 +228,11 @@ croset-component[croset-component-in-list] .mat-wrapper {
   min-height: 25px;
 }
 /* line 139, ../../sass/program.scss */
-croset-component croset-component-property > span {
+croset-component croset-component-property > span, croset-component croset-component-valiable > span {
   align-items: center;
 }
 /* line 143, ../../sass/program.scss */
-croset-component croset-component-property croset-component-property-modify-icon {
+croset-component croset-component-property croset-component-property-modify-icon, croset-component croset-component-valiable croset-component-property-modify-icon {
   margin: -5px -10px -7px 5px;
   align-items: center;
   z-index: 0;
@@ -241,15 +241,19 @@ croset-component croset-component-property croset-component-property-modify-icon
   width: 25px;
 }
 /* line 151, ../../sass/program.scss */
-croset-component croset-component-property croset-component-property-modified {
+croset-component croset-component-property croset-component-property-modified, croset-component croset-component-valiable croset-component-property-modified {
   margin: -5px -10px -7px 10px;
 }
 /* line 154, ../../sass/program.scss */
-croset-component croset-component-property croset-component-property-modified > croset-component-in-code {
+croset-component croset-component-property croset-component-property-modified > croset-component-in-code, croset-component croset-component-valiable croset-component-property-modified > croset-component-in-code {
   position: relative;
   height: auto;
 }
-/* line 161, ../../sass/program.scss */
+/* line 162, ../../sass/program.scss */
+croset-component croset-component-valiable md-select {
+  margin: 5px 3px !important;
+}
+/* line 167, ../../sass/program.scss */
 croset-component .croset-component-body {
   font-size: 12px;
   min-height: 45px;
@@ -259,121 +263,139 @@ croset-component .croset-component-body {
   -webkit-transition: box-shadow 0.15s cubic-bezier(0.55, 0, 0.1, 1);
   transition: box-shadow 0.15s cubic-bezier(0.55, 0, 0.1, 1);
 }
-/* line 168, ../../sass/program.scss */
+/* line 174, ../../sass/program.scss */
 croset-component .croset-component-body > * {
   display: flex;
 }
-/* line 172, ../../sass/program.scss */
+/* line 178, ../../sass/program.scss */
 croset-component .croset-component-body > .input-border {
   border: 2px solid #FF5722;
 }
-/* line 176, ../../sass/program.scss */
+/* line 182, ../../sass/program.scss */
 croset-component .croset-component-body croset-component-input {
   display: flex;
   align-items: center;
 }
-/* line 180, ../../sass/program.scss */
+/* line 186, ../../sass/program.scss */
 croset-component .croset-component-body croset-component-input > *:nth-child(2) {
   display: none;
 }
-/* line 184, ../../sass/program.scss */
+/* line 190, ../../sass/program.scss */
 croset-component .croset-component-body croset-component-input croset-component-in-code {
   position: relative;
   height: auto;
 }
-/* line 190, ../../sass/program.scss */
+/* line 196, ../../sass/program.scss */
 croset-component .croset-component-body croset-component-input croset-component-input-text span {
   align-items: center;
   white-space: nowrap;
 }
-/* line 195, ../../sass/program.scss */
+/* line 201, ../../sass/program.scss */
 croset-component .croset-component-body croset-component-input croset-component-input-textbox, croset-component .croset-component-body croset-component-input croset-component-input-expbox {
   font-family: 'メイリオ';
 }
-/* line 197, ../../sass/program.scss */
+/* line 203, ../../sass/program.scss */
 croset-component .croset-component-body croset-component-input croset-component-input-textbox md-input-container, croset-component .croset-component-body croset-component-input croset-component-input-expbox md-input-container {
   padding-bottom: 0;
 }
-/* line 198, ../../sass/program.scss */
+/* line 204, ../../sass/program.scss */
 croset-component .croset-component-body croset-component-input croset-component-input-textbox input, croset-component .croset-component-body croset-component-input croset-component-input-expbox input {
   text-align: center;
   margin: 0px 3px;
   padding: 10px 5px;
   border: 0;
 }
-/* line 204, ../../sass/program.scss */
+/* line 210, ../../sass/program.scss */
 croset-component .croset-component-body croset-component-input croset-component-input-textbox span, croset-component .croset-component-body croset-component-input croset-component-input-expbox span {
   visibility: hidden;
   white-space: nowrap;
   position: absolute;
 }
-/* line 213, ../../sass/program.scss */
+/* line 217, ../../sass/program.scss */
+croset-component .croset-component-body croset-component-input croset-component-input-screen > md-select {
+  margin: 5px 3px !important;
+}
+/* line 223, ../../sass/program.scss */
 croset-component croset-component-literal {
   background-color: #fff;
   color: #000;
 }
-/* line 218, ../../sass/program.scss */
+/* line 228, ../../sass/program.scss */
 croset-component croset-component-literal > croset-component-input > croset-component-input-expbox input, croset-component croset-component-literal > croset-component-input > croset-component-input-textbox input, croset-component croset-component-literal > .croset-mat-flex > croset-component-input > croset-component-input-expbox input, croset-component croset-component-literal > .croset-mat-flex > croset-component-input > croset-component-input-textbox input {
   background-color: #E6E6E6;
   color: #444444;
 }
-/* line 222, ../../sass/program.scss */
+/* line 232, ../../sass/program.scss */
 croset-component croset-component-literal > croset-component-input > croset-component-input-expbox input:focused, croset-component croset-component-literal > croset-component-input > croset-component-input-textbox input:focused, croset-component croset-component-literal > .croset-mat-flex > croset-component-input > croset-component-input-expbox input:focused, croset-component croset-component-literal > .croset-mat-flex > croset-component-input > croset-component-input-textbox input:focused {
   outline: none;
 }
-/* line 213, ../../sass/program.scss */
+/* line 223, ../../sass/program.scss */
 croset-component croset-component-function {
   background-color: rgba(219, 68, 55, 0.95);
   color: #fff;
 }
-/* line 218, ../../sass/program.scss */
+/* line 228, ../../sass/program.scss */
 croset-component croset-component-function > croset-component-input > croset-component-input-expbox input, croset-component croset-component-function > croset-component-input > croset-component-input-textbox input, croset-component croset-component-function > .croset-mat-flex > croset-component-input > croset-component-input-expbox input, croset-component croset-component-function > .croset-mat-flex > croset-component-input > croset-component-input-textbox input {
   background-color: #E06055;
   color: #fff;
 }
-/* line 222, ../../sass/program.scss */
+/* line 232, ../../sass/program.scss */
 croset-component croset-component-function > croset-component-input > croset-component-input-expbox input:focused, croset-component croset-component-function > croset-component-input > croset-component-input-textbox input:focused, croset-component croset-component-function > .croset-mat-flex > croset-component-input > croset-component-input-expbox input:focused, croset-component croset-component-function > .croset-mat-flex > croset-component-input > croset-component-input-textbox input:focused {
   outline: none;
 }
-/* line 213, ../../sass/program.scss */
+/* line 223, ../../sass/program.scss */
 croset-component croset-component-property {
   background-color: #03A9F4;
   color: #fff;
 }
-/* line 218, ../../sass/program.scss */
+/* line 228, ../../sass/program.scss */
 croset-component croset-component-property > croset-component-input > croset-component-input-expbox input, croset-component croset-component-property > croset-component-input > croset-component-input-textbox input, croset-component croset-component-property > .croset-mat-flex > croset-component-input > croset-component-input-expbox input, croset-component croset-component-property > .croset-mat-flex > croset-component-input > croset-component-input-textbox input {
   background-color: #29B6F6;
   color: #C9EDFD;
 }
-/* line 222, ../../sass/program.scss */
+/* line 232, ../../sass/program.scss */
 croset-component croset-component-property > croset-component-input > croset-component-input-expbox input:focused, croset-component croset-component-property > croset-component-input > croset-component-input-textbox input:focused, croset-component croset-component-property > .croset-mat-flex > croset-component-input > croset-component-input-expbox input:focused, croset-component croset-component-property > .croset-mat-flex > croset-component-input > croset-component-input-textbox input:focused {
   outline: none;
 }
-/* line 213, ../../sass/program.scss */
+/* line 223, ../../sass/program.scss */
+croset-component croset-component-property {
+  background-color: #03A9F4;
+  color: #fff;
+}
+/* line 228, ../../sass/program.scss */
+croset-component croset-component-property > croset-component-input > croset-component-input-expbox input, croset-component croset-component-property > croset-component-input > croset-component-input-textbox input, croset-component croset-component-property > .croset-mat-flex > croset-component-input > croset-component-input-expbox input, croset-component croset-component-property > .croset-mat-flex > croset-component-input > croset-component-input-textbox input {
+  background-color: #29B6F6;
+  color: #C9EDFD;
+}
+/* line 232, ../../sass/program.scss */
+croset-component croset-component-property > croset-component-input > croset-component-input-expbox input:focused, croset-component croset-component-property > croset-component-input > croset-component-input-textbox input:focused, croset-component croset-component-property > .croset-mat-flex > croset-component-input > croset-component-input-expbox input:focused, croset-component croset-component-property > .croset-mat-flex > croset-component-input > croset-component-input-textbox input:focused {
+  outline: none;
+}
+/* line 223, ../../sass/program.scss */
 croset-component croset-component- {
   background-color: rgba(219, 68, 55, 0.95);
   color: #fff;
 }
-/* line 218, ../../sass/program.scss */
+/* line 228, ../../sass/program.scss */
 croset-component croset-component- > croset-component-input > croset-component-input-expbox input, croset-component croset-component- > croset-component-input > croset-component-input-textbox input, croset-component croset-component- > .croset-mat-flex > croset-component-input > croset-component-input-expbox input, croset-component croset-component- > .croset-mat-flex > croset-component-input > croset-component-input-textbox input {
   background-color: #E06055;
   color: #fff;
 }
-/* line 222, ../../sass/program.scss */
+/* line 232, ../../sass/program.scss */
 croset-component croset-component- > croset-component-input > croset-component-input-expbox input:focused, croset-component croset-component- > croset-component-input > croset-component-input-textbox input:focused, croset-component croset-component- > .croset-mat-flex > croset-component-input > croset-component-input-expbox input:focused, croset-component croset-component- > .croset-mat-flex > croset-component-input > croset-component-input-textbox input:focused {
   outline: none;
 }
-/* line 213, ../../sass/program.scss */
+/* line 223, ../../sass/program.scss */
 croset-component croset-component-mat {
   background-color: #455A64;
   color: #fff;
 }
-/* line 218, ../../sass/program.scss */
+/* line 228, ../../sass/program.scss */
 croset-component croset-component-mat > croset-component-input > croset-component-input-expbox input, croset-component croset-component-mat > croset-component-input > croset-component-input-textbox input, croset-component croset-component-mat > .croset-mat-flex > croset-component-input > croset-component-input-expbox input, croset-component croset-component-mat > .croset-mat-flex > croset-component-input > croset-component-input-textbox input {
   background-color: #61737B;
   color: #fff;
 }
-/* line 222, ../../sass/program.scss */
+/* line 232, ../../sass/program.scss */
 croset-component croset-component-mat > croset-component-input > croset-component-input-expbox input:focused, croset-component croset-component-mat > croset-component-input > croset-component-input-textbox input:focused, croset-component croset-component-mat > .croset-mat-flex > croset-component-input > croset-component-input-expbox input:focused, croset-component croset-component-mat > .croset-mat-flex > croset-component-input > croset-component-input-textbox input:focused {
   outline: none;
 }

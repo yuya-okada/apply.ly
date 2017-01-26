@@ -5,13 +5,16 @@
       <md-icon class="material-icons">menu</md-icon>
     </md-button>
     <h2><span>{{projectName}}</span></h2>
-    <h2>></h2>
+    <h2>></h2><img src="img/logo.png" height="47px" style="left: 50%;position: absolute;transform: translateX(-50%)"/>
     <h2><span>{{screenName}}</span></h2><span flex="flex"></span>
     <md-button id="build-download" aria-label="Run" ng-click="buildDownload($event)" class="md-primary"> 
       <md-icon class="material-icons">file_download</md-icon>
     </md-button>
-    <md-button id="run-fab" aria-label="Run" ng-click="run($event)" class="md-fab md-primary"> 
+    <md-button id="run-fab" aria-label="Run" ng-click="run($event)" class="md-primary"> 
       <md-icon class="material-icons">play_arrow</md-icon>
+    </md-button>
+    <md-button id="save-fab" aria-label="Run" ng-click="save($event)" class="md-fab md-primary"> 
+      <md-icon class="material-icons">save</md-icon>
     </md-button>
   </div>
 </md-toolbar>
@@ -37,9 +40,7 @@
     <div class="camera"></div>
     <div class="sensor"></div>
     <div class="speaker"></div>
-    <div id="screen" class="screen">
-      <resizer></resizer>
-    </div>
+    <div id="screen" class="screen"></div>
     <div class="home"></div>
     <div class="bottom-bar"></div>
   </div>

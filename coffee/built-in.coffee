@@ -497,117 +497,135 @@ crosetModule
 	}
 
 
-.service "ScreenElements", ["Elements", "ElementDatas", "$compile", "$injector"
-(Elements, ElementDatas, $compile, $injector) ->
-	screenScope = null  				# ここで初期化処理をするとまだScreenControllerにscopeがinjectionされていない
-	list = {}
-	this.get = () -> return list
-	this.set = (uuid, key, value) ->     # 指定されたオプションを対応するscopeのoptionsプロパティに適応
-		list[uuid].options[key] = value
-		scopes[uuid].options[key] = value
-
-	scopes = {}
-
-	this.add = (type, uuid) ->
-		screenScope ?= Elements.get().screen.scope()		# 初期化されてない場合初期化
-
-		# 要素のデータを取得
-		e = $ "<croset-element-#{type}>"
-			.addClass "croset-element"
-			.attr "id", uuid
-			.attr "ng-class", "{'croset-element': true}"	# 追加アニメーションに使う
-			.attr "croset-element-type", type				# タイプ。ex. Button, Text ...
-			.attr "uuid", uuid								# 固有のID
-			.attr "croset-element-editor", true				# エディタ上でのみ有効化する
-			.width ElementDatas[type].width					# 横幅を初期化
-			.height ElementDatas[type].height				# 縦幅を初期化
-
-		e = $compile(e)(screenScope)						# 追加した要素にディレクティブを適応させるためにコンパイル
-		Elements.get().screen.append e							# スクリーンに追加
-
-		options = {}
-		list[uuid] = {
-			type: type
-			name: ElementDatas[type].name
-			element: e
-			options: {}
-		}
-
-		scopes[uuid] = e.scope()
-		e.scope().options = {}
-
-	this.addFromData = (data, uuid) ->
-		screenScope ?= Elements.get().screen.scope()		# 初期化されてない場合初期化
-
-		e = $ "<croset-element-#{data.type}>"
-			.addClass "croset-element"
-			.attr "id", uuid
-			.attr "croset-element-type", data.type			# タイプ。ex. Button, Text ...
-			.attr "uuid", uuid								# 固有のID
-
-		console.log(data.options.width, e , "あああいうえ")
-		e.width data.options.width
-			.height data.options.height
-			.css {
-				top: data.options.top
-				left: data.options.left
-			}
-
-		scope = screenScope.$new true
-		e = $compile(e)(scope)								# 追加した要素にディレクティブを適応させるためにコンパイル
-		scope.options = data.options
-
-		Elements.get().screen.append e							# スクリーンに追加
-
-
-	this.addFromDataEditor = (data, uuid) ->
-		console.log Elements
-		screenScope ?= Elements.get().screen.scope()		# 初期化されてない場合初期化
-
-		e = $ "<croset-element-#{data.type}>"
-			.addClass "croset-element"
-			.attr "croset-element-editor", true				# エディタ上でのみ有効化する
-			.attr "id", uuid
-			.attr "croset-element-type", data.type			# タイプ。ex. Button, Text ...
-			.attr "uuid", uuid								# 固有のID
-
-		console.log data
-		e.width data.options.width
-			.height data.options.height
-			.css {
-				top: data.options.top
-				left: data.options.left
-			}
-
-		console.log Elements, "hi"
-
-		scope = screenScope.$new true
-		e = $compile(e)(scope)								# 追加した要素にディレクティブを適応させるためにコンパイル
-		Elements.get().screen.append e							# スクリーンに追加
-
-		scopes[uuid] = scope
-		scope.options = data.options
-		data.element = e
-		list[uuid] = data
-
-
-	this.delete = (uuid) ->
-		list[uuid].element.remove()
-		VisiblePropertyCards = $injector.get("VisiblePropertyCards")		# アプリとして実行した時にVisiblePropertyCardsが存在しないとエラーが起きるので、使うときだけinjectする
-		VisiblePropertyCards.set []
-		delete list[uuid]
-
-	this.initialize = () ->
+.factory "ScreenElementsManager", ["Elements", "ElementDatas", "$compile", "$injector", (Elements, ElementDatas, $compile, $injector) ->
+	return (screenElement) ->
+		console.log screenElement
+		screenScope = null
 		list = {}
 		scopes = {}
-		Elements.get().screen.empty()
+		screenElement.empty()
 
-	window.se = () -> list
+		this.init = () ->						# Screenが変更された場合は追加前に必ず呼ぶ
+			screenScope = null
+			list = {}
 
-	return
+		this.get = () -> return list
+		this.set = (uuid, key, value) ->     # 指定されたオプションを対応するscopeのoptionsプロパティに適応
+			list[uuid].options[key] = value
+			scopes[uuid].options[key] = value
+
+		this.removeAll = () ->
+			list = {}
+			screenElement.empty()
+
+		this.add = (type, uuid) ->
+			screenScope ?= screenElement.scope()		# 初期化されてない場合初期化
+
+			# 要素のデータを取得
+			e = $ "<croset-element-#{type}>"
+				.addClass "croset-element"
+				.attr "id", uuid
+				.attr "ng-class", "{'croset-element': true}"	# 追加アニメーションに使う
+				.attr "croset-element-type", type				# タイプ。ex. Button, Text ...
+				.attr "uuid", uuid								# 固有のID
+				.attr "croset-element-editor", true				# エディタ上でのみ有効化する
+				.width ElementDatas[type].width					# 横幅を初期化
+				.height ElementDatas[type].height				# 縦幅を初期化
+
+			e = $compile(e)(screenScope)						# 追加した要素にディレクティブを適応させるためにコンパイル
+			screenElement.append e							# スクリーンに追加
+
+			options = {}
+			list[uuid] = {
+				type: type
+				name: ElementDatas[type].name
+				element: e
+				options: {}
+			}
+
+			scopes[uuid] = e.scope()
+			e.scope().options = {}
+
+		this.addFromData = (data, uuid) ->
+
+			screenScope ?= screenElement.scope()		# 初期化されてない場合初期化
+
+			e = $ "<croset-element-#{data.type}>"
+				.addClass "croset-element"
+				.attr "id", uuid
+				.attr "croset-element-type", data.type			# タイプ。ex. Button, Text ...
+				.attr "uuid", uuid								# 固有のID
+
+			e.width data.options.width
+				.height data.options.height
+				.css {
+					top: data.options.top
+					left: data.options.left
+				}
+
+			scope = screenScope.$new true
+			e = $compile(e)(scope)								# 追加した要素にディレクティブを適応させるためにコンパイル
+			scope.options = data.options
+			screenElement.append e							# スクリーンに追加
+
+			console.log e.children().children().html()
+
+		this.addFromDataEditor = (data, uuid) ->
+			console.log Elements
+			screenScope ?= screenElement.scope()		# 初期化されてない場合初期化
+
+			e = $ "<croset-element-#{data.type}>"
+				.addClass "croset-element"
+				.attr "croset-element-editor", true				# エディタ上でのみ有効化する
+				.attr "id", uuid
+				.attr "croset-element-type", data.type			# タイプ。ex. Button, Text ...
+				.attr "uuid", uuid								# 固有のID
+
+			console.log data
+			e.width data.options.width
+				.height data.options.height
+				.css {
+					top: data.options.top
+					left: data.options.left
+				}
+
+
+			scope = screenScope.$new true
+			e = $compile(e)(scope)								# 追加した要素にディレクティブを適応させるためにコンパイル
+			screenElement.append e							# スクリーンに追加
+
+			scopes[uuid] = scope
+			scope.options = data.options
+			data.element = e
+			list[uuid] = data
+
+
+		this.delete = (uuid) ->
+			list[uuid].element.remove()
+			VisiblePropertyCards = $injector.get("VisiblePropertyCards")		# アプリとして実行した時にVisiblePropertyCardsが存在しないとエラーが起きるので、使うときだけinjectする
+			VisiblePropertyCards.set []
+			delete list[uuid]
+
+
+		this.initialize = () ->
+			list = {}
+			scopes = {}
+			screenElement.empty()
+
+
+		return
+
 ]
 
 
+.directive "crosetElement", ["$compile", ($compile)->
+	return {
+		restrict: "C"
+		scope: false
+		link: (scope, element, attrs) ->
+
+	}
+]
 
 .directive "crosetElementButton", ()->
 	return {
@@ -618,7 +636,7 @@ crosetModule
 			scope.click = () ->
 	}
 
-.directive "crosetElementText", ()->
+.directive "crosetElementText", ($compile, $interval)->
 	return {
 		restrict: "E"
 		scope: true
@@ -640,4 +658,5 @@ crosetModule
 		scope: true
 		templateUrl: "template-square.html"
 		link: (scope, element, attrs) ->
+			console.log element, scope, "スクエア"
 	}

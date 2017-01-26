@@ -26,7 +26,7 @@ html, body {
     @include flex-direction(column);
 }
 md-backdrop {
-	display: none;
+	// display: none;
 }
 
 
@@ -115,20 +115,58 @@ md-backdrop {
 		color: white;
 	}
 
-	#select-screen {
+	.select-screen {
 		width: 250px;
 		padding: 25px;
 		margin: 25px;
-		md-card {
-			box-shadow: none !important;
-			width: 200px;				// 16:9
-			height: 355.6px;		// 16:9
 
+
+		.select-screen-card {
+			width: 200px;
+
+
+			.select-screen-body {
+				position: relative;
+				box-shadow: none !important;
+				width: 200px;				// -> 高さは16:9なら355.6px
+				height: 240px;
+				overflow: hidden;
+
+				.select-screen-preview {
+					width: 1000px;
+					height: 1000px;
+					background-color: white;
+					position: absolute;
+					transform: scale(0.533);
+					transform-origin: top left;
+					top: 0px;
+					left:0px;
+					overflow: hidden;
+				}
+			}
+			.select-screen-separater {
+				height: 4px;
+				background-color: $ac;
+			}
+			.select-screen-name {
+				background-color: #fdfdfd;
+				height: 50px;
+				color: black;
+			}
+			.selectScreenDefault {
+				color: $ac;
+			}
+			div {
+				text-align: center;
+				@extend .max-width;
+			}
 		}
-		div {
-			text-align: center;
-			@extend .max-width;
-		}
+	}
+
+	#new-screen {
+		position: absolute;
+		bottom: 30px;
+		right: 30px;
 	}
 }
 

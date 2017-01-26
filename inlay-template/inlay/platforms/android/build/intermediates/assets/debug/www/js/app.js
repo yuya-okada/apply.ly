@@ -1,19 +1,43 @@
+var isDebugMode = false;
 
-angular.module('Croset', ["ui.router", "ngAria", "ngMaterial", "ngAnimate", "ngMessages"])
-// .config(function($stateProvider, $urlRouterProvider) {
-// 	$stateProvider.state('run', {
-// 		url: '/run',
-// 		templateUrl: 'run.html',
-// 		controller: "RunController"
-// 	})
-// 	.state('index', {
-// 		url: '/',
-// 		templateUrl: 'top.html'
-// 	})
-// 	$urlRouterProvider.otherwise("/");
-// })
-//
+croset = angular.module('Croset', ["ui.router", "ngAria", "ngMaterial", "ngAnimate", "ngMessages", "ionic", "ngCordova"])
 
+// 引数に関数を渡すとデータファイルを読み込んでその関数にコールバックする
+.constant("getDataFile", function(func) {
+
+	document.addEventListener("deviceready", function () {
+		window.resolveLocalFileSystemURL(cordova.file.applicationDirectory + "www/data.json",		// データファイル読み込み
+			function(fileEntry) {										// 成功
+				fileEntry.file(function(file) {
+
+					var reader = new FileReader();
+					reader.onloadend = function(e) {
+
+						func(JSON.parse(this.result));
+
+					}
+					reader.readAsText(file);
+				});
+			}, function(e) {
+				console.log(e)
+			}
+		)
+	})
+})
+// config-time dependencies can be injected here at .provider() declaration
+.provider('runtimeStates', function runtimeStates($stateProvider) {
+  // runtime dependencies for the service can be injected here, at the provider.$get() function.
+  this.$get = function($q, $timeout, $state) { // for example
+    return {
+			getStateProvider: function() {
+				return $stateProvider
+			},
+      addState: function(name, state) {
+        $stateProvider.state(name, state);
+      }
+    }
+  }
+})
 .service("Elements", [function() {
 	elements = {
 		screen: null
@@ -26,47 +50,32 @@ angular.module('Croset', ["ui.router", "ngAria", "ngMaterial", "ngAnimate", "ngM
 	}
 }])
 
-.controller("InlayCtrl", ["$scope", "$http", "$timeout", "Elements", "ScreenElements", function($scope, $http, $timeout, Elements, ScreenElements) {
+.constant("defaultScreen", {
+	defaultScreen: null,
+	get: function() {
+		return this.defaultScreen
+	},
+	set: function(defaultScreen) {
+		console.log(this)
+		this.defaultScreen = defaultScreen
+	}
+})
 
-	$scope.projects = []
+.constant("generateController", function(screen, screenId) {
 
-	document.addEventListener("deviceready", function () {
-
-		alert(cordova)
-		html = {}
-		js = ""
-		window.resolveLocalFileSystemURL(cordova.file.applicationDirectory + "www/data.json",		// データファイル読み込み
-			function(fileEntry) {										// 成功
-				fileEntry.file(function(file) {
-
-					var reader = new FileReader();
-					reader.onloadend = function(e) {
-
-						data = JSON.parse(this.result);
-
-						console.log(data)
-						html = data.html
-						js = data.js
-
-						// 画面に要素を追加
-						angular.forEach(data.elements, function(data, uuid) {
-							console.log(data)
-							ScreenElements.addFromData(data, uuid);
-						});
-
-						console.log(data.sourceCode)
-						eval(data.sourceCode)
-					}
-
-					reader.readAsText(file);
-				});
-			}, function(e) {
-				console.log(e)
-			}
-		)
-
+	return ["$scope", "$state", "ScreenElements", "Elements", "$timeout", "$cordovaSpinnerDialog", function($scope, $state, ScreenElements, Elements, $timeout, $cordovaSpinnerDialog) {
 
 		Elements.set("screen", angular.element("#screen"));
+		angular.forEach(screen.elements, function(element, uuid) {
+			ScreenElements.addFromData(element, uuid);
+		})
+		console.log(location.href)
+		$cordovaSpinnerDialog.hide()
+
+		var func = new Function("$scope", "$state", "$timeout", screen.sourceCode);			// ソースコードを実行
+		func($scope, $state, $timeout)
+
+
 
 		// 画面のリサイズ
 		$scope.screenScaleRatio = 1
@@ -93,5 +102,98 @@ angular.module('Croset', ["ui.router", "ngAria", "ngMaterial", "ngAnimate", "ngM
 
 			}, 0)
 		}).trigger("resize")
-	})
+
+
+	}]
+})
+
+.constant("generateState", function($stateProvider, generateController, screenId, screen, $state) {
+
+	if($state && $state.get("screen" + screenId)) {
+			$state.get("screen" + screenId).controller = generateController(screen, screenId);
+	} else {
+		$stateProvider.state("screen" + screenId, {
+			url: "/screen" + screenId,
+			templateUrl: "templates/screen.html",
+			controller: generateController(screen, screenId)
+		})
+	}
+})
+
+.config(["$stateProvider", "$urlRouterProvider", "getDataFile", "generateController", "generateState", "defaultScreen", function($stateProvider, $urlRouterProvider, getDataFile, generateController, generateState, defaultScreen) {
+
+	$stateProvider.state("index", {
+		url: "/",
+		controller: "IndexController",
+		templateUrl: "logo.html"
+	}).state("debug", {
+		url: "/debug",
+		controller: "DebugController",
+		templateUrl: "debug.html"
+	});
+
+	if (isDebugMode) {
+		$urlRouterProvider.otherwise("/debug")
+	} else {
+		$urlRouterProvider.otherwise("/")
+
+		getDataFile(function(project) {
+			console.log(project)
+
+			defaultScreen.set("screen" + project.defaultScreen)
+			screens = project.screens
+			angular.forEach(screens, function(screen, screenId) {
+				generateState($stateProvider, generateController, screenId, screen)
+			})
+		})
+	}
+
+}])
+
+
+.controller("IndexController", ["$scope", "$state", "$timeout", "defaultScreen", function($scope, $state, $timeout, defaultScreen) {
+	$timeout(function() {
+		$state.go(defaultScreen.get())
+	}, 4000)
+	console.log("indexなう")
+}])
+
+.controller("DebugController", ["$scope", "$http", "$state", "$cordovaSpinnerDialog", "generateState", "generateController","runtimeStates", "$ionicViewSwitcher", function($scope, $http, $state, $cordovaSpinnerDialog, generateState, generateController, runtimeStates, $ionicViewSwitcher) {
+	$scope.number = "IDを入力"
+	$scope.add = function(i) {
+		if ($scope.number == "IDを入力") {
+			$scope.number = "";
+		}
+		$scope.number = $scope.number + i
+	}
+	$scope.clear = function() {
+		$scope.number = "IDを入力"
+	}
+	$ionicViewSwitcher.nextDirection('forward');
+	$scope.ok = function() {
+		$cordovaSpinnerDialog.show("通信中", "データを取得しています");
+
+		$http({
+			method: "GET",
+			url: "http:apply.ly:3000/project",
+			params: {
+				projectId: $scope.number
+			}
+		}).then(function(result) {
+			project = result.data;
+			console.log(project);
+			screens = project.screens;
+			angular.forEach(screens, function(screen, screenId) {
+				generateState(runtimeStates.getStateProvider(), generateController, screenId, screen, $state)
+			})
+			window.plugins.spinnerDialog.hide()
+
+			$state.go("screen" + project.defaultScreen)
+
+		}, function(data) {
+			console.log(data)
+			window.plugins.spinnerDialog.hide()
+		})
+	}
+
 }])

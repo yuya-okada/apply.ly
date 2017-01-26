@@ -2,6 +2,30 @@ crosetModule = angular.module "Croset"
 
 crosetModule
 .value "GeneralComponents", {
+
+	"intentTo": {
+		type: "function"
+		appearance: [
+			{
+				type: "text"
+				options:
+					text: "画面を移動"
+			}
+			{
+				type: "screen"
+				defaultValue: ""
+				result: "screen"
+			}
+		]
+		compile: "$state.go('screen' + ${screen})"
+	}
+
+
+	"valiable": {
+		type: "valiable"
+		compile: "${val}"
+	}
+
 	"hensu": {
 		type: "property"
 		text: "変数"
@@ -265,7 +289,7 @@ crosetModule
 			fncs.push fnc
 ]
 
-.service "Build", ["GeneralComponents", "ElementComponents", "ScreenElements", "ScreenCards", (GeneralComponents, ElementComponents, ScreenElements, ScreenCards) ->
+.service "Build", ["GeneralComponents", "ElementComponents", "CurrentScreenData", "ScreenCards", (GeneralComponents, ElementComponents, CurrentScreenData, ScreenCards) ->
 	this.build = () ->
 		return this.compile this.parse()
 
@@ -309,7 +333,7 @@ crosetModule
 			compiledBlock = ""
 
 			if block.elementId
-				elementData = ScreenElements.get()[block.elementId]
+				elementData = CurrentScreenData.elementsManager.get()[block.elementId]
 				blockData = ElementComponents[elementData.type][block.blockId]
 
 			else
@@ -332,6 +356,13 @@ crosetModule
 					if block.propertyChild											# 子要素がある場合
 						console.log block.propertyChild
 						compiledBlock +=  " = " + (compileBlock block.propertyChild) + ";\n"
+
+				when "valiable"
+					console.log block, blockData
+					compiledBlock = block.valiableName
+
+
+
 
 
 			if block.child
@@ -363,18 +394,19 @@ crosetModule
 	return
 ]
 
-.controller "ComponentListController", ["$scope", "GeneralComponents", "ScreenElements", "SelectedElementUUID", "ElementComponents", "ScreenCards",
-($scope, GeneralComponents, ScreenElements, SelectedElementUUID, ElementComponents, ScreenCards) ->
+.controller "ComponentListController", ["$scope", "GeneralComponents", "CurrentScreenData", "SelectedElementUUID", "ElementComponents", "ScreenCards",
+($scope, GeneralComponents, CurrentScreenData, SelectedElementUUID, ElementComponents, ScreenCards) ->
 	$scope.generalComponents = GeneralComponents
 
+	screenElementsManager = CurrentScreenData.getElementsManager()
 	$scope.$watch () ->
 		return SelectedElementUUID.get()
 	, (newVal, oldVal) ->
-		$scope.elementComponents = ElementComponents[ScreenElements.get()[newVal]?.type]
+		$scope.elementComponents = ElementComponents[screenElementsManager.get()[newVal]?.type]
 
 ]
-.directive "addComponentButton", ["ScreenCards", "SelectedElementUUID", "ScreenElements"
-(ScreenCards, SelectedElementUUID, ScreenElements) ->
+.directive "addComponentButton", ["ScreenCards", "SelectedElementUUID", "CurrentScreenData"
+(ScreenCards, SelectedElementUUID, CurrentScreenData) ->
 	return {
 		restrict: "A"
 		link: (scope) ->
@@ -395,7 +427,7 @@ crosetModule
 						left: 200
 					elementId: SelectedElementUUID.get()
 					blockId: id
-					type: ScreenElements.get()[SelectedElementUUID.get()].type
+					type: CurrentScreenData.elementsManager.get()[SelectedElementUUID.get()].type
 				}
 	}
 ]
@@ -442,23 +474,23 @@ crosetModule
 	}
 ]
 
-.directive "crosetComponentInCode", ["$compile", "ScreenElements", "GeneralComponents", "GetCardTemplate", "ElementComponents", "GetDistance", "IsInDiv", "ScreenCards", "Build", "GenerateElement", "ServiceConfig"
-($compile, ScreenElements, GeneralComponents, GetCardTemplate, ElementComponents, GetDistance, IsInDiv, ScreenCards, Build, GenerateElement, ServiceConfig) ->
+.directive "crosetComponentInCode", ["$compile", "CurrentScreenData", "GeneralComponents", "GetCardTemplate", "ElementComponents", "GetDistance", "IsInDiv", "ScreenCards", "Build", "GenerateElement", "ServiceConfig"
+($compile, CurrentScreenData, GeneralComponents, GetCardTemplate, ElementComponents, GetDistance, IsInDiv, ScreenCards, Build, GenerateElement, ServiceConfig) ->
 	return {
 		restrict: "E"
 		scope: true
 
 		link: (scope, element, attrs) ->
 			scope.elementName = ""
+			screenElementsManager = CurrentScreenData.elementsManager
 
 			if scope.card.elementId
-				console.log ScreenElements.get()[scope.card.elementId], "かーど"
-				type = ScreenElements.get()[scope.card.elementId].type
+				type = screenElementsManager.get()[scope.card.elementId].type
 				scope.data = ElementComponents[type][scope.card.blockId]
 
 
 				scope.$watch () ->
-					return ScreenElements.get()[scope.card.elementId].name
+					return screenElementsManager.get()[scope.card.elementId].name
 				, (newVal, oldVal) ->
 					scope.elementName = newVal
 					console.log scope.elementName, "ネーム", scope
@@ -603,10 +635,10 @@ crosetModule
 	}
 ]
 
-.directive "crosetElementComponentInList", ["ScreenElements", "SelectedElementUUID", (ScreenElements, SelectedElementUUID) ->
+.directive "crosetElementComponentInList", ["CurrentScreenData", "SelectedElementUUID", (CurrentScreenData, SelectedElementUUID) ->
 	return {
 		link: (scope) ->
-			scope.elementData = ScreenElements.get()[SelectedElementUUID.get()]
+			scope.elementData = CurrentScreenData.elementsManager.get()[SelectedElementUUID.get()]
 	}
 ]
 
@@ -650,11 +682,11 @@ crosetModule
 				if !inputs[0]
 					inputs = $(element).children(".croset-component-body").children(".croset-mat-flex").children("croset-component-input")
 
+
 				inputs.each (i, e) ->
 					inputCard = $(e).children("croset-component-in-code")
 					inputScope = $(e).scope()
 					key = inputScope.input.result
-
 
 					if key
 						options[key] = inputScope.value
@@ -691,6 +723,12 @@ crosetModule
 					.children "croset-component-in-code"
 				if propertyChild[0]
 					data.propertyChild = angular.element(propertyChild).scope().parse()
+
+
+
+				valiable = $(element).children "croset-component-valiable"					# このカードが変数ならば
+				if valiable[0]
+					data.valiableName = angular.element(valiable).scope().valiableName
 
 				return data
 
@@ -760,7 +798,7 @@ crosetModule
 ]
 
 
-.directive "crosetComponentProperty", ["$compile", ($compile) ->
+.directive "crosetComponentProperty", [() ->
 	return {
 		restrict: "E"
 		scope: false
@@ -770,6 +808,43 @@ crosetModule
 	}
 ]
 
+
+.directive "crosetComponentValiable", ["ProjectData", "$mdDialog", "$mdToast", (ProjectData, $mdDialog, $mdToast) ->
+	return {
+		restrict: "E"
+		scope: false
+		templateUrl: "component-valiable.html"
+		link: (scope, element, attrs) ->
+			if scope.card
+				scope.valiables = ProjectData.valiables
+				scope.valiableName = scope.card.valiableName
+				scope.onchange = () ->
+
+				# 新しい変数を作る
+				scope.new = (ev) ->
+					confirm = $mdDialog.prompt()
+						.title "新しい変数"
+						.textContent ""
+						.targetEvent ev
+						.ok "OK"
+						.cancel "キャンセル"
+
+					$mdDialog.show(confirm).then (name) ->
+						result = ProjectData.addValiable name
+						if !result
+							$mdToast.show(
+								$mdToast.simple()
+								.textContent 'その名前の変数はすでに存在します'
+								.position "right bottom"
+								.hideDelay 3000
+							)
+
+				# 変数が追加・変更された時
+				ProjectData.onChangeValiables (valiables)->
+					scope.valiables = valiables
+
+	}
+]
 
 .directive "crosetComponentLiteral", [() ->
 	return {
@@ -785,6 +860,7 @@ crosetModule
 		restrict: "E"
 		scope: true
 		link: (scope, element, attrs) ->
+
 			element.empty()
 
 			cardData = scope.$parent.card?.cardOptions?[scope.input?.result]
@@ -884,6 +960,39 @@ crosetModule
 				width = element.children("span")[0].offsetWidth;
 				element.find("input").css "width", calculateWidth(width)
 				return
+
+			$timeout () ->										# timeoutは、バインドされたdomのrenderが終わったタイミングで呼ばれる
+				scope.onchange()
+	}
+]
+
+
+
+.directive "crosetComponentInputScreen", ["$timeout", "Build", "ScreenCards", "ProjectData", ($timeout, Build, ScreenCards, ProjectData) ->
+	calculateWidth = (stringWidth) ->
+		minWidth = 50
+		padding = 10
+		if stringWidth + padding < minWidth
+			return minWidth
+		else
+			return stringWidth + padding
+
+	return {
+		restrict: "E"
+		scope: false
+		templateUrl: "component-input-screen.html"
+		link: (scope, element, attrs) ->
+			# scope.inputValue = "'" + scope.inputValue + "'"
+			scope.screens = ProjectData.screens
+			ProjectData.setCallback () ->			# 画面数や画面名の更新がある時呼ばれる
+				scope.screens = ProjectData.getScreens()
+				console.log scope.value
+
+			scope.onchange = () ->
+				scope.value = "'" + scope.inputValue + "'"
+				console.log scope.value
+				return
+
 
 			$timeout () ->										# timeoutは、バインドされたdomのrenderが終わったタイミングで呼ばれる
 				scope.onchange()

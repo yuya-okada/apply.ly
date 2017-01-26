@@ -69,11 +69,45 @@
             <div id="select-screen-title">画面を選択</div>
           </h1>
         </md-toolbar>
-        <div layout="row" layout-align="center start">
-          <div id="select-screen" ng-repeat="(name, screen) in screens track by $index">
-            <md-card>a</md-card><span>{{name}}</span>
+        <div layout="row" layout-align="center start" layout-wrap="layout-wrap">
+          <div ng-repeat="(id, screen) in screens track by $index" repeat-finished="repeat-finished" class="select-screen">
+            <md-card layout="column" class="select-screen-card"> 
+              <div ng-click="onclick(id)" class="select-screen-body">
+                <div class="select-screen-preview"></div>
+              </div>
+              <div class="select-screen-separater"></div>
+              <div layout="row" layout-align="start center" ng-class="{selectScreenDefault: id == defaultScreen}" class="select-screen-name"><span flex="flex" ng-click="onclick(id)">{{screen.name}}</span>
+                <md-menu>
+                  <md-button ng-click="openMore($mdOpenMenu, $event)" class="md-icon-button">
+                    <md-icon aria-label="More" md-menu-origin="md-menu-origin" class="material-icons">more_vert</md-icon>
+                  </md-button>
+                  <md-menu-content width="4">
+                    <md-menu-item>
+                      <md-button ng-click="setAsTop(id)">
+                        <md-icon aria-label="More" md-menu-align-target="md-menu-align-target" class="material-icons">star_border</md-icon><span>トップ画面に設定</span>
+                      </md-button>
+                    </md-menu-item>
+                    <md-menu-divider></md-menu-divider>
+                    <md-menu-item>
+                      <md-button ng-click="rename($event, id)">
+                        <md-icon aria-label="More" class="material-icons">edit</md-icon><span>名前を変更</span>
+                      </md-button>
+                    </md-menu-item>
+                    <md-menu-divider></md-menu-divider>
+                    <md-menu-item>
+                      <md-button ng-click="remove($event, id)">
+                        <md-icon aria-label="More" class="material-icons">delete</md-icon><span>削除</span>
+                      </md-button>
+                    </md-menu-item>
+                  </md-menu-content>
+                </md-menu>
+              </div>
+            </md-card>
           </div>
         </div>
+        <md-button id="new-screen" aria-label="New Screen" ng-click="create($event)" class="md-fab">
+          <md-icon aria-label="New Screen" class="material-icons">add</md-icon>
+        </md-button>
       </div>
     </md-sidenav>
     <div class="max-height max-width">

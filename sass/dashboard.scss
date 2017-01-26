@@ -1,5 +1,6 @@
 @import "compass";
 @import "mixins";
+@import "valiables";
 
 
 body {
@@ -86,13 +87,20 @@ body {
 				height: auto !important;
 			}
 
-			md-card-title {
-				border-top: 1px solid #E2E2E2;
+			.project-card-title {
+				border-top: 4px solid $ac;
 				z-index: 1;
 				background-color: #fdfdfd;
+				color: black;
+				text-align: center;
+				height: 50px;
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: 2px;
 
-				.md-headline {
-					font-size: 15px;
+				span {
+					font-size: 14px !important;
 				}
 			}
 

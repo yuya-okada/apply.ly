@@ -3,6 +3,26 @@ var crosetModule;
 crosetModule = angular.module("Croset");
 
 crosetModule.value("GeneralComponents", {
+  "intentTo": {
+    type: "function",
+    appearance: [
+      {
+        type: "text",
+        options: {
+          text: "画面を移動"
+        }
+      }, {
+        type: "screen",
+        defaultValue: "",
+        result: "screen"
+      }
+    ],
+    compile: "$state.go('screen' + ${screen})"
+  },
+  "valiable": {
+    type: "valiable",
+    compile: "${val}"
+  },
   "hensu": {
     type: "property",
     text: "変数",
@@ -243,7 +263,7 @@ crosetModule.value("GeneralComponents", {
     };
   }
 ]).service("Build", [
-  "GeneralComponents", "ElementComponents", "ScreenElements", "ScreenCards", function(GeneralComponents, ElementComponents, ScreenElements, ScreenCards) {
+  "GeneralComponents", "ElementComponents", "CurrentScreenData", "ScreenCards", function(GeneralComponents, ElementComponents, CurrentScreenData, ScreenCards) {
     this.build = function() {
       return this.compile(this.parse());
     };
@@ -284,7 +304,7 @@ crosetModule.value("GeneralComponents", {
         };
         compiledBlock = "";
         if (block.elementId) {
-          elementData = ScreenElements.get()[block.elementId];
+          elementData = CurrentScreenData.elementsManager.get()[block.elementId];
           blockData = ElementComponents[elementData.type][block.blockId];
         } else {
           blockData = GeneralComponents[block.blockId];
@@ -309,6 +329,10 @@ crosetModule.value("GeneralComponents", {
               console.log(block.propertyChild);
               compiledBlock += " = " + (compileBlock(block.propertyChild)) + ";\n";
             }
+            break;
+          case "valiable":
+            console.log(block, blockData);
+            compiledBlock = block.valiableName;
         }
         if (block.child) {
           compiledBlock += ";\n" + compileBlock(block.child);
@@ -337,17 +361,19 @@ crosetModule.value("GeneralComponents", {
     };
   }
 ]).controller("ComponentListController", [
-  "$scope", "GeneralComponents", "ScreenElements", "SelectedElementUUID", "ElementComponents", "ScreenCards", function($scope, GeneralComponents, ScreenElements, SelectedElementUUID, ElementComponents, ScreenCards) {
+  "$scope", "GeneralComponents", "CurrentScreenData", "SelectedElementUUID", "ElementComponents", "ScreenCards", function($scope, GeneralComponents, CurrentScreenData, SelectedElementUUID, ElementComponents, ScreenCards) {
+    var screenElementsManager;
     $scope.generalComponents = GeneralComponents;
+    screenElementsManager = CurrentScreenData.getElementsManager();
     return $scope.$watch(function() {
       return SelectedElementUUID.get();
     }, function(newVal, oldVal) {
       var ref;
-      return $scope.elementComponents = ElementComponents[(ref = ScreenElements.get()[newVal]) != null ? ref.type : void 0];
+      return $scope.elementComponents = ElementComponents[(ref = screenElementsManager.get()[newVal]) != null ? ref.type : void 0];
     });
   }
 ]).directive("addComponentButton", [
-  "ScreenCards", "SelectedElementUUID", "ScreenElements", function(ScreenCards, SelectedElementUUID, ScreenElements) {
+  "ScreenCards", "SelectedElementUUID", "CurrentScreenData", function(ScreenCards, SelectedElementUUID, CurrentScreenData) {
     return {
       restrict: "A",
       link: function(scope) {
@@ -368,7 +394,7 @@ crosetModule.value("GeneralComponents", {
             },
             elementId: SelectedElementUUID.get(),
             blockId: id,
-            type: ScreenElements.get()[SelectedElementUUID.get()].type
+            type: CurrentScreenData.elementsManager.get()[SelectedElementUUID.get()].type
           });
         };
       }
@@ -424,19 +450,19 @@ crosetModule.value("GeneralComponents", {
     };
   }
 ]).directive("crosetComponentInCode", [
-  "$compile", "ScreenElements", "GeneralComponents", "GetCardTemplate", "ElementComponents", "GetDistance", "IsInDiv", "ScreenCards", "Build", "GenerateElement", "ServiceConfig", function($compile, ScreenElements, GeneralComponents, GetCardTemplate, ElementComponents, GetDistance, IsInDiv, ScreenCards, Build, GenerateElement, ServiceConfig) {
+  "$compile", "CurrentScreenData", "GeneralComponents", "GetCardTemplate", "ElementComponents", "GetDistance", "IsInDiv", "ScreenCards", "Build", "GenerateElement", "ServiceConfig", function($compile, CurrentScreenData, GeneralComponents, GetCardTemplate, ElementComponents, GetDistance, IsInDiv, ScreenCards, Build, GenerateElement, ServiceConfig) {
     return {
       restrict: "E",
       scope: true,
       link: function(scope, element, attrs) {
-        var type;
+        var screenElementsManager, type;
         scope.elementName = "";
+        screenElementsManager = CurrentScreenData.elementsManager;
         if (scope.card.elementId) {
-          console.log(ScreenElements.get()[scope.card.elementId], "かーど");
-          type = ScreenElements.get()[scope.card.elementId].type;
+          type = screenElementsManager.get()[scope.card.elementId].type;
           scope.data = ElementComponents[type][scope.card.blockId];
           scope.$watch(function() {
-            return ScreenElements.get()[scope.card.elementId].name;
+            return screenElementsManager.get()[scope.card.elementId].name;
           }, function(newVal, oldVal) {
             scope.elementName = newVal;
             return console.log(scope.elementName, "ネーム", scope);
@@ -586,10 +612,10 @@ crosetModule.value("GeneralComponents", {
     };
   }
 ]).directive("crosetElementComponentInList", [
-  "ScreenElements", "SelectedElementUUID", function(ScreenElements, SelectedElementUUID) {
+  "CurrentScreenData", "SelectedElementUUID", function(CurrentScreenData, SelectedElementUUID) {
     return {
       link: function(scope) {
-        return scope.elementData = ScreenElements.get()[SelectedElementUUID.get()];
+        return scope.elementData = CurrentScreenData.elementsManager.get()[SelectedElementUUID.get()];
       }
     };
   }
@@ -612,7 +638,7 @@ crosetModule.value("GeneralComponents", {
           element.append(child);
         }
         return scope.parse = function() {
-          var cardOptions, data, inputOptions, inputs, matChildren, options, propertyChild;
+          var cardOptions, data, inputOptions, inputs, matChildren, options, propertyChild, valiable;
           data = {
             offset: {
               top: element.css("top"),
@@ -661,6 +687,10 @@ crosetModule.value("GeneralComponents", {
           propertyChild = $(element).children("croset-component-property").children("croset-component-property-modified").children("croset-component-in-code");
           if (propertyChild[0]) {
             data.propertyChild = angular.element(propertyChild).scope().parse();
+          }
+          valiable = $(element).children("croset-component-valiable");
+          if (valiable[0]) {
+            data.valiableName = angular.element(valiable).scope().valiableName;
           }
           return data;
         };
@@ -728,12 +758,41 @@ crosetModule.value("GeneralComponents", {
     };
   }
 ]).directive("crosetComponentProperty", [
-  "$compile", function($compile) {
+  function() {
     return {
       restrict: "E",
       scope: false,
       templateUrl: "component-property.html",
       link: function(scope, element, attrs) {}
+    };
+  }
+]).directive("crosetComponentValiable", [
+  "ProjectData", "$mdDialog", "$mdToast", function(ProjectData, $mdDialog, $mdToast) {
+    return {
+      restrict: "E",
+      scope: false,
+      templateUrl: "component-valiable.html",
+      link: function(scope, element, attrs) {
+        if (scope.card) {
+          scope.valiables = ProjectData.valiables;
+          scope.valiableName = scope.card.valiableName;
+          scope.onchange = function() {};
+          scope["new"] = function(ev) {
+            var confirm;
+            confirm = $mdDialog.prompt().title("新しい変数").textContent("").targetEvent(ev).ok("OK").cancel("キャンセル");
+            return $mdDialog.show(confirm).then(function(name) {
+              var result;
+              result = ProjectData.addValiable(name);
+              if (!result) {
+                return $mdToast.show($mdToast.simple().textContent('その名前の変数はすでに存在します').position("right bottom").hideDelay(3000));
+              }
+            });
+          };
+          return ProjectData.onChangeValiables(function(valiables) {
+            return scope.valiables = valiables;
+          });
+        }
+      }
     };
   }
 ]).directive("crosetComponentLiteral", [
@@ -843,6 +902,39 @@ crosetModule.value("GeneralComponents", {
           var width;
           width = element.children("span")[0].offsetWidth;
           element.find("input").css("width", calculateWidth(width));
+        };
+        return $timeout(function() {
+          return scope.onchange();
+        });
+      }
+    };
+  }
+]).directive("crosetComponentInputScreen", [
+  "$timeout", "Build", "ScreenCards", "ProjectData", function($timeout, Build, ScreenCards, ProjectData) {
+    var calculateWidth;
+    calculateWidth = function(stringWidth) {
+      var minWidth, padding;
+      minWidth = 50;
+      padding = 10;
+      if (stringWidth + padding < minWidth) {
+        return minWidth;
+      } else {
+        return stringWidth + padding;
+      }
+    };
+    return {
+      restrict: "E",
+      scope: false,
+      templateUrl: "component-input-screen.html",
+      link: function(scope, element, attrs) {
+        scope.screens = ProjectData.screens;
+        ProjectData.setCallback(function() {
+          scope.screens = ProjectData.getScreens();
+          return console.log(scope.value);
+        });
+        scope.onchange = function() {
+          scope.value = "'" + scope.inputValue + "'";
+          console.log(scope.value);
         };
         return $timeout(function() {
           return scope.onchange();

@@ -221,6 +221,14 @@ module.exports = [
             "cordova.plugins.Keyboard"
         ],
         "runs": true
+    },
+    {
+        "file": "plugins/cordova-plugin-spinner-dialog/www/spinner.js",
+        "id": "cordova-plugin-spinner-dialog.SpinnerDialog",
+        "pluginId": "cordova-plugin-spinner-dialog",
+        "merges": [
+            "window.plugins.spinnerDialog"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -233,7 +241,8 @@ module.exports.metadata =
     "cordova-plugin-splashscreen": "3.1.0",
     "cordova-plugin-statusbar": "2.1.3",
     "cordova-plugin-whitelist": "1.2.2",
-    "ionic-plugin-keyboard": "2.2.1"
+    "ionic-plugin-keyboard": "2.2.1",
+    "cordova-plugin-spinner-dialog": "1.3.1"
 }
 // BOTTOM OF METADATA
 });

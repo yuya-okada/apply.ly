@@ -1,0 +1,18 @@
+
+<div layout="row" layout-align="center center">
+  <h1 class="md-primary"> {{number}} </h1>
+</div>
+<div layout="row" layout-align="center center">
+  <div flex="75">
+    <md-grid-list md-cols='3' md-row-height='4:4' md-gutter='0px'>
+      <md-grid-tile ng-repeat='i in [9,8,7,6,5,4,3,2,1,0]'>
+        <md-button class="number" flex ng-click='add(i)'> {{i}} </md-button>
+      <md-grid-title>
+    </md-grid-list>
+
+  </div>
+</div>
+<div layout="row">
+  <md-button flex id="clear" flex ng-click="clear()"> クリア </md-button>
+  <md-button flex id="ok" flex ng-click="ok()" class="md-accent"> OK </md-button>
+</div>

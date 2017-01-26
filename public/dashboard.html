@@ -14,13 +14,30 @@
   <md-tabs id="tabs" md-dynamic-height="" md-border-bottom="" dashboard-tabs="dashboard-tabs">
     <md-tab label="ダッシュボード">
       <md-content id="main-tab-content" layout="row" class="md-padding">
-        <md-card ng-repeat="project in projects track by $index" repeat-finished="repeat-finished" ui-sref="editor.design({projectId: project.projectId, screenName: 'トップ'})" md-ink-ripple="md-ink-ripple" class="project-card"><img ng-src="img/black_flat_bg.png" alt="Washed Out" class="project-background md-card-image"/>
+        <md-card ng-repeat="project in projects track by $index" repeat-finished="repeat-finished" ui-sref="editor.design({projectId: project.projectId, screenName: 'トップ'})" md-ink-ripple="md-ink-ripple" class="project-card">
           <div class="project-preview-wrapper">
             <div class="project-preview"></div>
           </div>
-          <md-card-title>
-            <md-card-title-text><span class="md-headline">{{project.name}}</span></md-card-title-text>
-          </md-card-title>
+          <div layout="row" layout-align="start center" class="project-card-title"><span flex="flex" class="md-headline">{{project.name}}</span>
+            <md-menu>
+              <md-button ng-click="openMore($mdOpenMenu, $event)" class="md-icon-button">
+                <md-icon aria-label="More" md-menu-origin="md-menu-origin" class="material-icons">more_vert</md-icon>
+              </md-button>
+              <md-menu-content width="4">
+                <md-menu-item>
+                  <md-button ng-click="rename($event, project)">
+                    <md-icon aria-label="More" class="material-icons">edit</md-icon><span>名前を変更</span>
+                  </md-button>
+                </md-menu-item>
+                <md-menu-divider></md-menu-divider>
+                <md-menu-item>
+                  <md-button ng-click="remove($event, project.projectId)">
+                    <md-icon aria-label="More" class="material-icons">delete</md-icon><span>削除</span>
+                  </md-button>
+                </md-menu-item>
+              </md-menu-content>
+            </md-menu>
+          </div>
         </md-card>
       </md-content>
     </md-tab>

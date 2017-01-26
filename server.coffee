@@ -6,7 +6,7 @@ session = require "express-session"
 crypto = require "crypto"
 bodyParser = require "body-parser"
 exec = require("child_process").exec  # コマンドとか実行する用
-
+execFile = require('child_process').execFile
 
 app = express()
 
@@ -47,17 +47,19 @@ ProjectSchema = new Schema {
 	screens:
 		type: Schema.Types.Mixed					# 型を指定しない
 		default:　{
-			"トップ": {
+			"default": {
 			 	elements: {}
 				cards: []
 				sourceCode: ""
+				name: "トップ"
 			}
 		}
 	defaultScreen:
 		type: String
-		default: "トップ"
+		default: "default"
 	config: Schema.Types.Mixed
 	projectId: Number
+	valiables: Schema.Types.Mixed
 
 
 }, {strict: false}
@@ -83,7 +85,6 @@ Counter      = mongoose.model "Counter", CounterSchema
 
 # プロジェクトのオートインクリメント処理
 ProjectSchema.pre 'save', (next)->
-	this.wayway = "11111111111111111111111111111"
 	self = this
 	if self.projectId
 		next()
@@ -94,8 +95,8 @@ ProjectSchema.pre 'save', (next)->
 				next err
 
 			else
-				console.log "プロジェクトid", self
 				self.projectId = counter.count
+				console.log "プロジェクトid", self
 
 				counter.count++
 				counter.save (err) ->
@@ -169,8 +170,15 @@ app.post "/project", (req, res) ->
 							console.log us
 							res.send proj
 
+
+						req.session.passport.user.projects = user.projects
+						req.session.save () ->
+							console.log "saved"
+							req.session.reload ()->
+								console.log "reloaded"
+
+
 app.put "/project", (req, res) ->
-	project = new Project()
 	Project.update {projectId: req.body.projectId}, req.body, {},
 	(err) ->
 		console.log "PUT PROJ:", req.body
@@ -184,8 +192,35 @@ app.put "/project", (req, res) ->
 app.get "/project", (req, res) ->
 	Project.findOne req.query, (err, project) ->
 		console.log "GET PROJ:", project
+		delete project["_id"]
 		res.send project
 
+app.delete "/project", (req, res) ->
+	console.log "消す", req.body
+	Project.remove {projectId: req.body.projectId}, (err, result) ->
+		if err
+			console.log err
+		else
+			user = req.session.passport.user
+			index = user.projects.indexOf req.body.projectId
+			user.projects.splice index, 1
+
+			User.findById user._id, (err, model) ->
+				if err
+					console.log err
+				else
+					model.projects = user.projects
+					model.save (err) ->
+						if err
+							console.log err
+
+
+
+			req.session.save () ->
+				console.log "saved"
+				req.session.reload ()->
+					console.log "reloaded"
+	res.send "OK"
 
 
 
@@ -231,17 +266,24 @@ app.get "/build", (req, res) ->
 
 		else									# エラーがでないならビルド
 
-			exec "./build.sh '" + JSON.stringify(req.query)  + "' '" + req.query.name	 + ".zip'" , {maxBuffer: 1024 * 10000},  (err, stdout, stderr) ->
+			# exec "./build.sh '" + req.query  + "' '" + req.query.name	 + ".zip'" , {maxBuffer: 1024 * 10000},(err, stdout, stderr) ->
+			execFile "/home/develop/Croset/build.sh", [JSON.stringify(req.query), req.query.name + ".zip"], [], (err, stdout, stderr) ->
+				console.log("finished e:", err, "  st:", stdout, "  ste:", stderr )
+
+
 				if err != null
 					console.log "Error:" + err
+					return
 
 				if stderr
 					console.log "StdErr" + stderr
-
-				if stdout						# 成功した場合
-					buildingTask.remove (err, buildingTask) ->
-						if err
-							console.log err
+					return
+					
+				# 成功した場合
+				buildingTask.remove (err, buildingTask) ->
+					console.log "removed"
+					if err
+						console.log err
 
 
 	res.send "ok"

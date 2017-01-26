@@ -18,29 +18,129 @@ crosetModule
 
 ]
 
-.service "ProjectData", ["$http", "$rootScope", "$stateParams", "$state", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", ($http, $rootScope, $stateParams, $state, ScreenCards, ScreenElements, Build, ServiceConfig) ->
+
+.service "CurrentScreenData", [() ->
+	this.id = ""
+	this.elementsManager = null
+	that = this
+	this.getElementsManager = () ->
+		return that.elementsManager
+
+	return
+]
+
+
+.service "ProjectData", ["$http", "$rootScope", "$stateParams", "$state", "ScreenCards", "ScreenElementsManager", "Build", "ServiceConfig", "getUUID", "CurrentScreenData", ($http, $rootScope, $stateParams, $state, ScreenCards, ScreenElementsManager, Build, ServiceConfig, getUUID, CurrentScreenData) ->
+
+
 	this.projectId = null
 	this.name = null
 	this.screens = {}
+	this.defaultScreen = "トップ"
+	this.valiables = []
 	this.getScreens = () ->
 		return this.screens
 
-	currentScreenName = ""
-	$rootScope.$on "onChangedScreen", (ev, screenName) ->		# ChildEditorControllerから呼ばれる
-		currentScreenName = screenName
+	CurrentScreenData.id = this.defaultScreen
 
-	$rootScope.$on "$stateChangeStart", (event, toState, toParams, fromState, fromParams) ->
-		console.log toState
-		if toState.name.match(/editor/)
-			saveCurrentScreen()
+	# ChildEditorControllerから呼ばれる。画面が変更された時、それを適応するイベント
+	$rootScope.$on "onChangedScreen", (ev, screenId) ->
+		CurrentScreenData.id = screenId
 
 	that = this
+
+	this.init = () ->
+		that.callback = []
+		that.projectId = null
+		that.name = null
+		that.screens = {}
+		that.defaultScreen = "トップ"
+		that.valiables = []
+
+	# プロジェクトは変えずに別の画面に移動した時、自動的に遷移前の画面を保存する
+	$rootScope.$on "$stateChangeStart", (event, toState, toParams, fromState, fromParams) ->
+		if toState.name.match(/editor/) && toParams.projectId == that.projectId + ""
+			saveCurrentScreen()
+
+
+	# 現在の画面を保存する関数
 	saveCurrentScreen = () ->
-		that.screens[currentScreenName] = {
-			elements: ScreenElements.get()
-			cards: ScreenCards.get()
-			sourceCode: Build.compile ScreenCards.get()
+
+		angular.extend that.screens[CurrentScreenData.id], {
+			elements: CurrentScreenData.elementsManager.get()
+			cards: Build.parse()
+			sourceCode: Build.build()
 		}
+
+	# 当たらな画面を追加する。
+	# 同名画面がすでにある場合falseを返し処理を中断し、成功した場合trueを返す
+	this.addScreen = (name) ->
+
+		if that.getScreenByName name
+			return false
+		else
+			this.screens[getUUID()] = {
+				elements: {}
+				cards: []
+				sourceCode: ""
+				name: name
+			}
+
+			trigerCallback()					# 画面の変更イベントをトリガー
+			return true
+
+
+	this.renameScreen = (id, newName) ->
+		if that.getScreenByName newName
+			return false
+		else
+			that.screens[id]?.name = newName
+			trigerCallback()					# 画面の変更イベントをトリガー
+			return true
+
+	this.removeScreen = (id) ->
+		if that.screens[id]
+			delete that.screens[id]
+			trigerCallback()					# 画面の変更イベントをトリガー
+			return true
+		else
+			return false
+
+	# 与えられた名前をもつ画面のidを検索
+	this.getScreenByName = (name) ->
+		for id, screen of that.screens
+			console.log screen, name
+			if screen.name == name
+				return id
+
+		return null
+
+	# 関数を渡しておくと、画面名や画面数が変更される時に呼び出す
+	that.callbacks = []
+	this.setCallback = (fnc) ->
+		that.callbacks.push fnc
+	# 全てのコールバックを呼び出し
+	trigerCallback = () ->
+		for callback in that.callbacks
+			callback()
+
+	# 新しい変数を追加
+	this.addValiable = (name) ->
+		if that.valiables.indexOf(name) == -1
+			that.valiables.push name
+			that.trigetCallbackVal()
+			return true
+		else
+			return false
+
+	# 関数を渡しておくと、変数名や変数数が変更されるたびに呼び出す
+	callbacksVal = []
+	this.onChangeValiables = (fnc) ->
+		callbacksVal.push fnc
+	# 全てのコールバックを呼び出し
+	this.trigetCallbackVal = () ->
+		for callback in callbacksVal
+			callback(that.valiables)
 
 	this.get = () ->
 		saveCurrentScreen()
@@ -48,8 +148,9 @@ crosetModule
 			name: this.name
 			projectId: this.projectId
 			screens: this.screens
-			defaultScreen: "トップ"
+			defaultScreen: this.defaultScreen
 			config: ServiceConfig.get()
+			valiables: this.valiables
 
 		}
 
@@ -60,29 +161,37 @@ crosetModule
 
 
 # 現在選択されている要素のUUID
-.service "SelectedElementUUID", ["Elements", "SetElementProperty", "ScreenElements", (Elements, SetElementProperty, ScreenElements) ->
+.service "SelectedElementUUID", ["Elements", "SetElementProperty", "CurrentScreenData", (Elements, SetElementProperty, CurrentScreenData) ->
+
 	uuid = null
+
+	this.init = ()->
+		uuid = null
+
 	this.get = () -> return uuid
 
 	this.set = (val) ->
-		if val == uuid
-			return
+		screenElements = CurrentScreenData.elementsManager
+		if uuid && screenElements.get()[uuid]
+			console.log screenElements.get()[uuid].element
 
-		if uuid && ScreenElements.get()[uuid]
-			$ ScreenElements.get()[uuid].element							# 今選択されているElementを選択解除
-				.resizable "destroy"
+			selectedElement = $(screenElements.get()[uuid].element)
+			console.log(selectedElement, "トェっっっっっっっっっw")
+			if selectedElement.data("ui-resizable")							# 今選択されているElementのリサイザブルを削除
+				console.log("aaaa")
+				selectedElement.resizable "destroy"
 
 		uuid = val
 		SetElementProperty val
 
-		element = ScreenElements.get()[uuid].element
+		element = screenElements.get()[uuid].element
 
 		onResizedOrDraged = (ev, ui) ->
 			console.log element
-			ScreenElements.set uuid, "top", element.css "top"
-			ScreenElements.set uuid, "left", element.css "left"
-			ScreenElements.set uuid, "width", element.width()
-			ScreenElements.set uuid, "height", element.height()
+			screenElements.set uuid, "top", element.css "top"
+			screenElements.set uuid, "left", element.css "left"
+			screenElements.set uuid, "width", element.width()
+			screenElements.set uuid, "height", element.height()
 
 			return
 
@@ -96,7 +205,6 @@ crosetModule
 			.draggable {
 				cancel: null
 				stop: () ->
-					console.log "あああああ"
 					onResizedOrDraged()
 			}
 
@@ -105,11 +213,11 @@ crosetModule
 ]
 
 
-.controller "HeaderController", ["$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$interval", "$injector", "$stateParams", "ProjectData", ($scope, $http, $mdDialog, $mdSidenav, $timeout, $interval, $injector, $stateParams, ProjectData) ->
+.controller "HeaderController", ["$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$interval", "$injector", "$stateParams", "$mdToast", "ProjectData", ($scope, $http, $mdDialog, $mdSidenav, $timeout, $interval, $injector, $stateParams, $mdToast, ProjectData) ->
 
 	# プロジェクト名と画面名を設定
 	$scope.projectName = null
-	$scope.screenName = $stateParams.screenName
+	$scope.screenId = $stateParams.screenId
 	cancel = $interval () ->
 		$scope.projectName = ProjectData.name
 		if $scope.projectName
@@ -207,6 +315,17 @@ crosetModule
 
 
 	# 実行
+	$scope.save = (ev) ->
+		saveProject ()->
+			$mdToast.show(
+				$mdToast.simple()
+				.textContent '保存しました'
+				.position "right top"
+				.hideDelay 3000
+			)
+
+
+	# 実行
 	$scope.run = (ev) ->
 		console.log "------------実行結果--------------"
 		saveProject()
@@ -251,19 +370,112 @@ crosetModule
 
 ]
 
-.controller "SelectScreenController", ["$scope", "$mdSidenav", "ProjectData", ($scope, $mdSidenav, ProjectData) ->
+.controller "SelectScreenController", ["$scope", "$mdSidenav", "$injector", "$state", "$mdDialog", "$mdToast", "ProjectData", "ScreenElementsManager", ($scope, $mdSidenav, $injector, $state, $mdDialog, $mdToast, ProjectData, ScreenElementsManager) ->
+
+	$scope.projectId = $injector.get("$stateParams").projectId
+	$scope.defaultScreen = ProjectData.defaultScreen
 	$scope.screens = {}
 	$scope.$on "onSelectScreen", () ->		# EditorController内でトリガー
 		$scope.screens = ProjectData.getScreens()
+		# for id, screen of $scope.screens
+		# 	ScreenElementsManager.init()
+		# 	for uuid, data of screen.elements
+		# 		ScreenElementsManager.addFromData data, uuid, element.find ""
+
+
+	$scope.$on 'repeatFinishedEventFired', (ev, element) ->
+		screen = ev.targetScope.screen
+		console.log screen, ev.target
+		screenElementsManager = new ScreenElementsManager(element.find ".select-screen-preview")
+		for uuid, data of screen.elements
+			screenElementsManager.addFromData data, uuid
+
+
+	$scope.onclick = (id) ->
+		goScreen id
+		$scope.close()
 
 	$scope.close = ()	->
 		$mdSidenav("select-screen").close()
+
+	# 画面をトップ画面に設定する
+	$scope.setAsTop = (id) ->
+		ProjectData.defaultScreen = id
+		$scope.defaultScreen = ProjectData.defaultScreen
+
+	# 画面の名前を変更
+	$scope.rename = (ev, id) ->
+		confirmScreenName ev, "画面の名前を変更", (newName) ->
+			result = ProjectData.renameScreen id, newName
+			console.result
+			if result
+				$scope.screens = ProjectData.getScreens()
+
+			else
+				$mdToast.show(
+						$mdToast.simple()
+						.textContent　"その名前の画面はすでに存在します"
+						.hideDelay 3000
+				)
+
+	$scope.remove = (ev, id) ->
+		confirm = $mdDialog.confirm()
+			.title "削除"
+			.content "'" + ProjectData.getScreens()[id].name + "' を削除します"
+			# .ariaLabel 'Lucky day'
+			.targetEvent ev
+			.ok "OK"
+			.cancel "キャンセル"
+
+		$mdDialog.show(confirm).then () ->
+			ProjectData.removeScreen id
+		, () ->
+
+	# 画面を追加
+	$scope.create = (ev) ->
+		confirmScreenName ev, "新しい画面を追加", (name) ->
+			result = ProjectData.addScreen name
+			if result		# 成功した場合
+			else		# 同名画面がすでにある場合
+				$mdToast.show(
+						$mdToast.simple()
+						.textContent　"エラー：同名の画面がすでに存在します"
+						.hideDelay 3000
+				)
+
+	# 画面の名前を訪ねるダイアログを表示
+	confirmScreenName = (ev, title, fnc) ->
+		confirm = $mdDialog.prompt()
+			.title title
+			.textContent "新しい画面の名前を入力してください"
+			.targetEvent ev
+			.ok "OK"
+			.cancel "キャンセル"
+
+		$mdDialog.show(confirm).then (name) ->
+			fnc(name)
+
+		, () ->
+
+
+
+	$scope.openMore = ($mdOpenMenu, ev) ->
+		$mdOpenMenu ev
+
+
+	# 与えられた名前の画面へ遷移
+	goScreen = (id) ->
+		$stateParams = $injector.get "$stateParams"
+		$state.go "editor.design", {projectId: $stateParams.projectId , screenId: id}
+
 ]
 
 # エディタ画面のコントローラー
 # projectDataResはresolveからinjectされる
-.controller "EditorController", ["$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElements", "ScreenCards", "Elements",　"projectDataRes",
-($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElements, ScreenCards, Elements, projectDataRes) ->
+.controller "EditorController", ["$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElementsManager", "ScreenCards", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes",
+($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElementsManager, ScreenCards, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) ->
+
+	SelectedElementUUID.init()
 
 	$scope.settings = {
 		elementDatas: ElementDatas
@@ -293,7 +505,7 @@ crosetModule
 
 	$scope.changeMode = (name) ->
 		console.log name
-		$state.go "editor." + name
+		$state.go "editor." + name, {screenId: CurrentScreenData.id}
 
 	# Progress bar
 	$scope.progress = {
@@ -306,15 +518,18 @@ crosetModule
 	projectData = projectDataRes.data
 
 	console.log projectData
+	ProjectData.init()
 	ProjectData.screens = projectData.screens
 	ProjectData.name = projectData.name
 	ProjectData.projectId = projectData.projectId
 	ProjectData.defaultScreen = projectData.defaultScreen
+	ProjectData.valiables = projectData.valiables
 
 	# 子stateが読み込まれたらプロジェクトをロード
-	$rootScope.$on "onChangedScreen", (ev, screenName) ->		# ChildEditorControllerから呼ばれる
-		console.log ProjectData, screenName
-		nextScreen = ProjectData.getScreens()[screenName]
+	$rootScope.$on "onChangedScreen", (ev, screenId) ->		# ChildEditorControllerから呼ばれる
+		console.log ProjectData, screenId
+		screenId = screenId || ProjectData.defaultScreen
+		nextScreen = ProjectData.getScreens()[screenId]
 		nextScreen.elements ?= {}
 		nextScreen.card ?= []
 		changeScreen nextScreen.elements, nextScreen.cards
@@ -326,17 +541,20 @@ crosetModule
 
 	# 表示されている画面を変更
 	changeScreen = (elements, cards) ->
+		newScreenElementsManager = new ScreenElementsManager($("#screen"))
+		CurrentScreenData.elementsManager = newScreenElementsManager
 		angular.forEach elements, (data, uuid) ->
-			ScreenElements.addFromDataEditor data, uuid
+			newScreenElementsManager.addFromDataEditor data, uuid
 
 		ScreenCards.list = cards
 
 
+	$rootScope.$broadcast "onChangedScreen", $stateParams.screenId || ProjectData.defaultScreen
 ]
 
-.controller "ChildEditorController", ["$scope", "$rootScope", "$stateParams", ($scope, $rootScope, $stateParams) ->
-	console.log "child"
-	$rootScope.$broadcast "onChangedScreen", $stateParams.screenName
+.controller "ChildEditorController", ["$scope", "$rootScope", "$stateParams", "ProjectData", ($scope, $rootScope, $stateParams, ProjectData) ->
+	console.log "child", $stateParams.screenId
+	$rootScope.$broadcast "onChangedScreen", $stateParams.screenId || ProjectData.defaultScreen
 
 ]
 
@@ -349,6 +567,11 @@ crosetModule
 	screenZone = $  "#screen-zone"
 	screenDefaultWidth = screenZone.width()
 	screenDefaultHeight = screenZone.outerHeight()
+	console.log "Original Screen Size", {
+		width: screenDefaultWidth
+		height: screenDefaultHeight
+	}
+
 	$(window).on("resize", () ->
 		$timeout () ->
 			height = editor.height() - 20
@@ -400,11 +623,11 @@ crosetModule
 					compiled = $compile(newEl[0]) scope
 					el.append compiled
 			}
-		controller: ["$scope", "$attrs", "ScreenElements", "SelectedElementUUID"
-		($scope, $attrs, ScreenElements, SelectedElementUUID) ->
+		controller: ["$scope", "$attrs", "CurrentScreenData", "SelectedElementUUID"
+		($scope, $attrs, CurrentScreenData, SelectedElementUUID) ->
 
 			this.onchange = (value) ->
-				ScreenElements.set SelectedElementUUID.get(), $scope.options.result, value
+				CurrentScreenData.elementsManager.set SelectedElementUUID.get(), $scope.options.result, value
 
 			this.onchange $scope.options.defaultValue
 			return

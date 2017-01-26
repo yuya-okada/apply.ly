@@ -27,7 +27,7 @@
 }
 
 /* line 28, ../../sass/commonClass.scss */
-.max-width, #select-screen-sidenav #select-screen div {
+.max-width, #select-screen-sidenav .select-screen .select-screen-card div {
   width: 100%;
 }
 
@@ -123,11 +123,6 @@ html, body {
   flex-direction: column;
 }
 
-/* line 28, ../../sass/index.scss */
-md-backdrop {
-  display: none;
-}
-
 /* line 33, ../../sass/index.scss */
 #main-sidenav {
   min-width: 250px !important;
@@ -216,22 +211,62 @@ md-backdrop {
   color: white;
 }
 /* line 118, ../../sass/index.scss */
-#select-screen-sidenav #select-screen {
+#select-screen-sidenav .select-screen {
   width: 250px;
   padding: 25px;
   margin: 25px;
 }
-/* line 122, ../../sass/index.scss */
-#select-screen-sidenav #select-screen md-card {
+/* line 124, ../../sass/index.scss */
+#select-screen-sidenav .select-screen .select-screen-card {
   width: 200px;
-  height: 355.6px;
 }
-/* line 127, ../../sass/index.scss */
-#select-screen-sidenav #select-screen div {
+/* line 128, ../../sass/index.scss */
+#select-screen-sidenav .select-screen .select-screen-card .select-screen-body {
+  position: relative;
+  box-shadow: none !important;
+  width: 200px;
+  height: 240px;
+  overflow: hidden;
+}
+/* line 135, ../../sass/index.scss */
+#select-screen-sidenav .select-screen .select-screen-card .select-screen-body .select-screen-preview {
+  width: 1000px;
+  height: 1000px;
+  background-color: white;
+  position: absolute;
+  transform: scale(0.533);
+  transform-origin: top left;
+  top: 0px;
+  left: 0px;
+  overflow: hidden;
+}
+/* line 147, ../../sass/index.scss */
+#select-screen-sidenav .select-screen .select-screen-card .select-screen-separater {
+  height: 4px;
+  background-color: #FF5722;
+}
+/* line 151, ../../sass/index.scss */
+#select-screen-sidenav .select-screen .select-screen-card .select-screen-name {
+  background-color: #fdfdfd;
+  height: 50px;
+  color: black;
+}
+/* line 156, ../../sass/index.scss */
+#select-screen-sidenav .select-screen .select-screen-card .selectScreenDefault {
+  color: #FF5722;
+}
+/* line 159, ../../sass/index.scss */
+#select-screen-sidenav .select-screen .select-screen-card div {
   text-align: center;
 }
+/* line 166, ../../sass/index.scss */
+#select-screen-sidenav #new-screen {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+}
 
-/* line 135, ../../sass/index.scss */
+/* line 174, ../../sass/index.scss */
 main {
   height: calc(100% - 60px);
   position: relative;

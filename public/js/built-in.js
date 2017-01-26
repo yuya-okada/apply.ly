@@ -488,88 +488,104 @@ crosetModule.factory("ElementDatas", function() {
       icon: "swap_horizon"
     }
   };
-}).service("ScreenElements", [
+}).factory("ScreenElementsManager", [
   "Elements", "ElementDatas", "$compile", "$injector", function(Elements, ElementDatas, $compile, $injector) {
-    var list, scopes, screenScope;
-    screenScope = null;
-    list = {};
-    this.get = function() {
-      return list;
-    };
-    this.set = function(uuid, key, value) {
-      list[uuid].options[key] = value;
-      return scopes[uuid].options[key] = value;
-    };
-    scopes = {};
-    this.add = function(type, uuid) {
-      var e, options;
-      if (screenScope == null) {
-        screenScope = Elements.get().screen.scope();
-      }
-      e = $("<croset-element-" + type + ">").addClass("croset-element").attr("id", uuid).attr("ng-class", "{'croset-element': true}").attr("croset-element-type", type).attr("uuid", uuid).attr("croset-element-editor", true).width(ElementDatas[type].width).height(ElementDatas[type].height);
-      e = $compile(e)(screenScope);
-      Elements.get().screen.append(e);
-      options = {};
-      list[uuid] = {
-        type: type,
-        name: ElementDatas[type].name,
-        element: e,
-        options: {}
-      };
-      scopes[uuid] = e.scope();
-      return e.scope().options = {};
-    };
-    this.addFromData = function(data, uuid) {
-      var e, scope;
-      if (screenScope == null) {
-        screenScope = Elements.get().screen.scope();
-      }
-      e = $("<croset-element-" + data.type + ">").addClass("croset-element").attr("id", uuid).attr("croset-element-type", data.type).attr("uuid", uuid);
-      console.log(data.options.width, e, "あああいうえ");
-      e.width(data.options.width).height(data.options.height).css({
-        top: data.options.top,
-        left: data.options.left
-      });
-      scope = screenScope.$new(true);
-      e = $compile(e)(scope);
-      scope.options = data.options;
-      return Elements.get().screen.append(e);
-    };
-    this.addFromDataEditor = function(data, uuid) {
-      var e, scope;
-      console.log(Elements);
-      if (screenScope == null) {
-        screenScope = Elements.get().screen.scope();
-      }
-      e = $("<croset-element-" + data.type + ">").addClass("croset-element").attr("croset-element-editor", true).attr("id", uuid).attr("croset-element-type", data.type).attr("uuid", uuid);
-      console.log(data);
-      e.width(data.options.width).height(data.options.height).css({
-        top: data.options.top,
-        left: data.options.left
-      });
-      console.log(Elements, "hi");
-      scope = screenScope.$new(true);
-      e = $compile(e)(scope);
-      Elements.get().screen.append(e);
-      scopes[uuid] = scope;
-      scope.options = data.options;
-      data.element = e;
-      return list[uuid] = data;
-    };
-    this["delete"] = function(uuid) {
-      var VisiblePropertyCards;
-      list[uuid].element.remove();
-      VisiblePropertyCards = $injector.get("VisiblePropertyCards");
-      VisiblePropertyCards.set([]);
-      return delete list[uuid];
-    };
-    this.initialize = function() {
+    return function(screenElement) {
+      var list, scopes, screenScope;
+      console.log(screenElement);
+      screenScope = null;
       list = {};
       scopes = {};
-      return Elements.get().screen.empty();
+      screenElement.empty();
+      this.init = function() {
+        screenScope = null;
+        return list = {};
+      };
+      this.get = function() {
+        return list;
+      };
+      this.set = function(uuid, key, value) {
+        list[uuid].options[key] = value;
+        return scopes[uuid].options[key] = value;
+      };
+      this.removeAll = function() {
+        list = {};
+        return screenElement.empty();
+      };
+      this.add = function(type, uuid) {
+        var e, options;
+        if (screenScope == null) {
+          screenScope = screenElement.scope();
+        }
+        e = $("<croset-element-" + type + ">").addClass("croset-element").attr("id", uuid).attr("ng-class", "{'croset-element': true}").attr("croset-element-type", type).attr("uuid", uuid).attr("croset-element-editor", true).width(ElementDatas[type].width).height(ElementDatas[type].height);
+        e = $compile(e)(screenScope);
+        screenElement.append(e);
+        options = {};
+        list[uuid] = {
+          type: type,
+          name: ElementDatas[type].name,
+          element: e,
+          options: {}
+        };
+        scopes[uuid] = e.scope();
+        return e.scope().options = {};
+      };
+      this.addFromData = function(data, uuid) {
+        var e, scope;
+        if (screenScope == null) {
+          screenScope = screenElement.scope();
+        }
+        e = $("<croset-element-" + data.type + ">").addClass("croset-element").attr("id", uuid).attr("croset-element-type", data.type).attr("uuid", uuid);
+        e.width(data.options.width).height(data.options.height).css({
+          top: data.options.top,
+          left: data.options.left
+        });
+        scope = screenScope.$new(true);
+        e = $compile(e)(scope);
+        scope.options = data.options;
+        screenElement.append(e);
+        return console.log(e.children().children().html());
+      };
+      this.addFromDataEditor = function(data, uuid) {
+        var e, scope;
+        console.log(Elements);
+        if (screenScope == null) {
+          screenScope = screenElement.scope();
+        }
+        e = $("<croset-element-" + data.type + ">").addClass("croset-element").attr("croset-element-editor", true).attr("id", uuid).attr("croset-element-type", data.type).attr("uuid", uuid);
+        console.log(data);
+        e.width(data.options.width).height(data.options.height).css({
+          top: data.options.top,
+          left: data.options.left
+        });
+        scope = screenScope.$new(true);
+        e = $compile(e)(scope);
+        screenElement.append(e);
+        scopes[uuid] = scope;
+        scope.options = data.options;
+        data.element = e;
+        return list[uuid] = data;
+      };
+      this["delete"] = function(uuid) {
+        var VisiblePropertyCards;
+        list[uuid].element.remove();
+        VisiblePropertyCards = $injector.get("VisiblePropertyCards");
+        VisiblePropertyCards.set([]);
+        return delete list[uuid];
+      };
+      this.initialize = function() {
+        list = {};
+        scopes = {};
+        return screenElement.empty();
+      };
     };
-    window.se = function() {
-      return list;
+  }
+]).directive("crosetElement", [
+  "$compile", function($compile) {
+    return {
+      restrict: "C",
+      scope: false,
+      link: function(scope, element, attrs) {}
     };
   }
 ]).directive("crosetElementButton", function() {
@@ -581,7 +597,7 @@ crosetModule.factory("ElementDatas", function() {
       return scope.click = function() {};
     }
   };
-}).directive("crosetElementText", function() {
+}).directive("crosetElementText", function($compile, $interval) {
   return {
     restrict: "E",
     scope: true,
@@ -600,6 +616,8 @@ crosetModule.factory("ElementDatas", function() {
     restrict: "E",
     scope: true,
     templateUrl: "template-square.html",
-    link: function(scope, element, attrs) {}
+    link: function(scope, element, attrs) {
+      return console.log(element, scope, "スクエア");
+    }
   };
 });

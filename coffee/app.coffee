@@ -201,7 +201,7 @@ crosetModule.factory "IsInDiv", () ->
 					]
 			}
 			.state "editor.design", {
-				url: "/design/:screenName"
+				url: "/design/:screenId"
 				css: "css/design"
 				views:
 					left:
@@ -215,7 +215,7 @@ crosetModule.factory "IsInDiv", () ->
 
 			}
 			.state "editor.program", {
-				url: "/program/:screenName"
+				url: "/program/:screenId"
 				css: "css/program"
 				views:
 					right:
@@ -267,9 +267,11 @@ crosetModule.controller "LoginController", ["$scope", ($scope) ->
 ]
 
 
-crosetModule.controller "CrosetController", ["$scope", "$rootScope", ($scope, $rootScope) ->
+crosetModule.controller "CrosetController", ["$scope", "$rootScope", "$mdSidenav", ($scope, $rootScope, $mdSidenav) ->
 	$scope.cssPaths = []
 	$rootScope.$on "$stateChangeStart", (event, toState, toParams, fromState, fromParams) ->
+		$mdSidenav("side-menu").close()
+		$mdSidenav("select-screen").close()
 		$scope.cssPaths = []
 		if toState.css
 			if angular.isArray( toState.css )
@@ -372,3 +374,14 @@ crosetModule.directive "ngContextMenu", ["$parse", "$compile", ($parse, $compile
 
 			return
 ]
+
+
+# ng-repeatが更新されたとき、DOM更新後に各要素についてイベントを着火する
+# 呼ばれるイベントは repeatFinishedEventFired (event, element)
+.directive "repeatFinished", ($timeout) ->
+	return (scope, element, attrs) ->
+		console.log scope.$last, element, scope
+		# ループが最後であるときに呼ばれる
+		# if scope.$last
+		$timeout () ->
+			scope.$emit "repeatFinishedEventFired", element  #イベント発火

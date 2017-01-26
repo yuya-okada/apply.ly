@@ -1,3 +1,4 @@
-zip -r ./public/builded-projects/$2 ./inlay-template/inlay  -q
+echo "$1" > ./inlay-template/inlay/www/data.json
 
-echo successed
+zip -r ./public/builded-projects/$2 ./inlay-template/inlay -q
+

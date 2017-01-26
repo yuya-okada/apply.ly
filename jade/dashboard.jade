@@ -19,13 +19,28 @@
 			md-content#main-tab-content.md-padding(layout="row")
 			
 				md-card.project-card(ng-repeat="project in projects track by $index" repeat-finished ui-sref="editor.design({projectId: project.projectId, screenName: 'トップ'})" md-ink-ripple)
-					img.project-background(ng-src="img/black_flat_bg.png" class="md-card-image" alt="Washed Out")
 					.project-preview-wrapper
 						.project-preview
 						
-					md-card-title
-						md-card-title-text
-							span.md-headline {{project.name}}
+					.project-card-title(layout="row" layout-align="start center")
+						span.md-headline(flex) {{project.name}}
+				
+						md-menu
+							md-button.md-icon-button(ng-click="openMore($mdOpenMenu, $event)")
+								md-icon(aria-label="More" class="material-icons" md-menu-origin) more_vert
+							
+							md-menu-content(width="4")
+								md-menu-item
+									md-button(ng-click="rename($event, project)")
+										md-icon(aria-label="More" class="material-icons") edit
+										span 名前を変更
+								
+								md-menu-divider
+		
+								md-menu-item
+									md-button(ng-click="remove($event, project.projectId)")
+										md-icon(aria-label="More" class="material-icons") delete
+										span 削除
 							
 					//- md-card-content
 					//- 	p aaaa

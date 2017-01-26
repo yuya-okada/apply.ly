@@ -23,10 +23,10 @@ crosetModule.service "VisiblePropertyCards", () ->
 	return
 
 # 要素のプロパティのデータを渡すことで画面にプロパティを表示する
-.service "SetElementProperty", ["VisiblePropertyCards", "ElementDatas", "ScreenElements", (VisiblePropertyCards, ElementDatas, ScreenElements) ->
+.service "SetElementProperty", ["VisiblePropertyCards", "ElementDatas", "CurrentScreenData", (VisiblePropertyCards, ElementDatas, CurrentScreenData) ->
 	return (uuid) ->
 		VisiblePropertyCards.set([])
-		data = ScreenElements.get()[uuid]
+		data = CurrentScreenData.elementsManager.get()[uuid]
 		defaultData = [].concat ElementDatas[data.type].properties
 		for property, i in defaultData
 
@@ -46,9 +46,9 @@ crosetModule.service "VisiblePropertyCards", () ->
 
 
 # 配置済みのアイテム
-.controller "HierarchyController", ["$scope", "ScreenElements", "ElementDatas", "SelectedElementUUID"
-($scope, ScreenElements, ElementDatas, SelectedElementUUID) ->
-	$scope.screenElements = ScreenElements.get()						# TODO: 何故動いてるのかがわからない
+.controller "HierarchyController", ["$scope", "CurrentScreenData", "ElementDatas", "SelectedElementUUID"
+($scope, CurrentScreenData, ElementDatas, SelectedElementUUID) ->
+	$scope.screenElements = CurrentScreenData.elementsManager.get()
 	$scope.elementDatas = ElementDatas
 	$scope.$watch SelectedElementUUID.get, (newVal, oldVal) ->
 		$scope.selectedElementUUID = newVal
@@ -56,40 +56,41 @@ crosetModule.service "VisiblePropertyCards", () ->
 ]
 
 # リスト上の配置済みアイテム
-.directive "crosetHierarchyItem", ["$mdDialog", "ElementDatas", "SelectedElementUUID", "ScreenElements", ($mdDialog, ElementDatas, SelectedElementUUID, ScreenElements) ->
+.directive "crosetHierarchyItem", ["$mdDialog", "ElementDatas", "SelectedElementUUID", "CurrentScreenData", ($mdDialog, ElementDatas, SelectedElementUUID, CurrentScreenData) ->
 	return {
 		restrict: "A"
 		#クリックされた時プロパティを表示する
 		link: (scope, element, attrs) ->
+			screenElementsManager = CurrentScreenData.elementsManager
 			scope.onclick = (data)->
 				SelectedElementUUID.set scope.uuid
-				return;
+				return
 
 
 			scope.showConfirmDelete = (ev) ->
 				confirm = $mdDialog.confirm()
 					.title "削除"
-					.content "'" + ScreenElements.get()[scope.uuid].name + "' を削除します"
+					.content "'" + screenElementsManager.get()[scope.uuid].name + "' を削除します"
 					# .ariaLabel 'Lucky day'
 					.targetEvent ev
 					.ok "OK"
 					.cancel "キャンセル"
 
 				$mdDialog.show(confirm).then () ->
-					ScreenElements.delete(scope.uuid)
+					screenElementsManager.delete(scope.uuid)
 				, () ->
 
 	}
 ]
 
 # 要素を追加するボタン
-.directive("addElementCard", ["ScreenElements","$compile", "getUUID"
-(ScreenElements, $compile, getUUID) ->
+.directive("addElementCard", ["CurrentScreenData","$compile", "getUUID"
+(CurrentScreenData, $compile, getUUID) ->
 	return {
 		scope: true
 		link: (scope, element, attrs) ->
 			scope.onclick = () ->
-				ScreenElements.add element.attr("add-element-card"), getUUID()
+				CurrentScreenData.elementsManager.add element.attr("add-element-card"), getUUID()
 
 				return
 
@@ -99,21 +100,22 @@ crosetModule.service "VisiblePropertyCards", () ->
 
 
 # 詳細設定
-.controller "PropertyController", ["$scope", "ScreenElements", "SelectedElementUUID", "VisiblePropertyCards", "$timeout"
-($scope, ScreenElements, SelectedElementUUID, VisiblePropertyCards, $timeout) ->
+.controller "PropertyController", ["$scope", "CurrentScreenData", "SelectedElementUUID", "VisiblePropertyCards", "$timeout"
+($scope, CurrentScreenData, SelectedElementUUID, VisiblePropertyCards, $timeout) ->
 	$scope.visiblePropertyCards = []
 	$scope.elementName = null
+	screenElementsManager = CurrentScreenData.elementsManager
 	VisiblePropertyCards.onchange (value) ->
 		$timeout ()->									# applyが多重に実行されるとバグるので、代わりにtimeoutを使う
 			$scope.visiblePropertyCards = value
-			if ScreenElements.get()[SelectedElementUUID.get()]
-			    $scope.elementName = ScreenElements.get()[SelectedElementUUID.get()].name
+			if screenElementsManager.get()[SelectedElementUUID.get()]
+			    $scope.elementName = screenElementsManager.get()[SelectedElementUUID.get()].name
 			else
                 $scope.elementName = null
 		, 0
 
 	$scope.onChangeName = () ->
-		$scope.elementName = ScreenElements.get()[SelectedElementUUID.get()].name = $scope.elementName
+		$scope.elementName = screenElementsManager.get()[SelectedElementUUID.get()].name = $scope.elementName
 ]
 
 # プロパティのカード

@@ -176,7 +176,7 @@ crosetModule.factory("IsInDiv", function() {
         ]
       }
     }).state("editor.design", {
-      url: "/design/:screenName",
+      url: "/design/:screenId",
       css: "css/design",
       views: {
         left: {
@@ -188,7 +188,7 @@ crosetModule.factory("IsInDiv", function() {
         }
       }
     }).state("editor.program", {
-      url: "/program/:screenName",
+      url: "/program/:screenId",
       css: "css/program",
       views: {
         right: {
@@ -235,9 +235,11 @@ crosetModule.controller("LoginController", [
 ]);
 
 crosetModule.controller("CrosetController", [
-  "$scope", "$rootScope", function($scope, $rootScope) {
+  "$scope", "$rootScope", "$mdSidenav", function($scope, $rootScope, $mdSidenav) {
     $scope.cssPaths = [];
     return $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams) {
+      $mdSidenav("side-menu").close();
+      $mdSidenav("select-screen").close();
       $scope.cssPaths = [];
       if (toState.css) {
         if (angular.isArray(toState.css)) {
@@ -346,4 +348,11 @@ crosetModule.directive("ngContextMenu", [
       });
     };
   }
-]);
+]).directive("repeatFinished", function($timeout) {
+  return function(scope, element, attrs) {
+    console.log(scope.$last, element, scope);
+    return $timeout(function() {
+      return scope.$emit("repeatFinishedEventFired", element);
+    });
+  };
+});

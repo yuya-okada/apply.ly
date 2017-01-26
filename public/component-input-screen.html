@@ -1,0 +1,3 @@
+<md-select ng-model="inputValue" ng-change="onchange()" placeholder="画面" class="md-no-underline">
+  <md-option ng-repeat="(id, screen) in screens" value="{{id}}"> {{screen.name}} </md-option>
+</md-select>

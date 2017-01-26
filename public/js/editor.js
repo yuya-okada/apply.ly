@@ -15,69 +15,178 @@ crosetModule.service("ServiceConfig", [
       return config[key] = value;
     };
   }
+]).service("CurrentScreenData", [
+  function() {
+    var that;
+    this.id = "";
+    this.elementsManager = null;
+    that = this;
+    this.getElementsManager = function() {
+      return that.elementsManager;
+    };
+  }
 ]).service("ProjectData", [
-  "$http", "$rootScope", "$stateParams", "$state", "ScreenCards", "ScreenElements", "Build", "ServiceConfig", function($http, $rootScope, $stateParams, $state, ScreenCards, ScreenElements, Build, ServiceConfig) {
-    var currentScreenName, saveCurrentScreen, that;
+  "$http", "$rootScope", "$stateParams", "$state", "ScreenCards", "ScreenElementsManager", "Build", "ServiceConfig", "getUUID", "CurrentScreenData", function($http, $rootScope, $stateParams, $state, ScreenCards, ScreenElementsManager, Build, ServiceConfig, getUUID, CurrentScreenData) {
+    var callbacksVal, saveCurrentScreen, that, trigerCallback;
     this.projectId = null;
     this.name = null;
     this.screens = {};
+    this.defaultScreen = "トップ";
+    this.valiables = [];
     this.getScreens = function() {
       return this.screens;
     };
-    currentScreenName = "";
-    $rootScope.$on("onChangedScreen", function(ev, screenName) {
-      return currentScreenName = screenName;
+    CurrentScreenData.id = this.defaultScreen;
+    $rootScope.$on("onChangedScreen", function(ev, screenId) {
+      return CurrentScreenData.id = screenId;
     });
+    that = this;
+    this.init = function() {
+      that.callback = [];
+      that.projectId = null;
+      that.name = null;
+      that.screens = {};
+      that.defaultScreen = "トップ";
+      return that.valiables = [];
+    };
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams) {
-      console.log(toState);
-      if (toState.name.match(/editor/)) {
+      if (toState.name.match(/editor/) && toParams.projectId === that.projectId + "") {
         return saveCurrentScreen();
       }
     });
-    that = this;
     saveCurrentScreen = function() {
-      console.log(that);
-      that.screens[currentScreenName] = {
-        elements: ScreenElements.get(),
-        cards: ScreenCards.get(),
-        sourceCode: Build.compile(ScreenCards.get())
-      };
-      return console.log("saved", that.get());
+      return angular.extend(that.screens[CurrentScreenData.id], {
+        elements: CurrentScreenData.elementsManager.get(),
+        cards: Build.parse(),
+        sourceCode: Build.build()
+      });
+    };
+    this.addScreen = function(name) {
+      if (that.getScreenByName(name)) {
+        return false;
+      } else {
+        this.screens[getUUID()] = {
+          elements: {},
+          cards: [],
+          sourceCode: "",
+          name: name
+        };
+        trigerCallback();
+        return true;
+      }
+    };
+    this.renameScreen = function(id, newName) {
+      var ref;
+      if (that.getScreenByName(newName)) {
+        return false;
+      } else {
+        if ((ref = that.screens[id]) != null) {
+          ref.name = newName;
+        }
+        trigerCallback();
+        return true;
+      }
+    };
+    this.removeScreen = function(id) {
+      if (that.screens[id]) {
+        delete that.screens[id];
+        trigerCallback();
+        return true;
+      } else {
+        return false;
+      }
+    };
+    this.getScreenByName = function(name) {
+      var id, ref, screen;
+      ref = that.screens;
+      for (id in ref) {
+        screen = ref[id];
+        console.log(screen, name);
+        if (screen.name === name) {
+          return id;
+        }
+      }
+      return null;
+    };
+    that.callbacks = [];
+    this.setCallback = function(fnc) {
+      return that.callbacks.push(fnc);
+    };
+    trigerCallback = function() {
+      var callback, i, len, ref, results;
+      ref = that.callbacks;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        callback = ref[i];
+        results.push(callback());
+      }
+      return results;
+    };
+    this.addValiable = function(name) {
+      if (that.valiables.indexOf(name) === -1) {
+        that.valiables.push(name);
+        that.trigetCallbackVal();
+        return true;
+      } else {
+        return false;
+      }
+    };
+    callbacksVal = [];
+    this.onChangeValiables = function(fnc) {
+      return callbacksVal.push(fnc);
+    };
+    this.trigetCallbackVal = function() {
+      var callback, i, len, results;
+      results = [];
+      for (i = 0, len = callbacksVal.length; i < len; i++) {
+        callback = callbacksVal[i];
+        results.push(callback(that.valiables));
+      }
+      return results;
     };
     this.get = function() {
+      saveCurrentScreen();
       return {
         name: this.name,
         projectId: this.projectId,
         screens: this.screens,
-        defaultScreen: "トップ",
-        config: ServiceConfig.get()
+        defaultScreen: this.defaultScreen,
+        config: ServiceConfig.get(),
+        valiables: this.valiables
       };
     };
   }
 ]).service("SelectedElementUUID", [
-  "Elements", "SetElementProperty", "ScreenElements", function(Elements, SetElementProperty, ScreenElements) {
+  "Elements", "SetElementProperty", "CurrentScreenData", function(Elements, SetElementProperty, CurrentScreenData) {
     var uuid;
     uuid = null;
+    this.init = function() {
+      return uuid = null;
+    };
     this.get = function() {
       return uuid;
     };
     this.set = function(val) {
-      var element, onResizedOrDraged;
-      if (val === uuid) {
-        return;
-      }
-      if (uuid && ScreenElements.get()[uuid]) {
-        $(ScreenElements.get()[uuid].element).resizable("destroy");
+      var element, onResizedOrDraged, screenElements, selectedElement;
+      screenElements = CurrentScreenData.elementsManager;
+      if (uuid && screenElements.get()[uuid]) {
+        console.log(screenElements.get()[uuid].element);
+        selectedElement = $(screenElements.get()[uuid].element);
+        console.log(selectedElement, "トェっっっっっっっっっw");
+        if (selectedElement.data("ui-resizable")) {
+          console.log("aaaa");
+          selectedElement.resizable("destroy");
+        }
       }
       uuid = val;
       SetElementProperty(val);
-      element = ScreenElements.get()[uuid].element;
+      element = screenElements.get()[uuid].element;
       onResizedOrDraged = function(ev, ui) {
         console.log(element);
-        ScreenElements.set(uuid, "top", element.css("top"));
-        ScreenElements.set(uuid, "left", element.css("left"));
-        ScreenElements.set(uuid, "width", element.width());
-        ScreenElements.set(uuid, "height", element.height());
+        screenElements.set(uuid, "top", element.css("top"));
+        screenElements.set(uuid, "left", element.css("left"));
+        screenElements.set(uuid, "width", element.width());
+        screenElements.set(uuid, "height", element.height());
       };
       return $(element).resizable({
         handles: "ne, se, sw, nw",
@@ -87,17 +196,16 @@ crosetModule.service("ServiceConfig", [
       }).draggable({
         cancel: null,
         stop: function() {
-          console.log("あああああ");
           return onResizedOrDraged();
         }
       });
     };
   }
 ]).controller("HeaderController", [
-  "$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$interval", "$injector", "$stateParams", "ProjectData", function($scope, $http, $mdDialog, $mdSidenav, $timeout, $interval, $injector, $stateParams, ProjectData) {
+  "$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$interval", "$injector", "$stateParams", "$mdToast", "ProjectData", function($scope, $http, $mdDialog, $mdSidenav, $timeout, $interval, $injector, $stateParams, $mdToast, ProjectData) {
     var cancel, saveProject;
     $scope.projectName = null;
-    $scope.screenName = $stateParams.screenName;
+    $scope.screenId = $stateParams.screenId;
     cancel = $interval(function() {
       $scope.projectName = ProjectData.name;
       if ($scope.projectName) {
@@ -175,6 +283,11 @@ crosetModule.service("ServiceConfig", [
         clickOutsideToClose: false
       }).then(function(answer) {}, function() {});
     };
+    $scope.save = function(ev) {
+      return saveProject(function() {
+        return $mdToast.show($mdToast.simple().textContent('保存しました').position("right top").hideDelay(3000));
+      });
+    };
     $scope.run = function(ev) {
       var RunDialogController;
       console.log("------------実行結果--------------");
@@ -212,18 +325,91 @@ crosetModule.service("ServiceConfig", [
     };
   }
 ]).controller("SelectScreenController", [
-  "$scope", "$mdSidenav", "ProjectData", function($scope, $mdSidenav, ProjectData) {
+  "$scope", "$mdSidenav", "$injector", "$state", "$mdDialog", "$mdToast", "ProjectData", "ScreenElementsManager", function($scope, $mdSidenav, $injector, $state, $mdDialog, $mdToast, ProjectData, ScreenElementsManager) {
+    var confirmScreenName, goScreen;
+    $scope.projectId = $injector.get("$stateParams").projectId;
+    $scope.defaultScreen = ProjectData.defaultScreen;
     $scope.screens = {};
     $scope.$on("onSelectScreen", function() {
       return $scope.screens = ProjectData.getScreens();
     });
-    return $scope.close = function() {
+    $scope.$on('repeatFinishedEventFired', function(ev, element) {
+      var data, ref, results, screen, screenElementsManager, uuid;
+      screen = ev.targetScope.screen;
+      console.log(screen, ev.target);
+      screenElementsManager = new ScreenElementsManager(element.find(".select-screen-preview"));
+      ref = screen.elements;
+      results = [];
+      for (uuid in ref) {
+        data = ref[uuid];
+        results.push(screenElementsManager.addFromData(data, uuid));
+      }
+      return results;
+    });
+    $scope.onclick = function(id) {
+      goScreen(id);
+      return $scope.close();
+    };
+    $scope.close = function() {
       return $mdSidenav("select-screen").close();
+    };
+    $scope.setAsTop = function(id) {
+      ProjectData.defaultScreen = id;
+      return $scope.defaultScreen = ProjectData.defaultScreen;
+    };
+    $scope.rename = function(ev, id) {
+      return confirmScreenName(ev, "画面の名前を変更", function(newName) {
+        var result;
+        result = ProjectData.renameScreen(id, newName);
+        console.result;
+        if (result) {
+          return $scope.screens = ProjectData.getScreens();
+        } else {
+          return $mdToast.show($mdToast.simple().textContent("その名前の画面はすでに存在します").hideDelay(3000));
+        }
+      });
+    };
+    $scope.remove = function(ev, id) {
+      var confirm;
+      confirm = $mdDialog.confirm().title("削除").content("'" + ProjectData.getScreens()[id].name + "' を削除します").targetEvent(ev).ok("OK").cancel("キャンセル");
+      return $mdDialog.show(confirm).then(function() {
+        return ProjectData.removeScreen(id);
+      }, function() {});
+    };
+    $scope.create = function(ev) {
+      return confirmScreenName(ev, "新しい画面を追加", function(name) {
+        var result;
+        result = ProjectData.addScreen(name);
+        if (result) {
+
+        } else {
+          return $mdToast.show($mdToast.simple().textContent("エラー：同名の画面がすでに存在します").hideDelay(3000));
+        }
+      });
+    };
+    confirmScreenName = function(ev, title, fnc) {
+      var confirm;
+      confirm = $mdDialog.prompt().title(title).textContent("新しい画面の名前を入力してください").targetEvent(ev).ok("OK").cancel("キャンセル");
+      return $mdDialog.show(confirm).then(function(name) {
+        return fnc(name);
+      }, function() {});
+    };
+    $scope.openMore = function($mdOpenMenu, ev) {
+      return $mdOpenMenu(ev);
+    };
+    return goScreen = function(id) {
+      var $stateParams;
+      $stateParams = $injector.get("$stateParams");
+      return $state.go("editor.design", {
+        projectId: $stateParams.projectId,
+        screenId: id
+      });
     };
   }
 ]).controller("EditorController", [
-  "$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElements", "ScreenCards", "Elements", "projectDataRes", function($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElements, ScreenCards, Elements, projectDataRes) {
+  "$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElementsManager", "ScreenCards", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes", function($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElementsManager, ScreenCards, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) {
     var changeScreen, projectData;
+    SelectedElementUUID.init();
     $scope.settings = {
       elementDatas: ElementDatas
     };
@@ -251,7 +437,9 @@ crosetModule.service("ServiceConfig", [
     };
     $scope.changeMode = function(name) {
       console.log(name);
-      return $state.go("editor." + name);
+      return $state.go("editor." + name, {
+        screenId: CurrentScreenData.id
+      });
     };
     $scope.progress = {
       determinateValue: 0,
@@ -260,14 +448,17 @@ crosetModule.service("ServiceConfig", [
     Elements.set("screen", angular.element("#screen"));
     projectData = projectDataRes.data;
     console.log(projectData);
+    ProjectData.init();
     ProjectData.screens = projectData.screens;
     ProjectData.name = projectData.name;
     ProjectData.projectId = projectData.projectId;
     ProjectData.defaultScreen = projectData.defaultScreen;
-    $rootScope.$on("onChangedScreen", function(ev, screenName) {
+    ProjectData.valiables = projectData.valiables;
+    $rootScope.$on("onChangedScreen", function(ev, screenId) {
       var nextScreen;
-      console.log(ProjectData, screenName);
-      nextScreen = ProjectData.getScreens()[screenName];
+      console.log(ProjectData, screenId);
+      screenId = screenId || ProjectData.defaultScreen;
+      nextScreen = ProjectData.getScreens()[screenId];
       if (nextScreen.elements == null) {
         nextScreen.elements = {};
       }
@@ -278,17 +469,21 @@ crosetModule.service("ServiceConfig", [
       $scope.progress.isLoading = false;
       return $scope.progress.determinateValue += 100;
     });
-    return changeScreen = function(elements, cards) {
+    changeScreen = function(elements, cards) {
+      var newScreenElementsManager;
+      newScreenElementsManager = new ScreenElementsManager($("#screen"));
+      CurrentScreenData.elementsManager = newScreenElementsManager;
       angular.forEach(elements, function(data, uuid) {
-        return ScreenElements.addFromDataEditor(data, uuid);
+        return newScreenElementsManager.addFromDataEditor(data, uuid);
       });
       return ScreenCards.list = cards;
     };
+    return $rootScope.$broadcast("onChangedScreen", $stateParams.screenId || ProjectData.defaultScreen);
   }
 ]).controller("ChildEditorController", [
-  "$scope", "$rootScope", "$stateParams", function($scope, $rootScope, $stateParams) {
-    console.log("child");
-    return $rootScope.$broadcast("onChangedScreen", $stateParams.screenName);
+  "$scope", "$rootScope", "$stateParams", "ProjectData", function($scope, $rootScope, $stateParams, ProjectData) {
+    console.log("child", $stateParams.screenId);
+    return $rootScope.$broadcast("onChangedScreen", $stateParams.screenId || ProjectData.defaultScreen);
   }
 ]).controller("ScreenController", [
   "$scope", "$timeout", function($scope, $timeout) {
@@ -298,6 +493,10 @@ crosetModule.service("ServiceConfig", [
     screenZone = $("#screen-zone");
     screenDefaultWidth = screenZone.width();
     screenDefaultHeight = screenZone.outerHeight();
+    console.log("Original Screen Size", {
+      width: screenDefaultWidth,
+      height: screenDefaultHeight
+    });
     return $(window).on("resize", function() {
       return $timeout(function() {
         var height;
@@ -340,9 +539,9 @@ crosetModule.service("ServiceConfig", [
         };
       },
       controller: [
-        "$scope", "$attrs", "ScreenElements", "SelectedElementUUID", function($scope, $attrs, ScreenElements, SelectedElementUUID) {
+        "$scope", "$attrs", "CurrentScreenData", "SelectedElementUUID", function($scope, $attrs, CurrentScreenData, SelectedElementUUID) {
           this.onchange = function(value) {
-            return ScreenElements.set(SelectedElementUUID.get(), $scope.options.result, value);
+            return CurrentScreenData.elementsManager.set(SelectedElementUUID.get(), $scope.options.result, value);
           };
           this.onchange($scope.options.defaultValue);
         }

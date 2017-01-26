@@ -72,6 +72,9 @@
         },
         "cordova-plugin-file": {
             "PACKAGE_NAME": "com.ionicframework.starter"
+        },
+        "cordova-plugin-spinner-dialog": {
+            "PACKAGE_NAME": "com.ionicframework.inlay964559"
         }
     },
     "dependent_plugins": {

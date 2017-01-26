@@ -38,27 +38,26 @@ module.exports = (grunt) =>
                     cleanBowerDir: false
         shell:
             start:
-                 command: 'nodemon server.js'
+                 command: 'node server.js'
               
-        esteWatch:
-            options:
-                dirs: [
-                    "coffee/**"
-                    "jade/**"
-                    "sass/**"
-                    "public/**"
-                ]
-                livereload:
-                    enabled: true
-                    extensions: ['js', 'html', 'css']
-                    port: 35729
-            "coffee": (path) ->
-                ['newer:coffee']
-            
-            "jade": (path) ->
-                ['newer:jade']
-            "sass": (path) ->
-                ['newer:compass']
+	    esteWatch:
+	        options:
+	            dirs: [
+	                "coffee/**"
+	                "jade/**"
+	                "sass/**"
+	            ]
+	            livereload:
+	                enabled: true
+	                extensions: ['js', 'html', 'css']
+	                port: 35729
+	        "coffee": (path) ->
+	            ['newer:coffee']
+           
+	        "jade": (path) ->
+	            ['newer:jade']
+	        "sass": (path) ->
+	            ['newer:compass']
 
 
     grunt.loadNpmTasks 'grunt-contrib-jade'
@@ -67,8 +66,8 @@ module.exports = (grunt) =>
     grunt.loadNpmTasks 'grunt-bower-task'
    # grunt.loadNpmTasks 'grunt-contrib-connect'
     grunt.loadNpmTasks 'grunt-shell'
-    grunt.loadNpmTasks 'grunt-este-watch'
+	# grunt.loadNpmTasks 'grunt-este-watch'
     grunt.loadNpmTasks 'grunt-newer'
     grunt.registerTask 'make', ['bower', 'newer:coffee', 'newer:jade', 'newer:compass']
    #  grunt.registerTask 'default', ['make', 'connect', 'esteWatch']
-    grunt.registerTask 'default', ['make', 'shell:start', 'esteWatch']
+    grunt.registerTask 'default', ['make', 'shell:start'] #, 'esteWatch']

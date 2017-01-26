@@ -179,6 +179,14 @@ module.exports = [
             "cordova"
         ],
         "runs": true
+    },
+    {
+        "id": "cordova-plugin-spinner-dialog.SpinnerDialog",
+        "file": "plugins/cordova-plugin-spinner-dialog/www/spinner.js",
+        "pluginId": "cordova-plugin-spinner-dialog",
+        "merges": [
+            "window.plugins.spinnerDialog"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -191,7 +199,8 @@ module.exports.metadata =
     "cordova-plugin-whitelist": "1.2.2",
     "ionic-plugin-keyboard": "2.2.1",
     "cordova-plugin-compat": "1.0.0",
-    "cordova-plugin-file": "4.3.1-dev"
+    "cordova-plugin-file": "4.3.1-dev",
+    "cordova-plugin-spinner-dialog": "1.3.1"
 };
 // BOTTOM OF METADATA
 });

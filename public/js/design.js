@@ -30,11 +30,11 @@ crosetModule.service("VisiblePropertyCards", function() {
     return results;
   };
 }).service("SetElementProperty", [
-  "VisiblePropertyCards", "ElementDatas", "ScreenElements", function(VisiblePropertyCards, ElementDatas, ScreenElements) {
+  "VisiblePropertyCards", "ElementDatas", "CurrentScreenData", function(VisiblePropertyCards, ElementDatas, CurrentScreenData) {
     return function(uuid) {
       var data, defaultData, i, input, j, k, l, len, len1, len2, m, n, property, ref, result, row;
       VisiblePropertyCards.set([]);
-      data = ScreenElements.get()[uuid];
+      data = CurrentScreenData.elementsManager.get()[uuid];
       defaultData = [].concat(ElementDatas[data.type].properties);
       for (i = l = 0, len = defaultData.length; l < len; i = ++l) {
         property = defaultData[i];
@@ -54,58 +54,62 @@ crosetModule.service("VisiblePropertyCards", function() {
     };
   }
 ]).controller("HierarchyController", [
-  "$scope", "ScreenElements", "ElementDatas", "SelectedElementUUID", function($scope, ScreenElements, ElementDatas, SelectedElementUUID) {
-    $scope.screenElements = ScreenElements.get();
+  "$scope", "CurrentScreenData", "ElementDatas", "SelectedElementUUID", function($scope, CurrentScreenData, ElementDatas, SelectedElementUUID) {
+    $scope.screenElements = CurrentScreenData.elementsManager.get();
     $scope.elementDatas = ElementDatas;
     return $scope.$watch(SelectedElementUUID.get, function(newVal, oldVal) {
       return $scope.selectedElementUUID = newVal;
     });
   }
 ]).directive("crosetHierarchyItem", [
-  "$mdDialog", "ElementDatas", "SelectedElementUUID", "ScreenElements", function($mdDialog, ElementDatas, SelectedElementUUID, ScreenElements) {
+  "$mdDialog", "ElementDatas", "SelectedElementUUID", "CurrentScreenData", function($mdDialog, ElementDatas, SelectedElementUUID, CurrentScreenData) {
     return {
       restrict: "A",
       link: function(scope, element, attrs) {
+        var screenElementsManager;
+        screenElementsManager = CurrentScreenData.elementsManager;
         scope.onclick = function(data) {
           SelectedElementUUID.set(scope.uuid);
         };
         return scope.showConfirmDelete = function(ev) {
           var confirm;
-          confirm = $mdDialog.confirm().title("削除").content("'" + ScreenElements.get()[scope.uuid].name + "' を削除します").targetEvent(ev).ok("OK").cancel("キャンセル");
+          confirm = $mdDialog.confirm().title("削除").content("'" + screenElementsManager.get()[scope.uuid].name + "' を削除します").targetEvent(ev).ok("OK").cancel("キャンセル");
           return $mdDialog.show(confirm).then(function() {
-            return ScreenElements["delete"](scope.uuid);
+            return screenElementsManager["delete"](scope.uuid);
           }, function() {});
         };
       }
     };
   }
 ]).directive("addElementCard", [
-  "ScreenElements", "$compile", "getUUID", function(ScreenElements, $compile, getUUID) {
+  "CurrentScreenData", "$compile", "getUUID", function(CurrentScreenData, $compile, getUUID) {
     return {
       scope: true,
       link: function(scope, element, attrs) {
         return scope.onclick = function() {
-          ScreenElements.add(element.attr("add-element-card"), getUUID());
+          CurrentScreenData.elementsManager.add(element.attr("add-element-card"), getUUID());
         };
       }
     };
   }
 ]).controller("PropertyController", [
-  "$scope", "ScreenElements", "SelectedElementUUID", "VisiblePropertyCards", "$timeout", function($scope, ScreenElements, SelectedElementUUID, VisiblePropertyCards, $timeout) {
+  "$scope", "CurrentScreenData", "SelectedElementUUID", "VisiblePropertyCards", "$timeout", function($scope, CurrentScreenData, SelectedElementUUID, VisiblePropertyCards, $timeout) {
+    var screenElementsManager;
     $scope.visiblePropertyCards = [];
     $scope.elementName = null;
+    screenElementsManager = CurrentScreenData.elementsManager;
     VisiblePropertyCards.onchange(function(value) {
       return $timeout(function() {
         $scope.visiblePropertyCards = value;
-        if (ScreenElements.get()[SelectedElementUUID.get()]) {
-          return $scope.elementName = ScreenElements.get()[SelectedElementUUID.get()].name;
+        if (screenElementsManager.get()[SelectedElementUUID.get()]) {
+          return $scope.elementName = screenElementsManager.get()[SelectedElementUUID.get()].name;
         } else {
           return $scope.elementName = null;
         }
       }, 0);
     });
     return $scope.onChangeName = function() {
-      return $scope.elementName = ScreenElements.get()[SelectedElementUUID.get()].name = $scope.elementName;
+      return $scope.elementName = screenElementsManager.get()[SelectedElementUUID.get()].name = $scope.elementName;
     };
   }
 ]).directive("propertyCard", function() {
