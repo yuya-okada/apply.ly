@@ -37,9 +37,11 @@ crosetModule
 	this.name = null
 	this.screens = {}
 	this.defaultScreen = "トップ"
-	this.valiables = []
+	this.variables = []
 	this.getScreens = () ->
 		return this.screens
+
+
 
 	CurrentScreenData.id = this.defaultScreen
 
@@ -55,21 +57,31 @@ crosetModule
 		that.name = null
 		that.screens = {}
 		that.defaultScreen = "トップ"
-		that.valiables = []
+		that.variables = []
 
-	# プロジェクトは変えずに別の画面に移動した時、自動的に遷移前の画面を保存する
+
 	$rootScope.$on "$stateChangeStart", (event, toState, toParams, fromState, fromParams) ->
-		if toState.name.match(/editor/) && toParams.projectId == that.projectId + ""
-			saveCurrentScreen()
+		if toState.name.match(/editor/)
+			# プロジェクトは変えずに別の画面に移動した時、自動的に遷移前の画面を保存する
+			if toParams.projectId == that.projectId + ""
+				saveCurrentScreen()
+				this.parsedStock = []
+
+			# プログラムエディタから他のエディタに移動する時に、パース結果をストックしておく
+			if fromState.name.match(/program/)
+					ScreenCards.list = Build.parse()
 
 
 	# 現在の画面を保存する関数
 	saveCurrentScreen = () ->
+		cards = Build.parse()
+		if cards.length == 0
+			cards = ScreenCards.list
 
 		angular.extend that.screens[CurrentScreenData.id], {
 			elements: CurrentScreenData.elementsManager.get()
-			cards: Build.parse()
-			sourceCode: Build.build()
+			cards: cards
+			sourceCode: Build.compile cards
 		}
 
 	# 当たらな画面を追加する。
@@ -116,7 +128,7 @@ crosetModule
 		return null
 
 	# 関数を渡しておくと、画面名や画面数が変更される時に呼び出す
-	that.callbacks = []
+	this.callbacks = []
 	this.setCallback = (fnc) ->
 		that.callbacks.push fnc
 	# 全てのコールバックを呼び出し
@@ -125,9 +137,9 @@ crosetModule
 			callback()
 
 	# 新しい変数を追加
-	this.addValiable = (name) ->
-		if that.valiables.indexOf(name) == -1
-			that.valiables.push name
+	this.addvariable = (name) ->
+		if that.variables.indexOf(name) == -1
+			that.variables.push name
 			that.trigetCallbackVal()
 			return true
 		else
@@ -135,12 +147,12 @@ crosetModule
 
 	# 関数を渡しておくと、変数名や変数数が変更されるたびに呼び出す
 	callbacksVal = []
-	this.onChangeValiables = (fnc) ->
+	this.onChangevariables = (fnc) ->
 		callbacksVal.push fnc
 	# 全てのコールバックを呼び出し
 	this.trigetCallbackVal = () ->
 		for callback in callbacksVal
-			callback(that.valiables)
+			callback(that.variables)
 
 	this.get = () ->
 		saveCurrentScreen()
@@ -150,7 +162,7 @@ crosetModule
 			screens: this.screens
 			defaultScreen: this.defaultScreen
 			config: ServiceConfig.get()
-			valiables: this.valiables
+			variables: this.variables
 
 		}
 
@@ -176,7 +188,6 @@ crosetModule
 			console.log screenElements.get()[uuid].element
 
 			selectedElement = $(screenElements.get()[uuid].element)
-			console.log(selectedElement, "トェっっっっっっっっっw")
 			if selectedElement.data("ui-resizable")							# 今選択されているElementのリサイザブルを削除
 				console.log("aaaa")
 				selectedElement.resizable "destroy"
@@ -523,7 +534,8 @@ crosetModule
 	ProjectData.name = projectData.name
 	ProjectData.projectId = projectData.projectId
 	ProjectData.defaultScreen = projectData.defaultScreen
-	ProjectData.valiables = projectData.valiables
+	if projectData.variables
+		ProjectData.variables = projectData.variables
 
 	# 子stateが読み込まれたらプロジェクトをロード
 	$rootScope.$on "onChangedScreen", (ev, screenId) ->		# ChildEditorControllerから呼ばれる

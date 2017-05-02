@@ -5,6 +5,7 @@
       <md-list-item croset-hierarchy-item="croset-hierarchy-item" ng-repeat="(uuid, element) in screenElements" ng-click="onclick(element)" ng-class="{'hierarchy-item-selected' : uuid === selectedElementUUID}">
         <md-icon md-font-icon="menu" aria-label="Type">{{elementDatas[element.type].icon}}</md-icon>
         <p class="hierarcy-text">{{element.name}}</p>
+        <md-icon ng-click="showPromptRename($event)" aria-label="Rename" class="md-secondary">edit</md-icon>
         <md-icon ng-click="showConfirmDelete($event)" aria-label="Delete" class="md-secondary">delete
         </md-icon>
         <div class="hierarchy-children md-secondary"></div>

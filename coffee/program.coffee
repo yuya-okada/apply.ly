@@ -2,7 +2,22 @@ crosetModule = angular.module "Croset"
 
 crosetModule
 .value "GeneralComponents", {
+	"onload": {
+		type: "mat"
+		appearance: [
 
+			{
+				type: "text"
+				options:
+					text: "この画面は始まった時"
+			}
+			{
+				type: "mat"
+				result: "mat"
+			}
+		]
+		compile: "$events.onload(function({ ${mat} })) "
+	}
 	"intentTo": {
 		type: "function"
 		appearance: [
@@ -21,8 +36,8 @@ crosetModule
 	}
 
 
-	"valiable": {
-		type: "valiable"
+	"variable": {
+		type: "variable"
 		compile: "${val}"
 	}
 
@@ -181,6 +196,23 @@ crosetModule
 		]
 		compile: "alert(${message})"
 	}
+	"toint": {
+		type: "function"
+		appearance: [
+
+			{
+				type: "text"
+				options:
+					text: "数字に変換"
+			}
+			{
+				type: "textbox"
+				defaultValue: "条件"
+				result: "text"
+			}
+		]
+		compile: "parseInt(${text})"
+	}
 	"if": {
 		type: "mat"
 		appearance: [
@@ -200,8 +232,42 @@ crosetModule
 				options:
 					text: "なら"
 			}
+			{
+				type: "mat"
+				result: "mat"
+			}
 		]
 		compile: "if(${exp}) { ${mat} }"
+	}
+	"ifelse": {
+		type: "mat"
+		appearance: [
+
+			{
+				type: "text"
+				options:
+					text: "もし"
+			}
+			{
+				type: "expbox"
+				defaultValue: "条件"
+				result: "exp"
+			}
+			{
+				type: "mat"
+				result: "mat"
+			}
+			{
+				type: "text"
+				options:
+					text: "でなければ"
+			}
+			{
+				type: "mat"
+				result: "mat2"
+			}
+		]
+		compile: "if(${exp}) { ${mat} } else { ${mat2} }"
 	}
 	"interval": {
 		type: "mat"
@@ -215,6 +281,10 @@ crosetModule
 				type: "text"
 				options:
 					text: "秒ごとに繰り返す"
+			}
+			{
+				type: "mat"
+				result: "mat"
 			}
 		]
 		compile: "$interval(function() { ${mat} }, ${exp} * 1000)"
@@ -237,13 +307,32 @@ crosetModule
 					options:
 						text: "がクリックされたとき、"
 				}
+
+				{
+					type: "mat"
+					result: "mat"
+				}
 			]
-			compile: "${scope}.click = function() { $timeout(function() { ${mat} });  }"
+			compile: "${options}.click = function() { $timeout(function() { ${mat} });  }"
 		}
 		"text": {
 			type: "property"
 			text: "のテキスト"
-			compile: "${scope}.options.text"
+			compile: "${options}.text"
+		}
+	}
+	"text": {
+		"text": {
+			type: "property"
+			text: "のテキスト"
+			compile: "${options}.text"
+		}
+	}
+	"textbox": {
+		"text": {
+			type: "property"
+			text: "のテキスト"
+			compile: "${options}.value"
 		}
 	}
 }
@@ -289,12 +378,184 @@ crosetModule
 			fncs.push fnc
 ]
 
+# スコープとdraggableにしたい要素を指定することで、カードのドラッグを実装する
+# 第3引数にコンポーネントのidを指定することで、helperをcloneにできる
+.factory "AddDraggableEvent", ["IsInDiv", "GetDistance", "ServiceConfig", "Build", "ScreenCards", "CurrentScreenData", "SelectedElementUUID", "GenerateElement", (IsInDiv, GetDistance, ServiceConfig, Build, ScreenCards, CurrentScreenData, SelectedElementUUID, GenerateElement) ->
+	return (scope, element, helperId) ->
+		bodyBottomLeftPoints = []
+		propertyTopRightPoints = []
+		inputTopLeftPoints = []
+
+		bottomBorder = null
+		modifyIcon = null
+		targetInput = null
+
+		isDragged = false  # stopコールバック内の処理が重くて動かしてない時に起動させたくないので、動かしたかどうか調べるスイッチを用意
+
+		component = $(element).children "croset-component"
+
+
+		helper = "origin"
+		if helperId
+			helper = "clone"
+
+
+		programCode = $("#program-code")
+
+		$(component).draggable {
+			appendTo: "body"
+			cancel: ".croset-mat-resizer, input"
+			helper: helper
+			start: (ev, ui) ->
+				bodyBottomLeftPoints = []
+				propertyTopRightPoints = []
+				inputTopLeftPoints = []
+				isDragged = false
+
+				console.log component, "イベント"
+
+
+
+				$(".croset-component-body").each (i, e) ->
+
+					if !$(e).closest(element)[0]
+						bodyBottomLeftPoints.push {
+							left: $(e).offset().left
+							top: $(e).offset().top + $(e).height()
+							element: $ e
+						}
+
+						if e.tagName == "CROSET-COMPONENT-PROPERTY" or e.tagName == "CROSET-COMPONENT-VARIABLE"
+							icon = $(e).children "croset-component-property-modify-icon"
+							propertyTopRightPoints.push {
+								left: icon.offset().left + icon.width()
+								top: icon.offset().top
+								element: $ e
+							}
+
+						if e.tagName == "CROSET-COMPONENT-MAT"
+							e = $(e).children()[0]
+
+
+						inputs = $(e).children "croset-component-input"					# 普通のカード
+						matInputs = $(e).children ".croset-mat-flex"
+							.children "croset-component-input"
+
+
+						inputs.add(matInputs).each (i, input) ->
+							if !$(input).children("croset-component-input-text")[0]
+								inputTopLeftPoints.push {
+									left: $(input).offset().left
+									top: $(input).offset().top
+									element: $ input
+								}
+
+
+
+			drag: (ev, ui) ->
+				isDragged = true
+
+				snapDistance = 20 * ServiceConfig.get().componentScale					# 要素同士が吸着する距離
+
+				pos = component.offset()
+
+				bottomBorder?.removeClass "bottom-border"
+				bottomBorder = null
+				for bodyBottomLeftPoint in bodyBottomLeftPoints
+					if snapDistance > GetDistance pos, bodyBottomLeftPoint
+						bodyBottomLeftPoint.element.addClass "bottom-border"
+						bottomBorder = bodyBottomLeftPoint.element
+
+				modifyIcon?.removeClass "selected-modify-icon"
+				modifyIcon = null
+				for propertyTopRightPoint in propertyTopRightPoints
+					if snapDistance > GetDistance pos, propertyTopRightPoint
+						propertyTopRightPoint.element.addClass "selected-modify-icon"
+						modifyIcon = propertyTopRightPoint.element
+
+				targetInput?.removeClass "target-input"
+				targetInput = null
+				for inputTopLeftPoint in inputTopLeftPoints
+					if snapDistance > GetDistance pos, inputTopLeftPoint
+						targetInput = inputTopLeftPoint.element
+
+				targetInput?.addClass "target-input"
+
+			stop: (ev, ui) ->
+
+				if helper == "clone"
+						# 	scope = $scope.$new true
+						# 	scope.card = card
+						# 	GenerateElement "<croset-component-in-code>", scope, $element
+
+					card = {
+						offset:
+							top: $(ui.helper).offset().top - $("#program-code").offset().top
+							left: $(ui.helper).offset().left - $("#program-code").offset().left
+						blockId: helperId
+					}
+
+					if scope.elementData
+						card.elementId = SelectedElementUUID.get()
+						card.type = scope.elementData.type
+
+					newScope = scope.$new true
+					newScope.card = card
+					GenerateElement "<croset-component-in-code>", newScope, $("#program-code")
+
+				if isDragged
+					if bottomBorder
+						element.appendTo bottomBorder.closest "croset-component"
+						component.css {top:0, left:0}
+
+					else if modifyIcon
+						element.appendTo modifyIcon.children "croset-component-property-modified"
+						component.css {top:0, left:0}
+
+					else if targetInput
+						firstChild = targetInput.children()[0]
+						# if firstChild?.tagName == "CROSET-COMPONENT-IN-CODE"
+
+						element.prependTo targetInput
+
+						component.css {top:0, left:0}
+						targetInput.removeClass "target-input"
+
+
+					else
+						offset = component.offset()
+
+						mats = $ ".mat-wrapper"
+
+						mats = mats.filter (i) ->
+							return IsInDiv(component.offset(), this)
+
+						mat = mats.last()
+						element.appendTo(mat.children(".croset-mat"))
+						component.offset offset
+
+
+
+					console.log Build
+					ScreenCards.list = Build.parse()
+					scope.$apply()
+
+					component.css {
+						width: ""
+						height: ""
+					}
+		}
+]
+
 .service "Build", ["GeneralComponents", "ElementComponents", "CurrentScreenData", "ScreenCards", (GeneralComponents, ElementComponents, CurrentScreenData, ScreenCards) ->
+
+
 	this.build = () ->
 		return this.compile this.parse()
 
 	this.parse = () ->
 		program = []
+
 		$("#program-code").children().each (i, e) ->				# eは croset-component-in-code
 			childScope = angular.element(e).scope()
 			program.push childScope.parse()							# 子要素をすべてパースし、設定データを作る
@@ -321,11 +582,11 @@ crosetModule
 
 					compiledFunction = compiledFunction.replace "${" + optionName + "}", optionValue
 
-				console.log compiledFunction, block
+
 
 				if block.elementId
 					compiledFunction = compiledFunction.replace "${jquery}", "$('#" + block.elementId + "')"
-					compiledFunction = compiledFunction.replace "${scope}", "angular.element('#" + block.elementId + "').scope()"
+					compiledFunction = compiledFunction.replace "${options}", "$scope.list['" + block.elementId + "'].options"
 
 				return compiledFunction
 			# }
@@ -341,28 +602,25 @@ crosetModule
 
 			switch blockData.type
 				when "function"
+
 					compiledBlock = compileFunction()
 				when "mat"
 					compiledBlock = compileFunction()
-					console.log block
-					console.log compiledBlock
-					compiledBlock = compiledBlock.replace "${mat}", "\n" + compileMat(block.matContents) + "\n"
+					for matName, matContent of block.matContents
+						compiledBlock = compiledBlock.replace "${" + matName + "}", "\n" + compileMat(matContent) + "\n"
 				when "property"
 					compiledBlock = blockData.compile
 					if block.elementId
 						compiledBlock = compiledBlock.replace "${jquery}", "$('#" + block.elementId + "')"
-						compiledBlock = compiledBlock.replace "${scope}", "angular.element('#" + block.elementId + "').scope()"
+						compiledBlock = compiledBlock.replace "${options}", "$scope.list['" + block.elementId + "'].options"
 
 					if block.propertyChild											# 子要素がある場合
-						console.log block.propertyChild
-						compiledBlock +=  " = " + (compileBlock block.propertyChild) + ";\n"
+						compiledBlock +=  " = " + (compileBlock block.propertyChild)
 
-				when "valiable"
-					console.log block, blockData
-					compiledBlock = block.valiableName
-
-
-
+				when "variable"
+					compiledBlock = "variables['" + block.variableName + "']"
+					if block.propertyChild											# 子要素がある場合
+						compiledBlock +=  " = " + (compileBlock block.propertyChild)
 
 
 			if block.child
@@ -379,6 +637,7 @@ crosetModule
 			compiledMat = ""
 			for block in mat
 				compiledMat += compileBlock block
+				compiledMat += ";\n"
 
 			return compiledMat
 		# }
@@ -387,6 +646,7 @@ crosetModule
 		compiled = ""
 		for block in source
 			compiled += compileBlock block
+			compiled += ";\n"
 
 		console.log compiled
 		return compiled
@@ -405,11 +665,14 @@ crosetModule
 		$scope.elementComponents = ElementComponents[screenElementsManager.get()[newVal]?.type]
 
 ]
-.directive "addComponentButton", ["ScreenCards", "SelectedElementUUID", "CurrentScreenData"
-(ScreenCards, SelectedElementUUID, CurrentScreenData) ->
+.directive "addComponentButton", ["ScreenCards", "SelectedElementUUID", "CurrentScreenData", "AddDraggableEvent",
+(ScreenCards, SelectedElementUUID, CurrentScreenData, AddDraggableEvent) ->
 	return {
 		restrict: "A"
-		link: (scope) ->
+		link: (scope, element, attrs) ->
+
+			AddDraggableEvent scope, element, scope.componentId
+
 			scope.addComponent = (id) ->
 
 				ScreenCards.list.push {
@@ -441,14 +704,22 @@ crosetModule
 	$scope.$watch () ->
 		return ScreenCards.get()
 	, (newVal, oldVal) ->
-		$scope.cards = ScreenCards.get()
-		$($element).empty()
-		console.log $scope.cards
-		for card in ScreenCards.get()
-			scope = $scope.$new true
-			scope.card = card
-			GenerateElement "<croset-component-in-code>", scope, $element
+		console.log "changed"
+
+		# $scope.cards = ScreenCards.get()
+		# $($element).empty()
+		# for card in ScreenCards.get()
+		# 	scope = $scope.$new true
+		# 	scope.card = card
+		# 	GenerateElement "<croset-component-in-code>", scope, $element
 	, true
+
+	$scope.cards = ScreenCards.get()
+	$($element).empty()
+	for card in ScreenCards.get()
+		scope = $scope.$new true
+		scope.card = card
+		GenerateElement "<croset-component-in-code>", scope, $element
 ]
 
 .directive "crosetComponentInputMatCard", [() ->
@@ -474,8 +745,8 @@ crosetModule
 	}
 ]
 
-.directive "crosetComponentInCode", ["$compile", "CurrentScreenData", "GeneralComponents", "GetCardTemplate", "ElementComponents", "GetDistance", "IsInDiv", "ScreenCards", "Build", "GenerateElement", "ServiceConfig"
-($compile, CurrentScreenData, GeneralComponents, GetCardTemplate, ElementComponents, GetDistance, IsInDiv, ScreenCards, Build, GenerateElement, ServiceConfig) ->
+.directive "crosetComponentInCode", ["$compile", "CurrentScreenData", "GeneralComponents", "GetCardTemplate", "ElementComponents", "ScreenCards", "Build", "GenerateElement", "AddDraggableEvent",
+($compile, CurrentScreenData, GeneralComponents, GetCardTemplate, ElementComponents, ScreenCards, Build, GenerateElement, AddDraggableEvent) ->
 	return {
 		restrict: "E"
 		scope: true
@@ -493,140 +764,20 @@ crosetModule
 					return screenElementsManager.get()[scope.card.elementId].name
 				, (newVal, oldVal) ->
 					scope.elementName = newVal
-					console.log scope.elementName, "ネーム", scope
 				, true
 
 
 			else
 				scope.data = GeneralComponents[scope.card.blockId]
 
-			# console.log template
 			GetCardTemplate (template) ->
 				element.empty()
 				GenerateElement template, scope, element
 
-
-				bodyBottomLeftPoints = []
-				propertyTopRightPoints = []
-				inputTopLeftPoints = []
-
-				bottomBorder = null
-				modifyIcon = null
-				targetInput = null
-
-				component = $(element).children "croset-component"
-				$(component).draggable {
-					appendTo: "body"
-					cancel: ".croset-mat-resizer, input"
-					start: (ev, ui) ->
-						bodyBottomLeftPoints = []
-						propertyTopRightPoints = []
-						inputTopLeftPoints = []
-
-						$(".croset-component-body").each (i, e) ->
-
-							if !$(e).closest(element)[0]
-								bodyBottomLeftPoints.push {
-									left: $(e).offset().left
-									top: $(e).offset().top + $(e).height()
-									element: $ e
-								}
-
-								if e.tagName == "CROSET-COMPONENT-PROPERTY"
-									icon = $(e).children "croset-component-property-modify-icon"
-									propertyTopRightPoints.push {
-										left: icon.offset().left + icon.width()
-										top: icon.offset().top
-										element: $ e
-									}
-
-								if e.tagName == "CROSET-COMPONENT-MAT"
-									e = $(e).children()[0]
-									console.log e
-
-								$(e).children("croset-component-input").each (i, input) ->
-									if !$(input).children("croset-component-input-text")[0]
-										inputTopLeftPoints.push {
-											left: $(input).offset().left
-											top: $(input).offset().top
-											element: $ input
-										}
-
-						console.log propertyTopRightPoints
-					drag: (ev, ui) ->
-						snapDistance = 20 * ServiceConfig.get().componentScale					# 要素同士が吸着する距離
-
-						pos = component.offset()
-
-						bottomBorder?.removeClass "bottom-border"
-						bottomBorder = null
-						for bodyBottomLeftPoint in bodyBottomLeftPoints
-							if snapDistance > GetDistance pos, bodyBottomLeftPoint
-								bodyBottomLeftPoint.element.addClass "bottom-border"
-								bottomBorder = bodyBottomLeftPoint.element
-
-						modifyIcon?.removeClass "selected-modify-icon"
-						modifyIcon = null
-						for propertyTopRightPoint in propertyTopRightPoints
-							if snapDistance > GetDistance pos, propertyTopRightPoint
-								propertyTopRightPoint.element.addClass "selected-modify-icon"
-								modifyIcon = propertyTopRightPoint.element
-
-						targetInput?.removeClass "target-input"
-						targetInput = null
-						for inputTopLeftPoint in inputTopLeftPoints
-							if snapDistance > GetDistance pos, inputTopLeftPoint
-								targetInput = inputTopLeftPoint.element
-
-						targetInput?.addClass "target-input"
-
-					stop: (ev, ui) ->
-						if bottomBorder
-							element.appendTo bottomBorder.closest "croset-component"
-							component.css {top:0, left:0}
-
-						else if modifyIcon
-							element.appendTo modifyIcon.children "croset-component-property-modified"
-							component.css {top:0, left:0}
-
-						else if targetInput
-							firstChild = targetInput.children()[0]
-							# if firstChild?.tagName == "CROSET-COMPONENT-IN-CODE"
-
-							element.prependTo targetInput
-
-							component.css {top:0, left:0}
-							targetInput.removeClass "target-input"
-							console.log element.parent()
-
-
-						else
-							offset = component.offset()
-
-							mats = $ ".mat-wrapper"
-
-							mats = mats.filter (i) ->
-								return IsInDiv(component.offset(), this)
-
-							mat = mats.last()
-							element.appendTo(mat.children(".croset-mat"))
-							component.offset offset
-
-
-						console.log Build
-						ScreenCards.list = Build.parse()
-
-						component.css {
-							width: ""
-							height: ""
-						}
-
-
-				}
+				AddDraggableEvent scope, element
 
 			scope._contextmenu = {
 				delete: () ->
-					console.log "deleting"
 					element.remove()
 					ScreenCards.list = Build.parse()
 					return
@@ -647,7 +798,6 @@ crosetModule
 		restrict: "E"
 		scope: false
 		link: (scope, element, attrs) ->
-
 			body = $ "<croset-component-" + scope.data.type + ">"			# カードの種類ごとに子要素を生成
 			body = $compile(body)(scope)
 			body.addClass "croset-component-body"
@@ -678,9 +828,13 @@ crosetModule
 				options = {}																						# インプットの結果
 				inputOptions = {}																					# インプットの入力されたままの値
 
-				inputs = $(element).children(".croset-component-body").children("croset-component-input")
+				inputs = $(element).children ".croset-component-body"
+					.children "croset-component-input"
 				if !inputs[0]
-					inputs = $(element).children(".croset-component-body").children(".croset-mat-flex").children("croset-component-input")
+					inputs = $(element).children ".croset-component-body"
+						.children()
+						.children ".croset-mat-flex"
+						.children "croset-component-input"
 
 
 				inputs.each (i, e) ->
@@ -705,17 +859,21 @@ crosetModule
 				if childScope
 					data.child = childScope.parse()
 
-				matChildren = $(element).children "croset-component-mat"
-				 	.children ".mat-wrapper"
+				mats = $(element).children "croset-component-mat"
+				 	.children()
+					.children ".mat-wrapper"
 					.children ".croset-component-input-mat-card"
-					.children "croset-component-in-code"
-				if matChildren[0]																				# マットがある場合
-					data.matContents = []
-					matChildren.each (i, e) ->
-						matChildScope = angular.element(e).scope()
-						data.matContents.push matChildScope.parse()
 
-						data.matSize = scope.card.matSize
+				data.matContents = {}
+				mats.each (i, e) ->																									# マットがある場合
+					matScope = angular.element(e).scope()
+					matResult = []
+					$(e).children().each (i, e) ->
+						matResult.push angular.element(e).scope().parse()
+
+					data.matContents[matScope.matName] = matResult
+
+					data.matSize = scope.card.matSize
 
 
 				propertyChild = $(element).children "croset-component-property"					# このカードがプロパティで、かつ何か代入されている場合
@@ -724,11 +882,16 @@ crosetModule
 				if propertyChild[0]
 					data.propertyChild = angular.element(propertyChild).scope().parse()
 
+				variableChild = $(element).children "croset-component-variable"
+					.children "croset-component-property-modified"
+					.children "croset-component-in-code"
+				if variableChild[0]
+						data.propertyChild = angular.element(variableChild).scope().parse()
 
 
-				valiable = $(element).children "croset-component-valiable"					# このカードが変数ならば
-				if valiable[0]
-					data.valiableName = angular.element(valiable).scope().valiableName
+				variable = $(element).children "croset-component-variable"					# このカードが変数ならば
+				if variable[0]
+					data.variableName = angular.element(variable).scope().variableName
 
 				return data
 
@@ -752,51 +915,92 @@ crosetModule
 		scope: false
 		templateUrl: "component-mat.html"
 		link: (scope, element, attrs) ->
+
+			scope.mats = {}
+			lastMatIndex = 0
+			angular.forEach scope.data.appearance, (e, i) -> # matごとに区切る
+				if e.type == "mat"
+					scope.mats[e.result] = scope.data.appearance.slice lastMatIndex, i
+					lastMatIndex = i + 1
+
+
 			if scope.card													# コードのなかでだけ実行し、カードリスト内では無効
 				resizing = false
 				mousePosition = {};
-				wrapper = element.children ".mat-wrapper"
 
-				console.log scope.card
-				scope.card.matSize ?= {
-					top: null
-					left: null
+
+		}
+]
+
+.directive "matWrapper", [() ->
+	return {
+		restrict: "C"
+		scope: false
+		link: (scope, element) ->
+			card = scope.$parent.$parent.$parent.card
+			if card
+
+				card.matSize ?= {
+					height: {}
+					width: null
 				}
-				wrapper.width scope.card.matSize.width						# サイズを初期化
-				wrapper.height scope.card.matSize.height
+
+				# サイズを初期化
+				element.parent().parent().width card.matSize.width
+				if card.matSize.height
+					element.height card.matSize.height[scope.matName]
 
 
-				# 以下ドラッグ時の処理
-				scope.startResizing = ($event) ->
-					resizing = true
+	}
+]
+
+# リサイザに付加しておくと、そのdomをドラッグした時にそのdomの親をリサイズする
+.directive "crosetMatResizer", ["Build", (Build)->
+	return {
+		restrict: "C"
+		scope:
+			direction: "@"
+		link:(scope, element, attrs) ->
+
+			target = element.parent()
+			# 以下ドラッグ時の処理
+			$(element).mousedown ($event) ->
+
+				resizing = true
+				mousePosition = {
+					x: $event.pageX
+					y: $event.pageY
+				}
+				currentMatWidth = target.width()
+				currentMatHeight = target.height()
+
+				$(document).mousemove	 (e) ->
+					switch scope.direction
+						when "right"
+							scope.$parent.card.matSize.width = currentMatWidth + e.pageX - mousePosition.x
+							target.width scope.$parent.card.matSize.width
+
+						when "bottom"
+							scope.$parent.$parent.card.matSize.height[scope.$parent.matName] = currentMatHeight + e.pageY - mousePosition.y
+							target.height currentMatHeight + e.pageY - mousePosition.y
+
+
+							scope.$parent.$parent.card.matSize
 					mousePosition = {
 						x: $event.pageX
 						y: $event.pageY
 					}
 
+					scope.$apply()
 
-				document.onmousemove = ($event) ->
-					if resizing
-						console.log $event.pageX, mousePosition.x
-						scope.card.matSize = {
-							width: wrapper.width() + $event.pageX - mousePosition.x
-							height: wrapper.height() + $event.pageY - mousePosition.y
-						}
-						wrapper.width scope.card.matSize.width
-						wrapper.height scope.card.matSize.height
+				return
 
-						mousePosition = {
-							x: $event.pageX
-							y: $event.pageY
-						}
-					return
-
-				document.onmouseup = () ->
-					resizing = false
-					Build.parse()
+			$(document).mouseup () ->
+				$(document).unbind "mousemove"
+				Build.parse()
 	}
-]
 
+]
 
 .directive "crosetComponentProperty", [() ->
 	return {
@@ -809,15 +1013,15 @@ crosetModule
 ]
 
 
-.directive "crosetComponentValiable", ["ProjectData", "$mdDialog", "$mdToast", (ProjectData, $mdDialog, $mdToast) ->
+.directive "crosetComponentVariable", ["ProjectData", "$mdDialog", "$mdToast", (ProjectData, $mdDialog, $mdToast) ->
 	return {
 		restrict: "E"
 		scope: false
-		templateUrl: "component-valiable.html"
+		templateUrl: "component-variable.html"
 		link: (scope, element, attrs) ->
 			if scope.card
-				scope.valiables = ProjectData.valiables
-				scope.valiableName = scope.card.valiableName
+				scope.variables = ProjectData.variables
+				scope.variableName = scope.card.variableName
 				scope.onchange = () ->
 
 				# 新しい変数を作る
@@ -830,7 +1034,7 @@ crosetModule
 						.cancel "キャンセル"
 
 					$mdDialog.show(confirm).then (name) ->
-						result = ProjectData.addValiable name
+						result = ProjectData.addvariable name
 						if !result
 							$mdToast.show(
 								$mdToast.simple()
@@ -840,8 +1044,8 @@ crosetModule
 							)
 
 				# 変数が追加・変更された時
-				ProjectData.onChangeValiables (valiables)->
-					scope.valiables = valiables
+				ProjectData.onChangevariables (variables)->
+					scope.variables = variables
 
 	}
 ]
@@ -865,7 +1069,6 @@ crosetModule
 
 			cardData = scope.$parent.card?.cardOptions?[scope.input?.result]
 			if cardData?.blockId																# カード
-				console.log "a"
 				e = $ "<croset-component-in-code>"
 				cardScope = scope.$new()
 				cardScope.card = cardData
@@ -874,7 +1077,6 @@ crosetModule
 
 
 			 																				# 普通のインプット
-			console.log "b"
 			e = angular.element "<croset-component-input-" + scope.input.type + ">"
 			e = $compile(e)(scope)
 			e.appendTo element
@@ -921,7 +1123,6 @@ crosetModule
 			scope.onblur = () ->
 				scope.value = "'" + scope.inputValue + "'"
 				ScreenCards.list = Build.parse()
-				console.log scope.value, scope.inputValue
 				return
 
 			scope.onchange = () ->
@@ -986,11 +1187,9 @@ crosetModule
 			scope.screens = ProjectData.screens
 			ProjectData.setCallback () ->			# 画面数や画面名の更新がある時呼ばれる
 				scope.screens = ProjectData.getScreens()
-				console.log scope.value
 
 			scope.onchange = () ->
 				scope.value = "'" + scope.inputValue + "'"
-				console.log scope.value
 				return
 
 

@@ -1,0 +1,21 @@
+
+
+<md-select ng-model="variableName" ng-change="onchange()" placeholder="画面" class="md-no-underline">
+  <md-select-header class="demo-select-header">
+    <md-button ng-click="new($event)" class="md-accent">
+      <md-icon aria-label="New" class="material-icons" md-menu-align-target> add </md-icon>
+      新しい変数
+    </md-button>
+  <md-select-header>
+  <md-optgroup>
+	  	<md-option ng-repeat="variable in variables" value="{{variable}}"> {{variable}} </md-option>
+  </md-optgroup>
+</md-select>
+
+
+<croset-component-property-modify-icon flex="1">
+  <ng-md-icon icon="keyboard_arrow_left" style="fill: #000" size="20"></ng-md-icon>
+</croset-component-property-modify-icon>
+<croset-component-property-modified>
+  <croset-component-in-code ng-if="card"></croset-component-in-code>
+</croset-component-property-modified>

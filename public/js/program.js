@@ -3,6 +3,21 @@ var crosetModule;
 crosetModule = angular.module("Croset");
 
 crosetModule.value("GeneralComponents", {
+  "onload": {
+    type: "mat",
+    appearance: [
+      {
+        type: "text",
+        options: {
+          text: "この画面は始まった時"
+        }
+      }, {
+        type: "mat",
+        result: "mat"
+      }
+    ],
+    compile: "$events.onload(function({ ${mat} })) "
+  },
   "intentTo": {
     type: "function",
     appearance: [
@@ -19,8 +34,8 @@ crosetModule.value("GeneralComponents", {
     ],
     compile: "$state.go('screen' + ${screen})"
   },
-  "valiable": {
-    type: "valiable",
+  "variable": {
+    type: "variable",
     compile: "${val}"
   },
   "hensu": {
@@ -166,6 +181,22 @@ crosetModule.value("GeneralComponents", {
     ],
     compile: "alert(${message})"
   },
+  "toint": {
+    type: "function",
+    appearance: [
+      {
+        type: "text",
+        options: {
+          text: "数字に変換"
+        }
+      }, {
+        type: "textbox",
+        defaultValue: "条件",
+        result: "text"
+      }
+    ],
+    compile: "parseInt(${text})"
+  },
   "if": {
     type: "mat",
     appearance: [
@@ -183,9 +214,39 @@ crosetModule.value("GeneralComponents", {
         options: {
           text: "なら"
         }
+      }, {
+        type: "mat",
+        result: "mat"
       }
     ],
     compile: "if(${exp}) { ${mat} }"
+  },
+  "ifelse": {
+    type: "mat",
+    appearance: [
+      {
+        type: "text",
+        options: {
+          text: "もし"
+        }
+      }, {
+        type: "expbox",
+        defaultValue: "条件",
+        result: "exp"
+      }, {
+        type: "mat",
+        result: "mat"
+      }, {
+        type: "text",
+        options: {
+          text: "でなければ"
+        }
+      }, {
+        type: "mat",
+        result: "mat2"
+      }
+    ],
+    compile: "if(${exp}) { ${mat} } else { ${mat2} }"
   },
   "interval": {
     type: "mat",
@@ -199,6 +260,9 @@ crosetModule.value("GeneralComponents", {
         options: {
           text: "秒ごとに繰り返す"
         }
+      }, {
+        type: "mat",
+        result: "mat"
       }
     ],
     compile: "$interval(function() { ${mat} }, ${exp} * 1000)"
@@ -213,14 +277,31 @@ crosetModule.value("GeneralComponents", {
           options: {
             text: "がクリックされたとき、"
           }
+        }, {
+          type: "mat",
+          result: "mat"
         }
       ],
-      compile: "${scope}.click = function() { $timeout(function() { ${mat} });  }"
+      compile: "${options}.click = function() { $timeout(function() { ${mat} });  }"
     },
     "text": {
       type: "property",
       text: "のテキスト",
-      compile: "${scope}.options.text"
+      compile: "${options}.text"
+    }
+  },
+  "text": {
+    "text": {
+      type: "property",
+      text: "のテキスト",
+      compile: "${options}.text"
+    }
+  },
+  "textbox": {
+    "text": {
+      type: "property",
+      text: "のテキスト",
+      compile: "${options}.value"
     }
   }
 }).service("ScreenCards", [
@@ -262,6 +343,166 @@ crosetModule.value("GeneralComponents", {
       }
     };
   }
+]).factory("AddDraggableEvent", [
+  "IsInDiv", "GetDistance", "ServiceConfig", "Build", "ScreenCards", "CurrentScreenData", "SelectedElementUUID", "GenerateElement", function(IsInDiv, GetDistance, ServiceConfig, Build, ScreenCards, CurrentScreenData, SelectedElementUUID, GenerateElement) {
+    return function(scope, element, helperId) {
+      var bodyBottomLeftPoints, bottomBorder, component, helper, inputTopLeftPoints, isDragged, modifyIcon, programCode, propertyTopRightPoints, targetInput;
+      bodyBottomLeftPoints = [];
+      propertyTopRightPoints = [];
+      inputTopLeftPoints = [];
+      bottomBorder = null;
+      modifyIcon = null;
+      targetInput = null;
+      isDragged = false;
+      component = $(element).children("croset-component");
+      helper = "origin";
+      if (helperId) {
+        helper = "clone";
+      }
+      programCode = $("#program-code");
+      return $(component).draggable({
+        appendTo: "body",
+        cancel: ".croset-mat-resizer, input",
+        helper: helper,
+        start: function(ev, ui) {
+          bodyBottomLeftPoints = [];
+          propertyTopRightPoints = [];
+          inputTopLeftPoints = [];
+          isDragged = false;
+          console.log(component, "イベント");
+          return $(".croset-component-body").each(function(i, e) {
+            var icon, inputs, matInputs;
+            if (!$(e).closest(element)[0]) {
+              bodyBottomLeftPoints.push({
+                left: $(e).offset().left,
+                top: $(e).offset().top + $(e).height(),
+                element: $(e)
+              });
+              if (e.tagName === "CROSET-COMPONENT-PROPERTY" || e.tagName === "CROSET-COMPONENT-VARIABLE") {
+                icon = $(e).children("croset-component-property-modify-icon");
+                propertyTopRightPoints.push({
+                  left: icon.offset().left + icon.width(),
+                  top: icon.offset().top,
+                  element: $(e)
+                });
+              }
+              if (e.tagName === "CROSET-COMPONENT-MAT") {
+                e = $(e).children()[0];
+              }
+              inputs = $(e).children("croset-component-input");
+              matInputs = $(e).children(".croset-mat-flex").children("croset-component-input");
+              return inputs.add(matInputs).each(function(i, input) {
+                if (!$(input).children("croset-component-input-text")[0]) {
+                  return inputTopLeftPoints.push({
+                    left: $(input).offset().left,
+                    top: $(input).offset().top,
+                    element: $(input)
+                  });
+                }
+              });
+            }
+          });
+        },
+        drag: function(ev, ui) {
+          var bodyBottomLeftPoint, inputTopLeftPoint, j, k, l, len, len1, len2, pos, propertyTopRightPoint, snapDistance;
+          isDragged = true;
+          snapDistance = 20 * ServiceConfig.get().componentScale;
+          pos = component.offset();
+          if (bottomBorder != null) {
+            bottomBorder.removeClass("bottom-border");
+          }
+          bottomBorder = null;
+          for (j = 0, len = bodyBottomLeftPoints.length; j < len; j++) {
+            bodyBottomLeftPoint = bodyBottomLeftPoints[j];
+            if (snapDistance > GetDistance(pos, bodyBottomLeftPoint)) {
+              bodyBottomLeftPoint.element.addClass("bottom-border");
+              bottomBorder = bodyBottomLeftPoint.element;
+            }
+          }
+          if (modifyIcon != null) {
+            modifyIcon.removeClass("selected-modify-icon");
+          }
+          modifyIcon = null;
+          for (k = 0, len1 = propertyTopRightPoints.length; k < len1; k++) {
+            propertyTopRightPoint = propertyTopRightPoints[k];
+            if (snapDistance > GetDistance(pos, propertyTopRightPoint)) {
+              propertyTopRightPoint.element.addClass("selected-modify-icon");
+              modifyIcon = propertyTopRightPoint.element;
+            }
+          }
+          if (targetInput != null) {
+            targetInput.removeClass("target-input");
+          }
+          targetInput = null;
+          for (l = 0, len2 = inputTopLeftPoints.length; l < len2; l++) {
+            inputTopLeftPoint = inputTopLeftPoints[l];
+            if (snapDistance > GetDistance(pos, inputTopLeftPoint)) {
+              targetInput = inputTopLeftPoint.element;
+            }
+          }
+          return targetInput != null ? targetInput.addClass("target-input") : void 0;
+        },
+        stop: function(ev, ui) {
+          var card, firstChild, mat, mats, newScope, offset;
+          if (helper === "clone") {
+            card = {
+              offset: {
+                top: $(ui.helper).offset().top - $("#program-code").offset().top,
+                left: $(ui.helper).offset().left - $("#program-code").offset().left
+              },
+              blockId: helperId
+            };
+            if (scope.elementData) {
+              card.elementId = SelectedElementUUID.get();
+              card.type = scope.elementData.type;
+            }
+            newScope = scope.$new(true);
+            newScope.card = card;
+            GenerateElement("<croset-component-in-code>", newScope, $("#program-code"));
+          }
+          if (isDragged) {
+            if (bottomBorder) {
+              element.appendTo(bottomBorder.closest("croset-component"));
+              component.css({
+                top: 0,
+                left: 0
+              });
+            } else if (modifyIcon) {
+              element.appendTo(modifyIcon.children("croset-component-property-modified"));
+              component.css({
+                top: 0,
+                left: 0
+              });
+            } else if (targetInput) {
+              firstChild = targetInput.children()[0];
+              element.prependTo(targetInput);
+              component.css({
+                top: 0,
+                left: 0
+              });
+              targetInput.removeClass("target-input");
+            } else {
+              offset = component.offset();
+              mats = $(".mat-wrapper");
+              mats = mats.filter(function(i) {
+                return IsInDiv(component.offset(), this);
+              });
+              mat = mats.last();
+              element.appendTo(mat.children(".croset-mat"));
+              component.offset(offset);
+            }
+            console.log(Build);
+            ScreenCards.list = Build.parse();
+            scope.$apply();
+            return component.css({
+              width: "",
+              height: ""
+            });
+          }
+        }
+      });
+    };
+  }
 ]).service("Build", [
   "GeneralComponents", "ElementComponents", "CurrentScreenData", "ScreenCards", function(GeneralComponents, ElementComponents, CurrentScreenData, ScreenCards) {
     this.build = function() {
@@ -282,7 +523,7 @@ crosetModule.value("GeneralComponents", {
     this.compile = function(source) {
       var block, compileBlock, compileMat, compiled, j, len;
       compileBlock = function(block) {
-        var blockData, compileFunction, compiledBlock, elementData;
+        var blockData, compileFunction, compiledBlock, elementData, matContent, matName, ref;
         compileFunction = function() {
           var cardOptionValue, compiledFunction, optionName, optionValue, ref, ref1;
           compiledFunction = blockData.compile;
@@ -295,10 +536,9 @@ crosetModule.value("GeneralComponents", {
             }
             compiledFunction = compiledFunction.replace("${" + optionName + "}", optionValue);
           }
-          console.log(compiledFunction, block);
           if (block.elementId) {
             compiledFunction = compiledFunction.replace("${jquery}", "$('#" + block.elementId + "')");
-            compiledFunction = compiledFunction.replace("${scope}", "angular.element('#" + block.elementId + "').scope()");
+            compiledFunction = compiledFunction.replace("${options}", "$scope.list['" + block.elementId + "'].options");
           }
           return compiledFunction;
         };
@@ -315,24 +555,27 @@ crosetModule.value("GeneralComponents", {
             break;
           case "mat":
             compiledBlock = compileFunction();
-            console.log(block);
-            console.log(compiledBlock);
-            compiledBlock = compiledBlock.replace("${mat}", "\n" + compileMat(block.matContents) + "\n");
+            ref = block.matContents;
+            for (matName in ref) {
+              matContent = ref[matName];
+              compiledBlock = compiledBlock.replace("${" + matName + "}", "\n" + compileMat(matContent) + "\n");
+            }
             break;
           case "property":
             compiledBlock = blockData.compile;
             if (block.elementId) {
               compiledBlock = compiledBlock.replace("${jquery}", "$('#" + block.elementId + "')");
-              compiledBlock = compiledBlock.replace("${scope}", "angular.element('#" + block.elementId + "').scope()");
+              compiledBlock = compiledBlock.replace("${options}", "$scope.list['" + block.elementId + "'].options");
             }
             if (block.propertyChild) {
-              console.log(block.propertyChild);
-              compiledBlock += " = " + (compileBlock(block.propertyChild)) + ";\n";
+              compiledBlock += " = " + (compileBlock(block.propertyChild));
             }
             break;
-          case "valiable":
-            console.log(block, blockData);
-            compiledBlock = block.valiableName;
+          case "variable":
+            compiledBlock = "variables['" + block.variableName + "']";
+            if (block.propertyChild) {
+              compiledBlock += " = " + (compileBlock(block.propertyChild));
+            }
         }
         if (block.child) {
           compiledBlock += ";\n" + compileBlock(block.child);
@@ -348,6 +591,7 @@ crosetModule.value("GeneralComponents", {
         for (j = 0, len = mat.length; j < len; j++) {
           block = mat[j];
           compiledMat += compileBlock(block);
+          compiledMat += ";\n";
         }
         return compiledMat;
       };
@@ -355,6 +599,7 @@ crosetModule.value("GeneralComponents", {
       for (j = 0, len = source.length; j < len; j++) {
         block = source[j];
         compiled += compileBlock(block);
+        compiled += ";\n";
       }
       console.log(compiled);
       return compiled;
@@ -373,10 +618,11 @@ crosetModule.value("GeneralComponents", {
     });
   }
 ]).directive("addComponentButton", [
-  "ScreenCards", "SelectedElementUUID", "CurrentScreenData", function(ScreenCards, SelectedElementUUID, CurrentScreenData) {
+  "ScreenCards", "SelectedElementUUID", "CurrentScreenData", "AddDraggableEvent", function(ScreenCards, SelectedElementUUID, CurrentScreenData, AddDraggableEvent) {
     return {
       restrict: "A",
-      link: function(scope) {
+      link: function(scope, element, attrs) {
+        AddDraggableEvent(scope, element, scope.componentId);
         scope.addComponent = function(id) {
           return ScreenCards.list.push({
             offset: {
@@ -402,26 +648,26 @@ crosetModule.value("GeneralComponents", {
   }
 ]).controller("CodeController", [
   "$scope", "$element", "$compile", "ScreenCards", "ProjectData", "GenerateElement", function($scope, $element, $compile, ScreenCards, ProjectData, GenerateElement) {
+    var card, j, len, ref, results, scope;
     window.a = function() {
       return ScreenCards;
     };
-    return $scope.$watch(function() {
+    $scope.$watch(function() {
       return ScreenCards.get();
     }, function(newVal, oldVal) {
-      var card, j, len, ref, results, scope;
-      $scope.cards = ScreenCards.get();
-      $($element).empty();
-      console.log($scope.cards);
-      ref = ScreenCards.get();
-      results = [];
-      for (j = 0, len = ref.length; j < len; j++) {
-        card = ref[j];
-        scope = $scope.$new(true);
-        scope.card = card;
-        results.push(GenerateElement("<croset-component-in-code>", scope, $element));
-      }
-      return results;
+      return console.log("changed");
     }, true);
+    $scope.cards = ScreenCards.get();
+    $($element).empty();
+    ref = ScreenCards.get();
+    results = [];
+    for (j = 0, len = ref.length; j < len; j++) {
+      card = ref[j];
+      scope = $scope.$new(true);
+      scope.card = card;
+      results.push(GenerateElement("<croset-component-in-code>", scope, $element));
+    }
+    return results;
   }
 ]).directive("crosetComponentInputMatCard", [
   function() {
@@ -450,7 +696,7 @@ crosetModule.value("GeneralComponents", {
     };
   }
 ]).directive("crosetComponentInCode", [
-  "$compile", "CurrentScreenData", "GeneralComponents", "GetCardTemplate", "ElementComponents", "GetDistance", "IsInDiv", "ScreenCards", "Build", "GenerateElement", "ServiceConfig", function($compile, CurrentScreenData, GeneralComponents, GetCardTemplate, ElementComponents, GetDistance, IsInDiv, ScreenCards, Build, GenerateElement, ServiceConfig) {
+  "$compile", "CurrentScreenData", "GeneralComponents", "GetCardTemplate", "ElementComponents", "ScreenCards", "Build", "GenerateElement", "AddDraggableEvent", function($compile, CurrentScreenData, GeneralComponents, GetCardTemplate, ElementComponents, ScreenCards, Build, GenerateElement, AddDraggableEvent) {
     return {
       restrict: "E",
       scope: true,
@@ -464,146 +710,18 @@ crosetModule.value("GeneralComponents", {
           scope.$watch(function() {
             return screenElementsManager.get()[scope.card.elementId].name;
           }, function(newVal, oldVal) {
-            scope.elementName = newVal;
-            return console.log(scope.elementName, "ネーム", scope);
+            return scope.elementName = newVal;
           }, true);
         } else {
           scope.data = GeneralComponents[scope.card.blockId];
         }
         GetCardTemplate(function(template) {
-          var bodyBottomLeftPoints, bottomBorder, component, inputTopLeftPoints, modifyIcon, propertyTopRightPoints, targetInput;
           element.empty();
           GenerateElement(template, scope, element);
-          bodyBottomLeftPoints = [];
-          propertyTopRightPoints = [];
-          inputTopLeftPoints = [];
-          bottomBorder = null;
-          modifyIcon = null;
-          targetInput = null;
-          component = $(element).children("croset-component");
-          return $(component).draggable({
-            appendTo: "body",
-            cancel: ".croset-mat-resizer, input",
-            start: function(ev, ui) {
-              bodyBottomLeftPoints = [];
-              propertyTopRightPoints = [];
-              inputTopLeftPoints = [];
-              $(".croset-component-body").each(function(i, e) {
-                var icon;
-                if (!$(e).closest(element)[0]) {
-                  bodyBottomLeftPoints.push({
-                    left: $(e).offset().left,
-                    top: $(e).offset().top + $(e).height(),
-                    element: $(e)
-                  });
-                  if (e.tagName === "CROSET-COMPONENT-PROPERTY") {
-                    icon = $(e).children("croset-component-property-modify-icon");
-                    propertyTopRightPoints.push({
-                      left: icon.offset().left + icon.width(),
-                      top: icon.offset().top,
-                      element: $(e)
-                    });
-                  }
-                  if (e.tagName === "CROSET-COMPONENT-MAT") {
-                    e = $(e).children()[0];
-                    console.log(e);
-                  }
-                  return $(e).children("croset-component-input").each(function(i, input) {
-                    if (!$(input).children("croset-component-input-text")[0]) {
-                      return inputTopLeftPoints.push({
-                        left: $(input).offset().left,
-                        top: $(input).offset().top,
-                        element: $(input)
-                      });
-                    }
-                  });
-                }
-              });
-              return console.log(propertyTopRightPoints);
-            },
-            drag: function(ev, ui) {
-              var bodyBottomLeftPoint, inputTopLeftPoint, j, k, l, len, len1, len2, pos, propertyTopRightPoint, snapDistance;
-              snapDistance = 20 * ServiceConfig.get().componentScale;
-              pos = component.offset();
-              if (bottomBorder != null) {
-                bottomBorder.removeClass("bottom-border");
-              }
-              bottomBorder = null;
-              for (j = 0, len = bodyBottomLeftPoints.length; j < len; j++) {
-                bodyBottomLeftPoint = bodyBottomLeftPoints[j];
-                if (snapDistance > GetDistance(pos, bodyBottomLeftPoint)) {
-                  bodyBottomLeftPoint.element.addClass("bottom-border");
-                  bottomBorder = bodyBottomLeftPoint.element;
-                }
-              }
-              if (modifyIcon != null) {
-                modifyIcon.removeClass("selected-modify-icon");
-              }
-              modifyIcon = null;
-              for (k = 0, len1 = propertyTopRightPoints.length; k < len1; k++) {
-                propertyTopRightPoint = propertyTopRightPoints[k];
-                if (snapDistance > GetDistance(pos, propertyTopRightPoint)) {
-                  propertyTopRightPoint.element.addClass("selected-modify-icon");
-                  modifyIcon = propertyTopRightPoint.element;
-                }
-              }
-              if (targetInput != null) {
-                targetInput.removeClass("target-input");
-              }
-              targetInput = null;
-              for (l = 0, len2 = inputTopLeftPoints.length; l < len2; l++) {
-                inputTopLeftPoint = inputTopLeftPoints[l];
-                if (snapDistance > GetDistance(pos, inputTopLeftPoint)) {
-                  targetInput = inputTopLeftPoint.element;
-                }
-              }
-              return targetInput != null ? targetInput.addClass("target-input") : void 0;
-            },
-            stop: function(ev, ui) {
-              var firstChild, mat, mats, offset;
-              if (bottomBorder) {
-                element.appendTo(bottomBorder.closest("croset-component"));
-                component.css({
-                  top: 0,
-                  left: 0
-                });
-              } else if (modifyIcon) {
-                element.appendTo(modifyIcon.children("croset-component-property-modified"));
-                component.css({
-                  top: 0,
-                  left: 0
-                });
-              } else if (targetInput) {
-                firstChild = targetInput.children()[0];
-                element.prependTo(targetInput);
-                component.css({
-                  top: 0,
-                  left: 0
-                });
-                targetInput.removeClass("target-input");
-                console.log(element.parent());
-              } else {
-                offset = component.offset();
-                mats = $(".mat-wrapper");
-                mats = mats.filter(function(i) {
-                  return IsInDiv(component.offset(), this);
-                });
-                mat = mats.last();
-                element.appendTo(mat.children(".croset-mat"));
-                component.offset(offset);
-              }
-              console.log(Build);
-              ScreenCards.list = Build.parse();
-              return component.css({
-                width: "",
-                height: ""
-              });
-            }
-          });
+          return AddDraggableEvent(scope, element);
         });
         return scope._contextmenu = {
           "delete": function() {
-            console.log("deleting");
             element.remove();
             ScreenCards.list = Build.parse();
           }
@@ -638,7 +756,7 @@ crosetModule.value("GeneralComponents", {
           element.append(child);
         }
         return scope.parse = function() {
-          var cardOptions, data, inputOptions, inputs, matChildren, options, propertyChild, valiable;
+          var cardOptions, data, inputOptions, inputs, mats, options, propertyChild, variable, variableChild;
           data = {
             offset: {
               top: element.css("top"),
@@ -652,7 +770,7 @@ crosetModule.value("GeneralComponents", {
           inputOptions = {};
           inputs = $(element).children(".croset-component-body").children("croset-component-input");
           if (!inputs[0]) {
-            inputs = $(element).children(".croset-component-body").children(".croset-mat-flex").children("croset-component-input");
+            inputs = $(element).children(".croset-component-body").children().children(".croset-mat-flex").children("croset-component-input");
           }
           inputs.each(function(i, e) {
             var inputCard, inputScope, key;
@@ -674,23 +792,29 @@ crosetModule.value("GeneralComponents", {
           if (childScope) {
             data.child = childScope.parse();
           }
-          matChildren = $(element).children("croset-component-mat").children(".mat-wrapper").children(".croset-component-input-mat-card").children("croset-component-in-code");
-          if (matChildren[0]) {
-            data.matContents = [];
-            matChildren.each(function(i, e) {
-              var matChildScope;
-              matChildScope = angular.element(e).scope();
-              data.matContents.push(matChildScope.parse());
-              return data.matSize = scope.card.matSize;
+          mats = $(element).children("croset-component-mat").children().children(".mat-wrapper").children(".croset-component-input-mat-card");
+          data.matContents = {};
+          mats.each(function(i, e) {
+            var matResult, matScope;
+            matScope = angular.element(e).scope();
+            matResult = [];
+            $(e).children().each(function(i, e) {
+              return matResult.push(angular.element(e).scope().parse());
             });
-          }
+            data.matContents[matScope.matName] = matResult;
+            return data.matSize = scope.card.matSize;
+          });
           propertyChild = $(element).children("croset-component-property").children("croset-component-property-modified").children("croset-component-in-code");
           if (propertyChild[0]) {
             data.propertyChild = angular.element(propertyChild).scope().parse();
           }
-          valiable = $(element).children("croset-component-valiable");
-          if (valiable[0]) {
-            data.valiableName = angular.element(valiable).scope().valiableName;
+          variableChild = $(element).children("croset-component-variable").children("croset-component-property-modified").children("croset-component-in-code");
+          if (variableChild[0]) {
+            data.propertyChild = angular.element(variableChild).scope().parse();
+          }
+          variable = $(element).children("croset-component-variable");
+          if (variable[0]) {
+            data.variableName = angular.element(variable).scope().variableName;
           }
           return data;
         };
@@ -713,47 +837,86 @@ crosetModule.value("GeneralComponents", {
       scope: false,
       templateUrl: "component-mat.html",
       link: function(scope, element, attrs) {
-        var base, mousePosition, resizing, wrapper;
+        var lastMatIndex, mousePosition, resizing;
+        scope.mats = {};
+        lastMatIndex = 0;
+        angular.forEach(scope.data.appearance, function(e, i) {
+          if (e.type === "mat") {
+            scope.mats[e.result] = scope.data.appearance.slice(lastMatIndex, i);
+            return lastMatIndex = i + 1;
+          }
+        });
         if (scope.card) {
           resizing = false;
-          mousePosition = {};
-          wrapper = element.children(".mat-wrapper");
-          console.log(scope.card);
-          if ((base = scope.card).matSize == null) {
-            base.matSize = {
-              top: null,
-              left: null
+          return mousePosition = {};
+        }
+      }
+    };
+  }
+]).directive("matWrapper", [
+  function() {
+    return {
+      restrict: "C",
+      scope: false,
+      link: function(scope, element) {
+        var card;
+        card = scope.$parent.$parent.$parent.card;
+        if (card) {
+          if (card.matSize == null) {
+            card.matSize = {
+              height: {},
+              width: null
             };
           }
-          wrapper.width(scope.card.matSize.width);
-          wrapper.height(scope.card.matSize.height);
-          scope.startResizing = function($event) {
-            resizing = true;
-            return mousePosition = {
+          element.parent().parent().width(card.matSize.width);
+          if (card.matSize.height) {
+            return element.height(card.matSize.height[scope.matName]);
+          }
+        }
+      }
+    };
+  }
+]).directive("crosetMatResizer", [
+  "Build", function(Build) {
+    return {
+      restrict: "C",
+      scope: {
+        direction: "@"
+      },
+      link: function(scope, element, attrs) {
+        var target;
+        target = element.parent();
+        $(element).mousedown(function($event) {
+          var currentMatHeight, currentMatWidth, mousePosition, resizing;
+          resizing = true;
+          mousePosition = {
+            x: $event.pageX,
+            y: $event.pageY
+          };
+          currentMatWidth = target.width();
+          currentMatHeight = target.height();
+          $(document).mousemove(function(e) {
+            switch (scope.direction) {
+              case "right":
+                scope.$parent.card.matSize.width = currentMatWidth + e.pageX - mousePosition.x;
+                target.width(scope.$parent.card.matSize.width);
+                break;
+              case "bottom":
+                scope.$parent.$parent.card.matSize.height[scope.$parent.matName] = currentMatHeight + e.pageY - mousePosition.y;
+                target.height(currentMatHeight + e.pageY - mousePosition.y);
+                scope.$parent.$parent.card.matSize;
+            }
+            mousePosition = {
               x: $event.pageX,
               y: $event.pageY
             };
-          };
-          document.onmousemove = function($event) {
-            if (resizing) {
-              console.log($event.pageX, mousePosition.x);
-              scope.card.matSize = {
-                width: wrapper.width() + $event.pageX - mousePosition.x,
-                height: wrapper.height() + $event.pageY - mousePosition.y
-              };
-              wrapper.width(scope.card.matSize.width);
-              wrapper.height(scope.card.matSize.height);
-              mousePosition = {
-                x: $event.pageX,
-                y: $event.pageY
-              };
-            }
-          };
-          return document.onmouseup = function() {
-            resizing = false;
-            return Build.parse();
-          };
-        }
+            return scope.$apply();
+          });
+        });
+        return $(document).mouseup(function() {
+          $(document).unbind("mousemove");
+          return Build.parse();
+        });
       }
     };
   }
@@ -766,30 +929,30 @@ crosetModule.value("GeneralComponents", {
       link: function(scope, element, attrs) {}
     };
   }
-]).directive("crosetComponentValiable", [
+]).directive("crosetComponentVariable", [
   "ProjectData", "$mdDialog", "$mdToast", function(ProjectData, $mdDialog, $mdToast) {
     return {
       restrict: "E",
       scope: false,
-      templateUrl: "component-valiable.html",
+      templateUrl: "component-variable.html",
       link: function(scope, element, attrs) {
         if (scope.card) {
-          scope.valiables = ProjectData.valiables;
-          scope.valiableName = scope.card.valiableName;
+          scope.variables = ProjectData.variables;
+          scope.variableName = scope.card.variableName;
           scope.onchange = function() {};
           scope["new"] = function(ev) {
             var confirm;
             confirm = $mdDialog.prompt().title("新しい変数").textContent("").targetEvent(ev).ok("OK").cancel("キャンセル");
             return $mdDialog.show(confirm).then(function(name) {
               var result;
-              result = ProjectData.addValiable(name);
+              result = ProjectData.addvariable(name);
               if (!result) {
                 return $mdToast.show($mdToast.simple().textContent('その名前の変数はすでに存在します').position("right bottom").hideDelay(3000));
               }
             });
           };
-          return ProjectData.onChangeValiables(function(valiables) {
-            return scope.valiables = valiables;
+          return ProjectData.onChangevariables(function(variables) {
+            return scope.variables = variables;
           });
         }
       }
@@ -814,14 +977,12 @@ crosetModule.value("GeneralComponents", {
         element.empty();
         cardData = (ref = scope.$parent.card) != null ? (ref1 = ref.cardOptions) != null ? ref1[(ref2 = scope.input) != null ? ref2.result : void 0] : void 0 : void 0;
         if (cardData != null ? cardData.blockId : void 0) {
-          console.log("a");
           e = $("<croset-component-in-code>");
           cardScope = scope.$new();
           cardScope.card = cardData;
           e = $compile(e)(cardScope);
           element.append(e);
         }
-        console.log("b");
         e = angular.element("<croset-component-input-" + scope.input.type + ">");
         e = $compile(e)(scope);
         e.appendTo(element);
@@ -862,7 +1023,6 @@ crosetModule.value("GeneralComponents", {
         scope.onblur = function() {
           scope.value = "'" + scope.inputValue + "'";
           ScreenCards.list = Build.parse();
-          console.log(scope.value, scope.inputValue);
         };
         scope.onchange = function() {
           var width;
@@ -929,12 +1089,10 @@ crosetModule.value("GeneralComponents", {
       link: function(scope, element, attrs) {
         scope.screens = ProjectData.screens;
         ProjectData.setCallback(function() {
-          scope.screens = ProjectData.getScreens();
-          return console.log(scope.value);
+          return scope.screens = ProjectData.getScreens();
         });
         scope.onchange = function() {
           scope.value = "'" + scope.inputValue + "'";
-          console.log(scope.value);
         };
         return $timeout(function() {
           return scope.onchange();

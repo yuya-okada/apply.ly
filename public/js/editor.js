@@ -32,7 +32,7 @@ crosetModule.service("ServiceConfig", [
     this.name = null;
     this.screens = {};
     this.defaultScreen = "トップ";
-    this.valiables = [];
+    this.variables = [];
     this.getScreens = function() {
       return this.screens;
     };
@@ -47,18 +47,29 @@ crosetModule.service("ServiceConfig", [
       that.name = null;
       that.screens = {};
       that.defaultScreen = "トップ";
-      return that.valiables = [];
+      return that.variables = [];
     };
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams) {
-      if (toState.name.match(/editor/) && toParams.projectId === that.projectId + "") {
-        return saveCurrentScreen();
+      if (toState.name.match(/editor/)) {
+        if (toParams.projectId === that.projectId + "") {
+          saveCurrentScreen();
+          this.parsedStock = [];
+        }
+        if (fromState.name.match(/program/)) {
+          return ScreenCards.list = Build.parse();
+        }
       }
     });
     saveCurrentScreen = function() {
+      var cards;
+      cards = Build.parse();
+      if (cards.length === 0) {
+        cards = ScreenCards.list;
+      }
       return angular.extend(that.screens[CurrentScreenData.id], {
         elements: CurrentScreenData.elementsManager.get(),
-        cards: Build.parse(),
-        sourceCode: Build.build()
+        cards: cards,
+        sourceCode: Build.compile(cards)
       });
     };
     this.addScreen = function(name) {
@@ -108,7 +119,7 @@ crosetModule.service("ServiceConfig", [
       }
       return null;
     };
-    that.callbacks = [];
+    this.callbacks = [];
     this.setCallback = function(fnc) {
       return that.callbacks.push(fnc);
     };
@@ -122,9 +133,9 @@ crosetModule.service("ServiceConfig", [
       }
       return results;
     };
-    this.addValiable = function(name) {
-      if (that.valiables.indexOf(name) === -1) {
-        that.valiables.push(name);
+    this.addvariable = function(name) {
+      if (that.variables.indexOf(name) === -1) {
+        that.variables.push(name);
         that.trigetCallbackVal();
         return true;
       } else {
@@ -132,7 +143,7 @@ crosetModule.service("ServiceConfig", [
       }
     };
     callbacksVal = [];
-    this.onChangeValiables = function(fnc) {
+    this.onChangevariables = function(fnc) {
       return callbacksVal.push(fnc);
     };
     this.trigetCallbackVal = function() {
@@ -140,7 +151,7 @@ crosetModule.service("ServiceConfig", [
       results = [];
       for (i = 0, len = callbacksVal.length; i < len; i++) {
         callback = callbacksVal[i];
-        results.push(callback(that.valiables));
+        results.push(callback(that.variables));
       }
       return results;
     };
@@ -152,7 +163,7 @@ crosetModule.service("ServiceConfig", [
         screens: this.screens,
         defaultScreen: this.defaultScreen,
         config: ServiceConfig.get(),
-        valiables: this.valiables
+        variables: this.variables
       };
     };
   }
@@ -172,7 +183,6 @@ crosetModule.service("ServiceConfig", [
       if (uuid && screenElements.get()[uuid]) {
         console.log(screenElements.get()[uuid].element);
         selectedElement = $(screenElements.get()[uuid].element);
-        console.log(selectedElement, "トェっっっっっっっっっw");
         if (selectedElement.data("ui-resizable")) {
           console.log("aaaa");
           selectedElement.resizable("destroy");
@@ -408,7 +418,7 @@ crosetModule.service("ServiceConfig", [
   }
 ]).controller("EditorController", [
   "$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElementsManager", "ScreenCards", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes", function($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElementsManager, ScreenCards, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) {
-    var changeScreen, projectData;
+    var changeScreen, projectData, ref, ref1;
     SelectedElementUUID.init();
     $scope.settings = {
       elementDatas: ElementDatas
@@ -453,7 +463,10 @@ crosetModule.service("ServiceConfig", [
     ProjectData.name = projectData.name;
     ProjectData.projectId = projectData.projectId;
     ProjectData.defaultScreen = projectData.defaultScreen;
-    ProjectData.valiables = projectData.valiables;
+    ProjectData.parsedStock = (ref = projectData.screens) != null ? (ref1 = ref[projectData.defaultScreen]) != null ? ref1.cards : void 0 : void 0;
+    if (projectData.variables) {
+      ProjectData.variables = projectData.variables;
+    }
     $rootScope.$on("onChangedScreen", function(ev, screenId) {
       var nextScreen;
       console.log(ProjectData, screenId);

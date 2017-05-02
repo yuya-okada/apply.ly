@@ -1,12 +1,19 @@
-div.croset-mat-flex
-	span {{elementName}}
-	croset-component-input(ng-repeat="input in data.appearance track by $index")
 
-md-divider
-.mat-wrapper
-	.croset-component-input-mat-card.croset-mat
-		croset-component-in-code(ng-repeat="card in cardData.matContents")
+div.mat-child(layout="column" ng-repeat="(matName, mat) in mats")
+
+	div.croset-mat-flex
+		span {{elementName}}
+		croset-component-input(ng-repeat="input in mat track by $index")
+
+	md-divider
+	.mat-wrapper
+	
 		
-.croset-mat-resizer(ng-mousedown="startResizing($event)")
-	md-icon(aria-label="Resizer" class="material-icons") zoom_out_map
+		.croset-component-input-mat-card.croset-mat
+			croset-component-in-code(ng-repeat="card in cardData.matContents[matName]")
+			
 		
+		.croset-mat-resizer(direction="bottom")
+			
+
+.croset-mat-resizer(direction="right")

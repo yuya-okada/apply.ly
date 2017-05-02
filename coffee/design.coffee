@@ -46,12 +46,16 @@ crosetModule.service "VisiblePropertyCards", () ->
 
 
 # 配置済みのアイテム
-.controller "HierarchyController", ["$scope", "CurrentScreenData", "ElementDatas", "SelectedElementUUID"
+.controller "HierarchyController", ["$scope", "CurrentScreenData", "ElementDatas",  "SelectedElementUUID",
 ($scope, CurrentScreenData, ElementDatas, SelectedElementUUID) ->
-	$scope.screenElements = CurrentScreenData.elementsManager.get()
+	screenElementsManager = CurrentScreenData.elementsManager
+	$scope.screenElements = screenElementsManager.get()
 	$scope.elementDatas = ElementDatas
 	$scope.$watch SelectedElementUUID.get, (newVal, oldVal) ->
-		$scope.selectedElementUUID = newVal
+		if newVal
+			$scope.selectedElementUUID = newVal
+			$scope.screenElements = screenElementsManager.get()
+			console.log screenElementsManager
 
 ]
 
@@ -65,6 +69,21 @@ crosetModule.service "VisiblePropertyCards", () ->
 			scope.onclick = (data)->
 				SelectedElementUUID.set scope.uuid
 				return
+
+			scope.showPromptRename = (ev) ->
+				confirm = $mdDialog.prompt()
+					.title '名前を変更'
+					.textContent "の名前を変更します。"
+					.placeholder ''
+					.ariaLabel '新しい名前を入力'
+					.targetEvent ev
+					.ok 'OK!'
+					.cancel 'キャンセル'
+
+				$mdDialog.show(confirm).then (result) ->
+					screenElementsManager.rename scope.uuid, result
+				, () ->
+					return
 
 
 			scope.showConfirmDelete = (ev) ->

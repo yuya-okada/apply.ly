@@ -14,7 +14,7 @@
       <md-tab label="アイテム">
         <md-content class="md-padding">
           <md-list ng-cloak="ng-cloak">
-            <md-item add-component-button="add-component-button" ng-click="addElementComponent(componentId)" ng-repeat="(componentId, data) in elementComponents">
+            <md-item add-component-button="add-component-button" ng-repeat="(componentId, data) in elementComponents">
               <croset-component md-ink-ripple="md-ink-ripple" data="data" croset-component-in-list="croset-component-in-list" croset-element-component-in-list="croset-element-component-in-list"></croset-component>
             </md-item>
           </md-list>

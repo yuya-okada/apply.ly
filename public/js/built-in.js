@@ -491,49 +491,55 @@ crosetModule.factory("ElementDatas", function() {
 }).factory("ScreenElementsManager", [
   "Elements", "ElementDatas", "$compile", "$injector", function(Elements, ElementDatas, $compile, $injector) {
     return function(screenElement) {
-      var list, scopes, screenScope;
+      var initScope, screenScope;
       console.log(screenElement);
       screenScope = null;
-      list = {};
-      scopes = {};
       screenElement.empty();
+      initScope = function() {
+        screenScope = screenElement.scope();
+        return screenScope.list = {};
+      };
       this.init = function() {
         screenScope = null;
-        return list = {};
+        return screenScope.list = {};
       };
       this.get = function() {
-        return list;
+        return screenScope != null ? screenScope.list : void 0;
       };
       this.set = function(uuid, key, value) {
-        list[uuid].options[key] = value;
-        return scopes[uuid].options[key] = value;
+        return screenScope.list[uuid].options[key] = value;
+      };
+      this.rename = function(uuid, name) {
+        return screenScope.list[uuid].name = name;
       };
       this.removeAll = function() {
-        list = {};
+        screenScope.list = {};
         return screenElement.empty();
       };
       this.add = function(type, uuid) {
-        var e, options;
-        if (screenScope == null) {
-          screenScope = screenElement.scope();
+        var e, options, scope;
+        if (!screenScope) {
+          initScope();
         }
         e = $("<croset-element-" + type + ">").addClass("croset-element").attr("id", uuid).attr("ng-class", "{'croset-element': true}").attr("croset-element-type", type).attr("uuid", uuid).attr("croset-element-editor", true).width(ElementDatas[type].width).height(ElementDatas[type].height);
-        e = $compile(e)(screenScope);
+        scope = screenScope.$new(true);
+        scope.uuid = uuid;
+        scope.s = screenScope;
+        e = $compile(e)(scope);
         screenElement.append(e);
         options = {};
-        list[uuid] = {
+        screenScope.list[uuid] = {
           type: type,
           name: ElementDatas[type].name,
           element: e,
           options: {}
         };
-        scopes[uuid] = e.scope();
-        return e.scope().options = {};
+        return console.log(screenScope);
       };
       this.addFromData = function(data, uuid) {
         var e, scope;
-        if (screenScope == null) {
-          screenScope = screenElement.scope();
+        if (!screenScope) {
+          initScope();
         }
         e = $("<croset-element-" + data.type + ">").addClass("croset-element").attr("id", uuid).attr("croset-element-type", data.type).attr("uuid", uuid);
         e.width(data.options.width).height(data.options.height).css({
@@ -541,16 +547,20 @@ crosetModule.factory("ElementDatas", function() {
           left: data.options.left
         });
         scope = screenScope.$new(true);
+        scope.uuid = uuid;
+        scope.s = screenScope;
+        console.log("ああああい", scope, e);
         e = $compile(e)(scope);
-        scope.options = data.options;
         screenElement.append(e);
-        return console.log(e.children().children().html());
+        data.element = e;
+        screenScope.list[uuid] = data;
+        return console.log(screenScope.list[uuid], screenScope.$id);
       };
       this.addFromDataEditor = function(data, uuid) {
         var e, scope;
         console.log(Elements);
-        if (screenScope == null) {
-          screenScope = screenElement.scope();
+        if (!screenScope) {
+          initScope();
         }
         e = $("<croset-element-" + data.type + ">").addClass("croset-element").attr("croset-element-editor", true).attr("id", uuid).attr("croset-element-type", data.type).attr("uuid", uuid);
         console.log(data);
@@ -559,29 +569,29 @@ crosetModule.factory("ElementDatas", function() {
           left: data.options.left
         });
         scope = screenScope.$new(true);
+        scope.uuid = uuid;
+        scope.s = screenScope;
+        console.log(screenScope);
         e = $compile(e)(scope);
         screenElement.append(e);
-        scopes[uuid] = scope;
-        scope.options = data.options;
         data.element = e;
-        return list[uuid] = data;
+        return screenScope.list[uuid] = data;
       };
       this["delete"] = function(uuid) {
         var VisiblePropertyCards;
-        list[uuid].element.remove();
+        screenScope.list[uuid].element.remove();
         VisiblePropertyCards = $injector.get("VisiblePropertyCards");
         VisiblePropertyCards.set([]);
-        return delete list[uuid];
+        return delete screenScope.list[uuid];
       };
       this.initialize = function() {
-        list = {};
-        scopes = {};
+        screenScope.list = {};
         return screenElement.empty();
       };
     };
   }
 ]).directive("crosetElement", [
-  "$compile", function($compile) {
+  "$interval", function($interval) {
     return {
       restrict: "C",
       scope: false,
@@ -591,30 +601,34 @@ crosetModule.factory("ElementDatas", function() {
 ]).directive("crosetElementButton", function() {
   return {
     restrict: "E",
-    scope: true,
     templateUrl: "template-button.html",
     link: function(scope, element, attrs) {
-      return scope.click = function() {};
+      return scope.click = function() {
+        var fnc;
+        fnc = scope.s.list[scope.uuid].options.click;
+        if (fnc) {
+          return fnc();
+        }
+      };
     }
   };
-}).directive("crosetElementText", function($compile, $interval) {
+}).directive("crosetElementText", function() {
   return {
     restrict: "E",
-    scope: true,
     templateUrl: "template-text.html",
     link: function(scope, element, attrs) {}
   };
 }).directive("crosetElementTextbox", function() {
   return {
     restrict: "E",
-    scope: true,
     templateUrl: "template-textbox.html",
-    link: function(scope, element, attrs) {}
+    link: function(scope, element, attrs) {
+      return scope.value = options["default"];
+    }
   };
 }).directive("crosetElementSquare", function() {
   return {
     restrict: "E",
-    scope: true,
     templateUrl: "template-square.html",
     link: function(scope, element, attrs) {
       return console.log(element, scope, "スクエア");

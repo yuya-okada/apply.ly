@@ -501,25 +501,32 @@ crosetModule
 	return (screenElement) ->
 		console.log screenElement
 		screenScope = null
-		list = {}
-		scopes = {}
 		screenElement.empty()
+
+		initScope = () ->
+			screenScope = screenElement.scope()
+			screenScope.list = {}
 
 		this.init = () ->						# Screenが変更された場合は追加前に必ず呼ぶ
 			screenScope = null
-			list = {}
+			screenScope.list = {}
 
-		this.get = () -> return list
+		this.get = () ->
+			return screenScope?.list
+
 		this.set = (uuid, key, value) ->     # 指定されたオプションを対応するscopeのoptionsプロパティに適応
-			list[uuid].options[key] = value
-			scopes[uuid].options[key] = value
+			screenScope.list[uuid].options[key] = value
+
+		this.rename = (uuid, name) ->
+			screenScope.list[uuid].name = name
 
 		this.removeAll = () ->
-			list = {}
+			screenScope.list = {}
 			screenElement.empty()
 
 		this.add = (type, uuid) ->
-			screenScope ?= screenElement.scope()		# 初期化されてない場合初期化
+			if !screenScope 		# 初期化されてない場合初期化
+				initScope()
 
 			# 要素のデータを取得
 			e = $ "<croset-element-#{type}>"
@@ -532,23 +539,27 @@ crosetModule
 				.width ElementDatas[type].width					# 横幅を初期化
 				.height ElementDatas[type].height				# 縦幅を初期化
 
-			e = $compile(e)(screenScope)						# 追加した要素にディレクティブを適応させるためにコンパイル
+
+			scope = screenScope.$new true
+			scope.uuid = uuid
+			scope.s = screenScope
+			e = $compile(e)(scope)						# 追加した要素にディレクティブを適応させるためにコンパイル
 			screenElement.append e							# スクリーンに追加
 
 			options = {}
-			list[uuid] = {
+			screenScope.list[uuid] = {
 				type: type
 				name: ElementDatas[type].name
 				element: e
 				options: {}
 			}
 
-			scopes[uuid] = e.scope()
-			e.scope().options = {}
+			console.log screenScope
+
 
 		this.addFromData = (data, uuid) ->
-
-			screenScope ?= screenElement.scope()		# 初期化されてない場合初期化
+			if !screenScope 		# 初期化されてない場合初期化
+				initScope()
 
 			e = $ "<croset-element-#{data.type}>"
 				.addClass "croset-element"
@@ -564,15 +575,21 @@ crosetModule
 				}
 
 			scope = screenScope.$new true
+			scope.uuid = uuid
+			scope.s = screenScope
+			console.log "ああああい", scope, e
 			e = $compile(e)(scope)								# 追加した要素にディレクティブを適応させるためにコンパイル
-			scope.options = data.options
 			screenElement.append e							# スクリーンに追加
 
-			console.log e.children().children().html()
+			data.element = e
+			screenScope.list[uuid] = data
+
+			console.log screenScope.list[uuid], screenScope.$id
 
 		this.addFromDataEditor = (data, uuid) ->
 			console.log Elements
-			screenScope ?= screenElement.scope()		# 初期化されてない場合初期化
+			if !screenScope 		# 初期化されてない場合初期化
+				initScope()
 
 			e = $ "<croset-element-#{data.type}>"
 				.addClass "croset-element"
@@ -591,25 +608,25 @@ crosetModule
 
 
 			scope = screenScope.$new true
+			scope.uuid = uuid
+			scope.s = screenScope
+			console.log screenScope
 			e = $compile(e)(scope)								# 追加した要素にディレクティブを適応させるためにコンパイル
 			screenElement.append e							# スクリーンに追加
 
-			scopes[uuid] = scope
-			scope.options = data.options
 			data.element = e
-			list[uuid] = data
+			screenScope.list[uuid] = data
 
 
 		this.delete = (uuid) ->
-			list[uuid].element.remove()
+			screenScope.list[uuid].element.remove()
 			VisiblePropertyCards = $injector.get("VisiblePropertyCards")		# アプリとして実行した時にVisiblePropertyCardsが存在しないとエラーが起きるので、使うときだけinjectする
 			VisiblePropertyCards.set []
-			delete list[uuid]
+			delete screenScope.list[uuid]
 
 
 		this.initialize = () ->
-			list = {}
-			scopes = {}
+			screenScope.list = {}
 			screenElement.empty()
 
 
@@ -618,28 +635,31 @@ crosetModule
 ]
 
 
-.directive "crosetElement", ["$compile", ($compile)->
+.directive "crosetElement", ["$interval", ($interval)->
 	return {
 		restrict: "C"
 		scope: false
 		link: (scope, element, attrs) ->
-
+			# $interval () ->
+			# 	console.log scope
+			# , 1000
 	}
 ]
 
 .directive "crosetElementButton", ()->
 	return {
 		restrict: "E"
-		scope: true
 		templateUrl: "template-button.html"
 		link: (scope, element, attrs) ->
 			scope.click = () ->
+				fnc = scope.s.list[scope.uuid].options.click
+				if fnc
+					fnc()
 	}
 
-.directive "crosetElementText", ($compile, $interval)->
+.directive "crosetElementText", ()->
 	return {
 		restrict: "E"
-		scope: true
 		templateUrl: "template-text.html"
 		link: (scope, element, attrs) ->
 	}
@@ -647,15 +667,14 @@ crosetModule
 .directive "crosetElementTextbox", ()->
 	return {
 		restrict: "E"
-		scope: true
 		templateUrl: "template-textbox.html"
 		link: (scope, element, attrs) ->
+			scope.value = options.default
 	}
 
 .directive "crosetElementSquare", ()->
 	return {
 		restrict: "E"
-		scope: true
 		templateUrl: "template-square.html"
 		link: (scope, element, attrs) ->
 			console.log element, scope, "スクエア"

@@ -55,10 +55,16 @@ crosetModule.service("VisiblePropertyCards", function() {
   }
 ]).controller("HierarchyController", [
   "$scope", "CurrentScreenData", "ElementDatas", "SelectedElementUUID", function($scope, CurrentScreenData, ElementDatas, SelectedElementUUID) {
-    $scope.screenElements = CurrentScreenData.elementsManager.get();
+    var screenElementsManager;
+    screenElementsManager = CurrentScreenData.elementsManager;
+    $scope.screenElements = screenElementsManager.get();
     $scope.elementDatas = ElementDatas;
     return $scope.$watch(SelectedElementUUID.get, function(newVal, oldVal) {
-      return $scope.selectedElementUUID = newVal;
+      if (newVal) {
+        $scope.selectedElementUUID = newVal;
+        $scope.screenElements = screenElementsManager.get();
+        return console.log(screenElementsManager);
+      }
     });
   }
 ]).directive("crosetHierarchyItem", [
@@ -70,6 +76,13 @@ crosetModule.service("VisiblePropertyCards", function() {
         screenElementsManager = CurrentScreenData.elementsManager;
         scope.onclick = function(data) {
           SelectedElementUUID.set(scope.uuid);
+        };
+        scope.showPromptRename = function(ev) {
+          var confirm;
+          confirm = $mdDialog.prompt().title('名前を変更').textContent("の名前を変更します。").placeholder('').ariaLabel('新しい名前を入力').targetEvent(ev).ok('OK!').cancel('キャンセル');
+          return $mdDialog.show(confirm).then(function(result) {
+            return screenElementsManager.rename(scope.uuid, result);
+          }, function() {});
         };
         return scope.showConfirmDelete = function(ev) {
           var confirm;

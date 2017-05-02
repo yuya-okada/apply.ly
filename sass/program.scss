@@ -58,6 +58,7 @@
 		background-color: #FDFDFD;
 		overflow: scroll;
 	}
+
 }
 
 
@@ -89,7 +90,7 @@ croset-component {
 		border-right: 2px solid $mc;
 	}
 
-	croset-component-function, croset-component-property, croset-component-literal, croset-component-valiable {
+	croset-component-function, croset-component-property, croset-component-literal, croset-component-variable {
 		display: flex;
 		flex-wrap: nowrap;
 		padding: 5px 10px 7px 10px;
@@ -106,11 +107,10 @@ croset-component {
 			margin-top: 7px;
 		}
 		.mat-wrapper {
-			min-width: 300px;
-			min-height: 300px;
+			min-width: 200px;
+			min-height: 100px;
 			background-color: #FDFDFD;
 			position: relative;
-			overflow: scroll;
 
 			.croset-component-input-mat-card {
 				position: absolute;
@@ -120,12 +120,25 @@ croset-component {
 
 		}
 
-		.croset-mat-resizer {
-			position: absolute;;
-			right: 0;
+		.croset-mat-resizer[direction="right"] {
+			position: absolute;
+			cursor: col-resize;
+			top: 0;
+			right: -10px;
 			bottom: 0;
-			padding: 10;
+			width: 20px;
+			z-index: 1;
 		}
+		.croset-mat-resizer[direction="bottom"] {
+			position: absolute;
+			cursor: row-resize;
+			left: 0;
+			right: 0;
+			bottom: -10px;
+			height: 20px;
+			z-index: 1;
+		}
+
 
 	}
 	&[croset-component-in-list] {
@@ -135,7 +148,7 @@ croset-component {
 	}
 
 
-	croset-component-property, croset-component-valiable {
+	croset-component-property, croset-component-variable {
 		&>span {
 			align-items: center;
 		}
@@ -158,7 +171,7 @@ croset-component {
 		}
 	}
 
-	croset-component-valiable {
+	croset-component-variable {
 		md-select {
 			margin: 5px 3px !important;
 		}
@@ -224,7 +237,7 @@ croset-component {
 			background-color: map-get($map, block);
 			color: map-get($map, blockWord);
 
-			&>croset-component-input, &>.croset-mat-flex>croset-component-input {
+			&>croset-component-input, &>.mat-child>.croset-mat-flex>croset-component-input {
 				&>croset-component-input-expbox input, &>croset-component-input-textbox input {
 					background-color: map-get($map, input);
 					color: map-get($map, inputWord);

@@ -7,6 +7,7 @@ md-card#hierarchy-zone(ng-controller="HierarchyController")
 				
 				md-icon(md-font-icon="menu" aria-label="Type") {{elementDatas[element.type].icon}}
 				p.hierarcy-text {{element.name}}
+				md-icon.md-secondary(ng-click="showPromptRename($event)" aria-label="Rename") edit
 				md-icon.md-secondary(ng-click="showConfirmDelete($event)" aria-label="Delete") delete
 					//- ng-md-icon.hierarchy-delete(icon="delete" style="fill: #000" size="20")
 				//- span.icomoon-delete
