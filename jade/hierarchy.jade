@@ -32,9 +32,9 @@ md-card#hierarchy-zone(ng-controller="HierarchyController")
 	//- #add-elementがクリックされたら表示
 	#new-elements(ng-class="{animationOn: animationTriggers.showNewElements}")
 		#new-element-title(ng-click="animationTriggers.showNewElements=false")
-			#new-element-title-ripple(style="overflow: hidden; position:relative")
-				md-icon-button
-					span.icomoon-cross2(md-ink-ripple)
+			#new-element-title-ripple(style="overflow: hidden; position:relative" md-ink-ripple)
+				md-icon(aria-label="Menu" class="material-icons") close
+				p 新しい画面部品
 				
 		#new-element-body(layout="row" layout-wrap)
 

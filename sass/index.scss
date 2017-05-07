@@ -107,6 +107,7 @@ md-backdrop {
 	color: white;
 	width: calc(100% - 200px);
   max-width: none;
+	z-index: 101;
 
 	#select-screen-close {
 			margin: 15px;
@@ -175,4 +176,15 @@ main {
 	height: calc(100% - 60px);
     position: relative;
     @include flex(1);
+}
+
+
+
+
+.md-dialog-container {
+	z-index: 103 !important;
+}
+
+._md-open-menu-container {
+	z-index: 102 !important;
 }

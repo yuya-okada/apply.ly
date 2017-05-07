@@ -21,6 +21,7 @@ crosetModule.service("ServiceConfig", [
     this.id = "";
     this.elementsManager = null;
     that = this;
+    this.workspace = null;
     this.getElementsManager = function() {
       return that.elementsManager;
     };
@@ -50,26 +51,29 @@ crosetModule.service("ServiceConfig", [
       return that.variables = [];
     };
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams) {
+      console.log("チェンジスタート");
       if (toState.name.match(/editor/)) {
         if (toParams.projectId === that.projectId + "") {
           saveCurrentScreen();
-          this.parsedStock = [];
-        }
-        if (fromState.name.match(/program/)) {
-          return ScreenCards.list = Build.parse();
+          return CurrentScreenData.workspace = null;
         }
       }
     });
     saveCurrentScreen = function() {
-      var cards;
-      cards = Build.parse();
-      if (cards.length === 0) {
-        cards = ScreenCards.list;
+      var cards, ref, ref1, sourceCode, xml;
+      if (CurrentScreenData.workspace) {
+        xml = Blockly.Xml.workspaceToDom(CurrentScreenData.workspace);
+        cards = Blockly.Xml.domToText(xml);
+        sourceCode = Blockly.JavaScript.workspaceToCode(CurrentScreenData.workspace);
+        that.variables = CurrentScreenData.workspace.variableList;
+      } else {
+        cards = (ref = that.screens[CurrentScreenData.id]) != null ? ref.cards : void 0;
+        sourceCode = (ref1 = that.screens[CurrentScreenData.id]) != null ? ref1.sourceCode : void 0;
       }
       return angular.extend(that.screens[CurrentScreenData.id], {
         elements: CurrentScreenData.elementsManager.get(),
         cards: cards,
-        sourceCode: Build.compile(cards)
+        sourceCode: sourceCode
       });
     };
     this.addScreen = function(name) {
@@ -78,7 +82,7 @@ crosetModule.service("ServiceConfig", [
       } else {
         this.screens[getUUID()] = {
           elements: {},
-          cards: [],
+          cards: "",
           sourceCode: "",
           name: name
         };
@@ -112,7 +116,6 @@ crosetModule.service("ServiceConfig", [
       ref = that.screens;
       for (id in ref) {
         screen = ref[id];
-        console.log(screen, name);
         if (screen.name === name) {
           return id;
         }
@@ -120,7 +123,7 @@ crosetModule.service("ServiceConfig", [
       return null;
     };
     this.callbacks = [];
-    this.setCallback = function(fnc) {
+    this.setScreenCallback = function(fnc) {
       return that.callbacks.push(fnc);
     };
     trigerCallback = function() {
@@ -156,8 +159,9 @@ crosetModule.service("ServiceConfig", [
       return results;
     };
     this.get = function() {
+      var projectData;
       saveCurrentScreen();
-      return {
+      projectData = {
         name: this.name,
         projectId: this.projectId,
         screens: this.screens,
@@ -165,10 +169,12 @@ crosetModule.service("ServiceConfig", [
         config: ServiceConfig.get(),
         variables: this.variables
       };
+      console.log("Builded", projectData);
+      return projectData;
     };
   }
 ]).service("SelectedElementUUID", [
-  "Elements", "SetElementProperty", "CurrentScreenData", function(Elements, SetElementProperty, CurrentScreenData) {
+  "Elements", "SetElementProperty", "CurrentScreenData", "$rootScope", function(Elements, SetElementProperty, CurrentScreenData, $rootScope) {
     var uuid;
     uuid = null;
     this.init = function() {
@@ -178,13 +184,11 @@ crosetModule.service("ServiceConfig", [
       return uuid;
     };
     this.set = function(val) {
-      var element, onResizedOrDraged, screenElements, selectedElement;
+      var click, element, onResizedOrDraged, screenElements, selectedElement;
       screenElements = CurrentScreenData.elementsManager;
       if (uuid && screenElements.get()[uuid]) {
-        console.log(screenElements.get()[uuid].element);
         selectedElement = $(screenElements.get()[uuid].element);
         if (selectedElement.data("ui-resizable")) {
-          console.log("aaaa");
           selectedElement.resizable("destroy");
         }
       }
@@ -192,23 +196,51 @@ crosetModule.service("ServiceConfig", [
       SetElementProperty(val);
       element = screenElements.get()[uuid].element;
       onResizedOrDraged = function(ev, ui) {
-        console.log(element);
         screenElements.set(uuid, "top", element.css("top"));
         screenElements.set(uuid, "left", element.css("left"));
         screenElements.set(uuid, "width", element.width());
         screenElements.set(uuid, "height", element.height());
       };
-      return $(element).resizable({
+      $rootScope.$broadcast("onResizedOrDragging", element);
+      click = {
+        x: 0,
+        y: 0
+      };
+      $(element).resizable({
         handles: "ne, se, sw, nw",
         minHeight: 3,
         minWidth: 3,
-        stop: onResizedOrDraged
+        stop: onResizedOrDraged,
+        resize: function() {
+          return $rootScope.$broadcast("onResizedOrDragging", element);
+        },
+        stop: function() {
+          return $rootScope.$broadcast("onResizedOrDraged");
+        }
       }).draggable({
         cancel: null,
+        start: function(ev) {
+          click.x = ev.clientX;
+          return click.y = ev.clientY;
+        },
+        drag: function(ev, ui) {
+          var original, screenScaleRatio;
+          $rootScope.$broadcast("onResizedOrDragging", element);
+          screenScaleRatio = angular.element("#screen").scope().screenScaleRatio;
+          original = ui.originalPosition;
+          return ui.position = {
+            left: (ev.clientX - click.x + original.left) / screenScaleRatio,
+            top: (ev.clientY - click.y + original.top) / screenScaleRatio
+          };
+        },
         stop: function() {
-          return onResizedOrDraged();
+          onResizedOrDraged();
+          return $rootScope.$broadcast("onResizedOrDraged");
         }
       });
+      if (CurrentScreenData.workspace) {
+        return CurrentScreenData.workspace.toolbox_.refreshSelection();
+      }
     };
   }
 ]).controller("HeaderController", [
@@ -244,10 +276,8 @@ crosetModule.service("ServiceConfig", [
                     "Content-Type": "application/json;charset=utf-8"
                   }
                 }).success(function(data, status, headers, config) {
-                  console.log("deleted");
                   return $interval.cancel(stop);
                 }).error(function(data, status, headers, config) {
-                  console.log(data);
                   return $interval.cancel(stop);
                 });
               }
@@ -267,7 +297,6 @@ crosetModule.service("ServiceConfig", [
                   projectId: ProjectData.get().name
                 }
               }).success(function(data, status, headers, config) {
-                console.log(data);
                 if (data) {
                   return $timeout(function() {
                     return checkBuilded();
@@ -346,7 +375,6 @@ crosetModule.service("ServiceConfig", [
     $scope.$on('repeatFinishedEventFired', function(ev, element) {
       var data, ref, results, screen, screenElementsManager, uuid;
       screen = ev.targetScope.screen;
-      console.log(screen, ev.target);
       screenElementsManager = new ScreenElementsManager(element.find(".select-screen-preview"));
       ref = screen.elements;
       results = [];
@@ -418,7 +446,7 @@ crosetModule.service("ServiceConfig", [
   }
 ]).controller("EditorController", [
   "$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElementsManager", "ScreenCards", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes", function($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElementsManager, ScreenCards, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) {
-    var changeScreen, projectData, ref, ref1;
+    var changeScreen, projectData;
     SelectedElementUUID.init();
     $scope.settings = {
       elementDatas: ElementDatas
@@ -431,11 +459,8 @@ crosetModule.service("ServiceConfig", [
       return $scope.mode = "program";
     };
     $scope.changeScreen = function() {
-      console.log("toggle");
       $rootScope.$broadcast("onSelectScreen");
-      return $mdSidenav("select-screen").toggle().then(function() {
-        return console.log("toggled");
-      });
+      return $mdSidenav("select-screen").toggle().then(function() {});
     };
     $scope.modeList = {
       design: {
@@ -446,7 +471,6 @@ crosetModule.service("ServiceConfig", [
       }
     };
     $scope.changeMode = function(name) {
-      console.log(name);
       return $state.go("editor." + name, {
         screenId: CurrentScreenData.id
       });
@@ -457,26 +481,23 @@ crosetModule.service("ServiceConfig", [
     };
     Elements.set("screen", angular.element("#screen"));
     projectData = projectDataRes.data;
-    console.log(projectData);
     ProjectData.init();
     ProjectData.screens = projectData.screens;
     ProjectData.name = projectData.name;
     ProjectData.projectId = projectData.projectId;
     ProjectData.defaultScreen = projectData.defaultScreen;
-    ProjectData.parsedStock = (ref = projectData.screens) != null ? (ref1 = ref[projectData.defaultScreen]) != null ? ref1.cards : void 0 : void 0;
     if (projectData.variables) {
       ProjectData.variables = projectData.variables;
     }
     $rootScope.$on("onChangedScreen", function(ev, screenId) {
       var nextScreen;
-      console.log(ProjectData, screenId);
       screenId = screenId || ProjectData.defaultScreen;
       nextScreen = ProjectData.getScreens()[screenId];
       if (nextScreen.elements == null) {
         nextScreen.elements = {};
       }
       if (nextScreen.card == null) {
-        nextScreen.card = [];
+        nextScreen.card = "";
       }
       changeScreen(nextScreen.elements, nextScreen.cards);
       $scope.progress.isLoading = false;
@@ -495,7 +516,6 @@ crosetModule.service("ServiceConfig", [
   }
 ]).controller("ChildEditorController", [
   "$scope", "$rootScope", "$stateParams", "ProjectData", function($scope, $rootScope, $stateParams, ProjectData) {
-    console.log("child", $stateParams.screenId);
     return $rootScope.$broadcast("onChangedScreen", $stateParams.screenId || ProjectData.defaultScreen);
   }
 ]).controller("ScreenController", [
@@ -692,7 +712,6 @@ crosetModule.service("ServiceConfig", [
         scope.id = getUUID();
         scope.value = scope.options.defaultValue;
         return scope.onchange = function() {
-          console.log(scope.value);
           return dynamicInput.onchange(scope.value);
         };
       }

@@ -1,36 +1,92 @@
 
 <div id="program-zone" layout="row"> 
-  <div id="program-component-list" ng-controller="ComponentListController">
-    <md-tabs md-dynamic-height="md-dynamic-height" md-border-bottom="md-border-bottom">
-      <md-tab label="基本">
-        <md-content class="md-padding">
-          <md-list ng-cloak="ng-cloak">
-            <md-item add-component-button="add-component-button" ng-click="addComponent(componentId)" ng-repeat="(componentId, data) in generalComponents">
-              <croset-component md-ink-ripple="md-ink-ripple" data="data" croset-component-in-list="croset-component-in-list"></croset-component>
-            </md-item>
-          </md-list>
-        </md-content>
-      </md-tab>
-      <md-tab label="アイテム">
-        <md-content class="md-padding">
-          <md-list ng-cloak="ng-cloak">
-            <md-item add-component-button="add-component-button" ng-repeat="(componentId, data) in elementComponents">
-              <croset-component md-ink-ripple="md-ink-ripple" data="data" croset-component-in-list="croset-component-in-list" croset-element-component-in-list="croset-element-component-in-list"></croset-component>
-            </md-item>
-          </md-list>
-        </md-content>
-      </md-tab>
-    </md-tabs>
+  <div id="program-code" style="height: 100%; width: 100%;" ng-controller="CodeController" class="croset-mat">
   </div>
-  <div id="program-code-wrapper" class="mat-wrapper flex">
-    <div id="program-code" flex="flex" ng-controller="CodeController" class="croset-mat">
-    </div>
-  </div>
+  <xml id="toolbox" style="display: none">
+    
+    <category name="基本">
+    	<block type="log"> </block>
+    	<block type="intent"> </block>
+    	<block type="controls_if"> </block>
+    	<block type="controls_interval"> </block>
+    
+    	<block type="controls_repeat"> </block>
+    	<block type="controls_whileUntil"> </block>
+    	<block type="controls_for"> </block>
+    	<block type="controls_forEach"> </block>
+    	<block type="controls_flow_statements"> </block>
+    </category>
+    
+    <category name="ロジック">
+    	<block type="logic_boolean"> </block>
+    	<block type="logic_compare"> </block>
+    	<block type="logic_operation"> </block>
+    	<block type="logic_negate"> </block>
+    	<block type="logic_null"> </block>
+    	<block type="logic_ternary"> </block>
+    </category>
+    
+    <category name="数学">
+    	<block type="math_number"> </block>
+    	<block type="math_arithmetic"> </block>
+    	<block type="math_single"> </block>
+    	<block type="math_trig"> </block>
+    	<block type="math_constant"> </block>
+    	<block type="math_number_property"> </block>
+    	<block type="math_round"> </block>
+    	<block type="math_on_list"> </block>
+    	<block type="math_modulo"> </block>
+    	<block type="math_constrain"> </block>
+    	<block type="math_random_int"> </block>
+    	<block type="math_random_float"> </block>
+    	<block type="parse_int"> </block>
+    </category>
+    
+    <category name="テキスト">
+    	<block type="text"> </block>
+    	<block type="text_join"> </block>
+    	<block type="text_create_join_item"> </block>
+    	<block type="text_append"> </block>
+    	<block type="text_length"> </block>
+    	<block type="text_isEmpty"> </block>
+    	<block type="text_indexOf"> </block>
+    	<block type="text_charAt"> </block>
+    	<block type="text_getSubstring"> </block>
+    	<block type="text_changeCase"> </block>
+    	<block type="text_print"> </block>
+    	<block type="text_prompt_ext"> </block>
+    	<block type="text_count"> </block>
+    	<block type="text_replace"> </block>
+    	<block type="text_reverse"> </block>
+    	
+    </category>
+    
+    <category name="変数" custom="VARIABLE"></category>
+    <category name="関数" custom="PROCEDURE"></category>
+    
+    
+    <category name="リスト">
+    	<block type="lists_create_empty"> </block>
+    	<block type="lists_repeat"> </block>
+    	<block type="lists_reverse"> </block>
+    	<block type="lists_isEmpty"> </block>
+    	<block type="lists_length"> </block>
+    	<block type="lists_create_with"> </block>
+    	<block type="lists_indexOf"> </block>
+    	<block type="lists_getIndex"> </block>
+    	<block type="lists_setIndex"> </block>
+    	<block type="lists_getSublist"> </block>
+    	<block type="lists_sort"> </block>
+    	<block type="lists_split"> </block>
+    </category>
+    
+    <category name="色">
+    	<block type="colour_picker"> </block>
+    	<block type="colour_random"> </block>
+    	<block type="colour_rgb"> </block>
+    	<block type="colour_blend"> </block>
+    </category>
+    
+    <category name="選択されている画面部品" custom="ELEMENT"></category>
+  </xml>
 </div>
-<md-menu-content id="component-menu" component-menu="component-menu">
-  <md-menu-item>
-    <md-button ng-click="delete()">
-      <md-icon md-menu-origin="md-menu-origin" aria-label="Delete" class="material-icons">delete</md-icon>削除
-    </md-button>
-  </md-menu-item>
-</md-menu-content>

@@ -24,8 +24,9 @@
   </div>
   <div id="new-elements" ng-class="{animationOn: animationTriggers.showNewElements}">
     <div id="new-element-title" ng-click="animationTriggers.showNewElements=false">
-      <div id="new-element-title-ripple" style="overflow: hidden; position:relative">
-        <md-icon-button><span md-ink-ripple="md-ink-ripple" class="icomoon-cross2"></span></md-icon-button>
+      <div id="new-element-title-ripple" style="overflow: hidden; position:relative" md-ink-ripple="md-ink-ripple">
+        <md-icon aria-label="Menu" class="material-icons">close</md-icon>
+        <p>新しい画面部品</p>
       </div>
     </div>
     <div id="new-element-body" layout="row" layout-wrap="layout-wrap">

@@ -12,7 +12,7 @@ crosetModule.factory("ElementDatas", function() {
       properties: [
         {
           title: "テキスト",
-          icon: "settings",
+          icon: "title",
           propertyInputs: [
             [
               {
@@ -80,9 +80,9 @@ crosetModule.factory("ElementDatas", function() {
                   defaultValue: "top",
                   label: "文字揃え(縦)",
                   items: {
-                    "上揃え": "top",
-                    "中央揃え": "middle",
-                    "下揃え": "bottom"
+                    "上揃え": "flex-start",
+                    "中央揃え": "center",
+                    "下揃え": "flex-end"
                   },
                   result: "verticalAlign"
                 }
@@ -100,7 +100,7 @@ crosetModule.factory("ElementDatas", function() {
       properties: [
         {
           title: "テキスト",
-          icon: "settings",
+          icon: "title",
           propertyInputs: [
             [
               {
@@ -492,7 +492,6 @@ crosetModule.factory("ElementDatas", function() {
   "Elements", "ElementDatas", "$compile", "$injector", function(Elements, ElementDatas, $compile, $injector) {
     return function(screenElement) {
       var initScope, screenScope;
-      console.log(screenElement);
       screenScope = null;
       screenElement.empty();
       initScope = function() {
@@ -528,13 +527,12 @@ crosetModule.factory("ElementDatas", function() {
         e = $compile(e)(scope);
         screenElement.append(e);
         options = {};
-        screenScope.list[uuid] = {
+        return screenScope.list[uuid] = {
           type: type,
           name: ElementDatas[type].name,
           element: e,
           options: {}
         };
-        return console.log(screenScope);
       };
       this.addFromData = function(data, uuid) {
         var e, scope;
@@ -549,21 +547,17 @@ crosetModule.factory("ElementDatas", function() {
         scope = screenScope.$new(true);
         scope.uuid = uuid;
         scope.s = screenScope;
-        console.log("ああああい", scope, e);
         e = $compile(e)(scope);
         screenElement.append(e);
         data.element = e;
-        screenScope.list[uuid] = data;
-        return console.log(screenScope.list[uuid], screenScope.$id);
+        return screenScope.list[uuid] = data;
       };
       this.addFromDataEditor = function(data, uuid) {
         var e, scope;
-        console.log(Elements);
         if (!screenScope) {
           initScope();
         }
         e = $("<croset-element-" + data.type + ">").addClass("croset-element").attr("croset-element-editor", true).attr("id", uuid).attr("croset-element-type", data.type).attr("uuid", uuid);
-        console.log(data);
         e.width(data.options.width).height(data.options.height).css({
           top: data.options.top,
           left: data.options.left
@@ -571,7 +565,6 @@ crosetModule.factory("ElementDatas", function() {
         scope = screenScope.$new(true);
         scope.uuid = uuid;
         scope.s = screenScope;
-        console.log(screenScope);
         e = $compile(e)(scope);
         screenElement.append(e);
         data.element = e;
@@ -623,15 +616,14 @@ crosetModule.factory("ElementDatas", function() {
     restrict: "E",
     templateUrl: "template-textbox.html",
     link: function(scope, element, attrs) {
-      return scope.value = options["default"];
+      console.log(scope, "suko-pu");
+      return scope.s.list[scope.uuid].options.text = options["default"];
     }
   };
 }).directive("crosetElementSquare", function() {
   return {
     restrict: "E",
     templateUrl: "template-square.html",
-    link: function(scope, element, attrs) {
-      return console.log(element, scope, "スクエア");
-    }
+    link: function(scope, element, attrs) {}
   };
 });

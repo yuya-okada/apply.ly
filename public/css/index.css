@@ -201,26 +201,27 @@ html, body {
   color: white;
   width: calc(100% - 200px);
   max-width: none;
+  z-index: 101;
 }
-/* line 111, ../../sass/index.scss */
+/* line 112, ../../sass/index.scss */
 #select-screen-sidenav #select-screen-close {
   margin: 15px;
 }
-/* line 114, ../../sass/index.scss */
+/* line 115, ../../sass/index.scss */
 #select-screen-sidenav #select-screen-title {
   color: white;
 }
-/* line 118, ../../sass/index.scss */
+/* line 119, ../../sass/index.scss */
 #select-screen-sidenav .select-screen {
   width: 250px;
   padding: 25px;
   margin: 25px;
 }
-/* line 124, ../../sass/index.scss */
+/* line 125, ../../sass/index.scss */
 #select-screen-sidenav .select-screen .select-screen-card {
   width: 200px;
 }
-/* line 128, ../../sass/index.scss */
+/* line 129, ../../sass/index.scss */
 #select-screen-sidenav .select-screen .select-screen-card .select-screen-body {
   position: relative;
   box-shadow: none !important;
@@ -228,7 +229,7 @@ html, body {
   height: 240px;
   overflow: hidden;
 }
-/* line 135, ../../sass/index.scss */
+/* line 136, ../../sass/index.scss */
 #select-screen-sidenav .select-screen .select-screen-card .select-screen-body .select-screen-preview {
   width: 1000px;
   height: 1000px;
@@ -240,36 +241,46 @@ html, body {
   left: 0px;
   overflow: hidden;
 }
-/* line 147, ../../sass/index.scss */
+/* line 148, ../../sass/index.scss */
 #select-screen-sidenav .select-screen .select-screen-card .select-screen-separater {
   height: 4px;
   background-color: #FF5722;
 }
-/* line 151, ../../sass/index.scss */
+/* line 152, ../../sass/index.scss */
 #select-screen-sidenav .select-screen .select-screen-card .select-screen-name {
   background-color: #fdfdfd;
   height: 50px;
   color: black;
 }
-/* line 156, ../../sass/index.scss */
+/* line 157, ../../sass/index.scss */
 #select-screen-sidenav .select-screen .select-screen-card .selectScreenDefault {
   color: #FF5722;
 }
-/* line 159, ../../sass/index.scss */
+/* line 160, ../../sass/index.scss */
 #select-screen-sidenav .select-screen .select-screen-card div {
   text-align: center;
 }
-/* line 166, ../../sass/index.scss */
+/* line 167, ../../sass/index.scss */
 #select-screen-sidenav #new-screen {
   position: absolute;
   bottom: 30px;
   right: 30px;
 }
 
-/* line 174, ../../sass/index.scss */
+/* line 175, ../../sass/index.scss */
 main {
   height: calc(100% - 60px);
   position: relative;
   -webkit-flex: 1;
   flex: 1;
+}
+
+/* line 184, ../../sass/index.scss */
+.md-dialog-container {
+  z-index: 103 !important;
+}
+
+/* line 188, ../../sass/index.scss */
+._md-open-menu-container {
+  z-index: 102 !important;
 }

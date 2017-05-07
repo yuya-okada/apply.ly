@@ -1,7 +1,6 @@
 crosetModule = angular.module "Croset"
 
 
-
 # 画面に追加されている要素
 crosetModule.service "VisiblePropertyCards", () ->
 	list = []
@@ -119,22 +118,59 @@ crosetModule.service "VisiblePropertyCards", () ->
 
 
 # 詳細設定
-.controller "PropertyController", ["$scope", "CurrentScreenData", "SelectedElementUUID", "VisiblePropertyCards", "$timeout"
-($scope, CurrentScreenData, SelectedElementUUID, VisiblePropertyCards, $timeout) ->
+.controller "PropertyController", ["$scope", "CurrentScreenData", "SelectedElementUUID", "VisiblePropertyCards", "$timeout",　"$interval", "$rootScope",
+($scope, CurrentScreenData, SelectedElementUUID, VisiblePropertyCards, $timeout, $interval, $rootScope) ->
 	$scope.visiblePropertyCards = []
 	$scope.elementName = null
+	$scope.isVisibleOffsetProperty = "none"
 	screenElementsManager = CurrentScreenData.elementsManager
 	VisiblePropertyCards.onchange (value) ->
 		$timeout ()->									# applyが多重に実行されるとバグるので、代わりにtimeoutを使う
 			$scope.visiblePropertyCards = value
+			$scope.isVisibleOffsetProperty = "block"
 			if screenElementsManager.get()[SelectedElementUUID.get()]
-			    $scope.elementName = screenElementsManager.get()[SelectedElementUUID.get()].name
+				$scope.elementName = screenElementsManager.get()[SelectedElementUUID.get()].name
 			else
-                $scope.elementName = null
+				$scope.elementName = null
 		, 0
 
 	$scope.onChangeName = () ->
 		$scope.elementName = screenElementsManager.get()[SelectedElementUUID.get()].name = $scope.elementName
+
+
+	# 以下は offsetに関するプロパティの設定
+	resizing = false
+	$rootScope.$on "onResizedOrDragging", (ev, element) ->		# editor.jsからbroadcastされる。
+		resizing = true
+		$timeout () ->
+			$scope.top = parseInt element.css("top"), 10
+			$scope.left = parseInt element.css("left"), 10
+			$scope.width = element.width()
+			$scope.height = element.height()
+		# $scope.$apply()
+
+	$rootScope.$on "onResizedOrDraged", (ev) ->		# editor.jsからbroadcastされる。
+		resizing = false
+
+	$scope.onChangeTop = () ->
+		if !resizing
+			screenElementsManager.get()[SelectedElementUUID.get()]?.element.css "top", $scope.top
+			screenElementsManager.set SelectedElementUUID.get(), "top", $scope.top
+
+	$scope.onChangeLeft = () ->
+		if !resizing
+			screenElementsManager.get()[SelectedElementUUID.get()]?.element.css "left", $scope.left
+			screenElementsManager.set SelectedElementUUID.get(), "left", $scope.left
+
+	$scope.onChangeWidth = () ->
+		if !resizing
+			screenElementsManager.get()[SelectedElementUUID.get()]?.element.width $scope.width
+			screenElementsManager.set SelectedElementUUID.get(), "width", $scope.width
+
+	$scope.onChangeHeight = () ->
+		if !resizing
+			screenElementsManager.get()[SelectedElementUUID.get()]?.element.height $scope.height
+			screenElementsManager.set SelectedElementUUID.get(), "height", $scope.height
 ]
 
 # プロパティのカード

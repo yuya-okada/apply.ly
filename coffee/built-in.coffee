@@ -5,6 +5,164 @@ crosetModule
 
 .factory "ElementDatas", () ->
 	return {
+		group:
+			name: "グループ"
+			icon: "folder"
+			width: 150
+			height: 150
+			properties: [
+				{
+					title: "レイアウト"
+					icon: ""
+				}
+				{
+					title: "図形"
+					icon: "border_all"
+					propertyInputs: [
+						[
+							{
+								type: "color_icon"
+								size: 30
+								options:
+									icon: "format_color_fill"
+									defaultValue: "#ffffff"
+									result: "bgColor"
+							}
+						]
+						[
+							{
+								type: "text"
+								size: 20
+								options:
+									text: "角丸"
+							}
+							{
+								type: "slider"
+								size: 80
+								options:
+									defaultValue: 3
+									min: 0
+									max: 150
+									step: 1
+									result: "borderRadius"
+							}
+						]
+						[
+							{
+								type: "headline"
+								size: 100
+								options	:
+									text: "影"
+									marginTop: 15
+							}
+						]
+						[
+							{
+								type: "text"
+								size: 20
+								options:
+									text: "透明度"
+							}
+							{
+								type: "slider"
+								size: 80
+								options:
+									defaultValue: 74
+									min: 0
+									max: 99
+									step: 1
+									result: "shadowOpacity"
+							}
+						]
+
+						[
+							{
+								type: "text"
+								size: 20
+								options:
+									text: "位置(横)"
+							}
+							{
+								type: "slider"
+								size: 80
+								options:
+									defaultValue: 0
+									min: -20
+									max: 20
+									step: 1
+									result: "shadowX"
+							}
+						]
+						[
+							{
+								type: "text"
+								size: 20
+								options:
+									text: "位置(縦)"
+							}
+							{
+								type: "slider"
+								size: 80
+								options:
+									defaultValue: 1
+									min: -20
+									max: 20
+									step: 1
+									result: "shadowY"
+							}
+						]
+						[
+							{
+								type: "text"
+								size: 20
+								options:
+									text: "ぼかし"
+							}
+							{
+								type: "slider"
+								size: 80
+								options:
+									defaultValue: 5
+									min: 0
+									max: 80
+									step: 1
+									result: "shadowGradation"
+							}
+						]
+						[
+							{
+								type: "headline"
+								size: 100
+								options:
+									text: "枠線"
+									marginTop: 15
+							}
+						]
+						[
+							{
+								type: "color_icon"
+								size: 30
+								options:
+									icon: "format_color_fill"
+									defaultValue: "#000000"
+									result: "borderColor"
+							}
+						]
+						[
+							{
+								type: "slider"
+								size: 100
+								options:
+									defaultValue: 0
+									min: 0
+									max: 20
+									step: 1
+									result: "borderWidth"
+							}
+						]
+					]
+				}
+			]
 		text:
 			name: "テキスト"
 			icon: "title"
@@ -13,7 +171,7 @@ crosetModule
 			properties: [
 				{
 					title: "テキスト"
-					icon: "settings"
+					icon: "title"
 					propertyInputs: [
 						[
 							{
@@ -82,9 +240,9 @@ crosetModule
 									defaultValue: "top"
 									label: "文字揃え(縦)"
 									items: {
-										"上揃え" : "top"
-										"中央揃え" : "middle"
-										"下揃え" : "bottom"
+										"上揃え" : "flex-start"
+										"中央揃え" : "center"
+										"下揃え" : "flex-end"
 									}
 									result: "verticalAlign"
 							}
@@ -101,7 +259,7 @@ crosetModule
 			properties: [
 				{
 					title: "テキスト"
-					icon: "settings"
+					icon: "title"
 					propertyInputs: [
 						[
 							{
@@ -499,7 +657,6 @@ crosetModule
 
 .factory "ScreenElementsManager", ["Elements", "ElementDatas", "$compile", "$injector", (Elements, ElementDatas, $compile, $injector) ->
 	return (screenElement) ->
-		console.log screenElement
 		screenScope = null
 		screenElement.empty()
 
@@ -554,7 +711,6 @@ crosetModule
 				options: {}
 			}
 
-			console.log screenScope
 
 
 		this.addFromData = (data, uuid) ->
@@ -577,17 +733,15 @@ crosetModule
 			scope = screenScope.$new true
 			scope.uuid = uuid
 			scope.s = screenScope
-			console.log "ああああい", scope, e
+
 			e = $compile(e)(scope)								# 追加した要素にディレクティブを適応させるためにコンパイル
 			screenElement.append e							# スクリーンに追加
 
 			data.element = e
 			screenScope.list[uuid] = data
 
-			console.log screenScope.list[uuid], screenScope.$id
 
 		this.addFromDataEditor = (data, uuid) ->
-			console.log Elements
 			if !screenScope 		# 初期化されてない場合初期化
 				initScope()
 
@@ -598,7 +752,7 @@ crosetModule
 				.attr "croset-element-type", data.type			# タイプ。ex. Button, Text ...
 				.attr "uuid", uuid								# 固有のID
 
-			console.log data
+
 			e.width data.options.width
 				.height data.options.height
 				.css {
@@ -610,7 +764,6 @@ crosetModule
 			scope = screenScope.$new true
 			scope.uuid = uuid
 			scope.s = screenScope
-			console.log screenScope
 			e = $compile(e)(scope)								# 追加した要素にディレクティブを適応させるためにコンパイル
 			screenElement.append e							# スクリーンに追加
 
@@ -669,7 +822,8 @@ crosetModule
 		restrict: "E"
 		templateUrl: "template-textbox.html"
 		link: (scope, element, attrs) ->
-			scope.value = options.default
+			console.log(scope, "suko-pu")
+			scope.s.list[scope.uuid].options.text = options.default
 	}
 
 .directive "crosetElementSquare", ()->
@@ -677,5 +831,4 @@ crosetModule
 		restrict: "E"
 		templateUrl: "template-square.html"
 		link: (scope, element, attrs) ->
-			console.log element, scope, "スクエア"
 	}

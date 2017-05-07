@@ -59,12 +59,22 @@
 
 		#new-element-title {
 
-			@extend .shadow2;
+			// @extend .shadow2;
 			font-size: 16px;
 
 			#new-element-title-ripple {
+				display: flex;
 				width: 100%;
-				padding: 13px;
+				padding: 15px;
+				height: 70px;
+				align-items: center;
+				md-icon {
+					margin: 0 15 0 25;
+				}
+				p {
+					font-size: 19px;
+				}
+
 			}
 		}
 
@@ -72,6 +82,7 @@
 			.md-avatar-icon {
 				width: 100%;
 				height: 100%;
+				background-color: #4696F7;
 			}
 			.md-title {
 				line-height: 40px;
@@ -130,9 +141,9 @@
 					outline: none;
 				}
 
-				ng-md-icon {
+				md-icon {
 					fill: #666;
-					margin-right: 15px;
+					margin: 0 15px 0 0;
 				}
 
 				span {

@@ -8,12 +8,42 @@
 	
 	
 	#property-body
-
 	
+		//- 座標の設定項目
+		md-card.property-card(ng-class="{'property-card-open': !cardToggle}" ng-style="{display: isVisibleOffsetProperty}")
+			div.property-card-title(layout="row" ng-click="cardToggle=!cardToggle" md-ink-ripple)
+				md-icon(aria-label="icon" class="material-icons") format_shapes
+				span 位置
+			
+			div.property-card-body(layout="column")
+				div(layout="row")
+					div.flex-50(layout="row" layout-align="center" flex)
+						md-input-container.md-block(text-align="left")
+							label X座標
+							input(ng-model="left" ng-change="onChangeLeft()" type="number" step="1")
+					
+					div.flex-50(layout="row" layout-align="center" flex)
+						md-input-container.md-block(text-align="left")
+							label Y座標
+							input(ng-model="top" ng-change="onChangeTop()" type="number" step="1")
+				div(layout="row")
+					div.flex-50(layout="row" layout-align="center" flex)
+						md-input-container.md-block(text-align="left")
+							label 幅
+							input(ng-model="width" ng-change="onChangeWidth()" type="number" step="1")
+					
+					div.flex-50(layout="row" layout-align="center" flex)		
+						md-input-container.md-block(text-align="left")
+							label 高さ
+							input(ng-model="height" ng-change="onChangeHeight()" type="number" step="1")
+				
+						
+
 		//- リピートして設定項目を増やす
 		md-card.property-card(ng-repeat="card in visiblePropertyCards track by $index" ng-class="{'property-card-open': !cardToggle}")
 			div.property-card-title(layout="row" ng-click="cardToggle=!cardToggle" md-ink-ripple)
-				ng-md-icon.top-left-icon(icon="{{ card.icon }}" size="25")
+				md-icon(aria-label="icon" class="material-icons") {{card.icon}}
+				//- ng-md-icon.top-left-icon(icon="{{ card.icon }}" size="25")
 				span {{ card.title }}
 			
 			div.property-card-body

@@ -647,27 +647,113 @@ crosetModule.value("GeneralComponents", {
     };
   }
 ]).controller("CodeController", [
-  "$scope", "$element", "$compile", "ScreenCards", "ProjectData", "GenerateElement", function($scope, $element, $compile, ScreenCards, ProjectData, GenerateElement) {
-    var card, j, len, ref, results, scope;
-    window.a = function() {
-      return ScreenCards;
+  "$scope", "$timeout", "ProjectData", "CurrentScreenData", "SelectedElementUUID", function($scope, $timeout, ProjectData, CurrentScreenData, SelectedElementUUID) {
+    var blocklyArea, blocklyDiv, cards, element, elementBlock, elementBlocks, id, j, len, onResize, onScreenChanged, ref, ref1, ref2, ref3, xml;
+    onScreenChanged = function() {
+      var id, options, ref, screen;
+      options = [];
+      ref = ProjectData.screens;
+      for (id in ref) {
+        screen = ref[id];
+        options.push([screen.name, id]);
+      }
+      CrosetBlock.intentBlock.args0[0].options = options;
+      Blockly.defineBlocksWithJsonArray([CrosetBlock.intentBlock]);
+      return CrosetBlock.intentBlockGenerator();
     };
-    $scope.$watch(function() {
-      return ScreenCards.get();
-    }, function(newVal, oldVal) {
-      return console.log("changed");
-    }, true);
-    $scope.cards = ScreenCards.get();
-    $($element).empty();
-    ref = ScreenCards.get();
-    results = [];
-    for (j = 0, len = ref.length; j < len; j++) {
-      card = ref[j];
-      scope = $scope.$new(true);
-      scope.card = card;
-      results.push(GenerateElement("<croset-component-in-code>", scope, $element));
+    ProjectData.setScreenCallback(function() {
+      var block, blocks, dom, id, j, len, results;
+      onScreenChanged();
+      dom = Blockly.Xml.workspaceToDom(CurrentScreenData.workspace);
+      CurrentScreenData.workspace.clear();
+      Blockly.Xml.domToWorkspace(dom, CurrentScreenData.workspace);
+      blocks = CurrentScreenData.workspace.getAllBlocks();
+      results = [];
+      for (j = 0, len = blocks.length; j < len; j++) {
+        block = blocks[j];
+        if (block.type === "intent") {
+          id = block.getFieldValue("ID");
+          console.log(id, Object.keys(ProjectData.screens)[0]);
+          if (!ProjectData.screens[id]) {
+            results.push(block.setFieldValue(Object.keys(ProjectData.screens)[0], "ID"));
+          } else {
+            results.push(void 0);
+          }
+        } else {
+          results.push(void 0);
+        }
+      }
+      return results;
+    });
+    onScreenChanged();
+    blocklyDiv = document.getElementById("program-code");
+    CurrentScreenData.workspace = Blockly.inject(blocklyDiv, {
+      toolbox: document.getElementById('toolbox'),
+      grid: {
+        spacing: 20,
+        length: 3,
+        colour: '#ccc',
+        snap: true
+      },
+      trashcan: false,
+      zoom: {
+        controls: true,
+        wheel: true,
+        startScale: 1.0,
+        maxScale: 3,
+        minScale: 0.3,
+        scaleSpeed: 1.2
+      }
+    });
+    CurrentScreenData.workspace.variableList = ProjectData.variables;
+    ref1 = (ref = CurrentScreenData.getElementsManager()) != null ? ref.get() : void 0;
+    for (id in ref1) {
+      element = ref1[id];
+      elementBlocks = angular.copy(CrosetBlock.elementBlocks[element.type]);
+      if (elementBlocks) {
+        for (j = 0, len = elementBlocks.length; j < len; j++) {
+          elementBlock = elementBlocks[j];
+          elementBlock.type = elementBlock.type.replace("#id", id);
+          elementBlock.message0 = elementBlock.message0.replace("#name", element.name);
+          Blockly.defineBlocksWithJsonArray([elementBlock]);
+        }
+        CrosetBlock.setGenerators(id, element.type);
+      }
     }
-    return results;
+    cards = (ref2 = ProjectData.screens) != null ? (ref3 = ref2[CurrentScreenData.id]) != null ? ref3.cards : void 0 : void 0;
+    if (cards && cards[0]) {
+      xml = Blockly.Xml.textToDom(cards);
+      Blockly.Xml.domToWorkspace(xml, CurrentScreenData.workspace);
+    }
+    CurrentScreenData.workspace.registerToolboxCategoryCallback('ELEMENT', function(workspace) {
+      var block, blockText, elementsManager, k, len1, ref4, ref5, selectedElement, type, xmlList;
+      if (SelectedElementUUID.get()) {
+        elementsManager = CurrentScreenData.getElementsManager();
+        selectedElement = (ref4 = elementsManager.get()) != null ? ref4[SelectedElementUUID.get()] : void 0;
+        xmlList = [];
+        ref5 = CrosetBlock.elementBlocks[selectedElement.type];
+        for (k = 0, len1 = ref5.length; k < len1; k++) {
+          elementBlock = ref5[k];
+          type = elementBlock.type.replace("#id", SelectedElementUUID.get());
+          blockText = '<xml>' + '<block type="' + type + '">　</block>' + '</xml>';
+          block = Blockly.Xml.textToDom(blockText).firstChild;
+          xmlList.push(block);
+        }
+        return xmlList;
+      }
+    });
+    blocklyArea = $("#program-zone");
+    onResize = function(e) {
+      blocklyDiv.style.left = blocklyArea.offset().left + 'px';
+      blocklyDiv.style.top = blocklyArea.offset().right + 'px';
+      blocklyDiv.style.width = blocklyArea.width() + 'px';
+      blocklyDiv.style.height = blocklyArea.height() + 'px';
+      console.log(blocklyArea.width(), blocklyArea.height());
+      return Blockly.svgResize(CurrentScreenData.workspace);
+    };
+    window.addEventListener('resize', onResize, false);
+    onResize();
+    return $timeout(onResize, 1000);
   }
 ]).directive("crosetComponentInputMatCard", [
   function() {

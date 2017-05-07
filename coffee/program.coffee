@@ -695,31 +695,143 @@ crosetModule
 	}
 ]
 
-.controller "CodeController", ["$scope", "$element", "$compile", "ScreenCards", "ProjectData", "GenerateElement"
-($scope, $element, $compile, ScreenCards, ProjectData, GenerateElement) ->
+.controller "CodeController", ["$scope", "$timeout", "ProjectData", "CurrentScreenData", "SelectedElementUUID", ($scope, $timeout, ProjectData, CurrentScreenData, SelectedElementUUID) ->
 
-	window.a = ()->
-		return ScreenCards
 
-	$scope.$watch () ->
-		return ScreenCards.get()
-	, (newVal, oldVal) ->
-		console.log "changed"
 
-		# $scope.cards = ScreenCards.get()
-		# $($element).empty()
-		# for card in ScreenCards.get()
-		# 	scope = $scope.$new true
-		# 	scope.card = card
-		# 	GenerateElement "<croset-component-in-code>", scope, $element
-	, true
+	onScreenChanged = () ->
+		options = []
+		for id, screen of ProjectData.screens
+			options.push [screen.name, id]
+		CrosetBlock.intentBlock.args0[0].options = options
 
-	$scope.cards = ScreenCards.get()
-	$($element).empty()
-	for card in ScreenCards.get()
-		scope = $scope.$new true
-		scope.card = card
-		GenerateElement "<croset-component-in-code>", scope, $element
+		Blockly.defineBlocksWithJsonArray [CrosetBlock.intentBlock]
+		CrosetBlock.intentBlockGenerator()
+
+	# 画面遷移ブロックの登録
+	ProjectData.setScreenCallback () ->
+
+		onScreenChanged();
+		dom = Blockly.Xml.workspaceToDom CurrentScreenData.workspace
+		CurrentScreenData.workspace.clear()
+		Blockly.Xml.domToWorkspace dom, CurrentScreenData.workspace
+
+		blocks = CurrentScreenData.workspace.getAllBlocks()
+		for block in blocks
+			if block.type == "intent"
+				id = block.getFieldValue("ID")
+				console.log id, Object.keys(ProjectData.screens)[0]
+				if !ProjectData.screens[id]
+					block.setFieldValue Object.keys(ProjectData.screens)[0], "ID"
+
+	onScreenChanged()
+
+
+	# Blocklyの初期設定と表示
+	blocklyDiv = document.getElementById "program-code"
+	CurrentScreenData.workspace = Blockly.inject blocklyDiv,{
+		toolbox: document.getElementById('toolbox')
+		grid:
+			spacing: 20
+			length: 3
+			colour: '#ccc'
+			snap: true
+
+		trashcan: false
+		zoom:
+			controls: true
+			wheel: true
+			startScale: 1.0
+			maxScale: 3
+			minScale: 0.3
+			scaleSpeed: 1.2
+	}
+
+	CurrentScreenData.workspace.variableList = ProjectData.variables
+
+
+	# 画面上の要素全てに関して関連するブロックを読み込んでおく
+	for id, element of CurrentScreenData.getElementsManager()?.get()
+		elementBlocks = angular.copy CrosetBlock.elementBlocks[element.type]
+		if elementBlocks
+			for elementBlock in elementBlocks
+				elementBlock.type = elementBlock.type.replace "#id", id
+				elementBlock.message0 = elementBlock.message0.replace "#name", element.name
+				Blockly.defineBlocksWithJsonArray [elementBlock]
+
+			CrosetBlock.setGenerators id, element.type　
+
+
+
+	# ブロックデータを読み込んでワークスペースに反映
+	cards = ProjectData.screens?[CurrentScreenData.id]?.cards
+	if cards && cards[0]
+		xml = Blockly.Xml.textToDom cards
+		Blockly.Xml.domToWorkspace xml, CurrentScreenData.workspace
+
+
+
+	# 選択した要素のブロックを要求された時の処理
+	CurrentScreenData.workspace.registerToolboxCategoryCallback　'ELEMENT', (workspace) ->
+		if SelectedElementUUID.get()
+			elementsManager = CurrentScreenData.getElementsManager()
+			selectedElement = elementsManager.get()?[SelectedElementUUID.get()]
+			xmlList = []
+			for elementBlock in CrosetBlock.elementBlocks[selectedElement.type]
+				type = elementBlock.type.replace "#id", SelectedElementUUID.get()
+				blockText = '<xml>' +
+					'<block type="' + type + '">　</block>' +
+					'</xml>'
+
+				block = Blockly.Xml.textToDom(blockText).firstChild
+				xmlList.push(block)
+
+			return xmlList
+			
+		else
+			return []
+
+
+
+	# ワークスペースのリサイズ処理
+	blocklyArea =  $ "#program-zone"
+	onResize = (e) ->
+		# Position blocklyDiv over blocklyArea
+		blocklyDiv.style.left = blocklyArea.offset().left + 'px'
+		blocklyDiv.style.top = blocklyArea.offset().right + 'px'
+		blocklyDiv.style.width = blocklyArea.width() + 'px'
+		blocklyDiv.style.height = blocklyArea.height() + 'px'
+		console.log blocklyArea.width(), blocklyArea.height()
+
+		Blockly.svgResize CurrentScreenData.workspace
+
+	window.addEventListener 'resize', onResize, false
+	onResize()
+	$timeout onResize, 1000
+
+
+	# window.a = ()->
+	# 	return ScreenCards
+	#
+	# $scope.$watch () ->
+	# 	return ScreenCards.get()
+	# , (newVal, oldVal) ->
+	# 	console.log "changed"
+	#
+	# 	# $scope.cards = ScreenCards.get()
+	# 	# $($element).empty()
+	# 	# for card in ScreenCards.get()
+	# 	# 	scope = $scope.$new true
+	# 	# 	scope.card = card
+	# 	# 	GenerateElement "<croset-component-in-code>", scope, $element
+	# , true
+	#
+	# $scope.cards = ScreenCards.get()
+	# $($element).empty()
+	# for card in ScreenCards.get()
+	# 	scope = $scope.$new true
+	# 	scope.card = card
+	# 	GenerateElement "<croset-component-in-code>", scope, $element
 ]
 
 .directive "crosetComponentInputMatCard", [() ->

@@ -35,7 +35,7 @@ croset-element-text div {
   word-wrap: break-word;
   white-space: pre-wrap;
   overflow-y: hidden;
-  display: table-cell;
+  display: flex;
 }
 
 /* line 41, ../../sass/screen.scss */

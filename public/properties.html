@@ -1,9 +1,44 @@
 
 <div id="property-zone" ng-controller="PropertyController">
   <div id="property-body">
+    <md-card ng-class="{'property-card-open': !cardToggle}" ng-style="{display: isVisibleOffsetProperty}" class="property-card">
+      <div layout="row" ng-click="cardToggle=!cardToggle" md-ink-ripple="md-ink-ripple" class="property-card-title">
+        <md-icon aria-label="icon" class="material-icons">format_shapes</md-icon><span>位置</span>
+      </div>
+      <div layout="column" class="property-card-body">
+        <div layout="row">
+          <div layout="row" layout-align="center" flex="flex" class="flex-50">
+            <md-input-container text-align="left" class="md-block">
+              <label>X座標</label>
+              <input ng-model="left" ng-change="onChangeLeft()" type="number" step="1"/>
+            </md-input-container>
+          </div>
+          <div layout="row" layout-align="center" flex="flex" class="flex-50">
+            <md-input-container text-align="left" class="md-block">
+              <label>Y座標</label>
+              <input ng-model="top" ng-change="onChangeTop()" type="number" step="1"/>
+            </md-input-container>
+          </div>
+        </div>
+        <div layout="row">
+          <div layout="row" layout-align="center" flex="flex" class="flex-50">
+            <md-input-container text-align="left" class="md-block">
+              <label>幅</label>
+              <input ng-model="width" ng-change="onChangeWidth()" type="number" step="1"/>
+            </md-input-container>
+          </div>
+          <div layout="row" layout-align="center" flex="flex" class="flex-50">		
+            <md-input-container text-align="left" class="md-block">
+              <label>高さ</label>
+              <input ng-model="height" ng-change="onChangeHeight()" type="number" step="1"/>
+            </md-input-container>
+          </div>
+        </div>
+      </div>
+    </md-card>
     <md-card ng-repeat="card in visiblePropertyCards track by $index" ng-class="{'property-card-open': !cardToggle}" class="property-card">
       <div layout="row" ng-click="cardToggle=!cardToggle" md-ink-ripple="md-ink-ripple" class="property-card-title">
-        <ng-md-icon icon="{{ card.icon }}" size="25" class="top-left-icon"></ng-md-icon><span>{{ card.title }}</span>
+        <md-icon aria-label="icon" class="material-icons">{{card.icon}}</md-icon><span>{{ card.title }}</span>
       </div>
       <div class="property-card-body">
         <div layout="row" ng-repeat="row in card.propertyInputs track by $index">

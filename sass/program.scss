@@ -11,242 +11,77 @@
 #program-zone {
 
 	position: relative;
-	height: 100%;
 	padding: 0;
+}
+
+.blocklyToolboxDiv {
+	box-shadow: 0 1px 3px 0 rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 2px 1px -1px rgba(0,0,0,.12);
 	background-color: white;
-
-	@include user-select(none);										// ユーザーによる選択を禁止
-	@include display-flex;
-	@include flex-direction(row);
-	@extend .shadow1;
-
-	#program-component-list {
-		border-right: 1px solid #e1e1e1;
-		background-color: #f6f6f6;
-		position: relative;
-		height: 100%;
-		width: 250px;
-
-		md-tabs {
-			height: 100%;
-			md-tabs-wrapper {
-				background-color: white;
-			}
-			md-content {
-				height: 100%;
-				background-color: #f6f6f6;
-
-				md-item {
-					display: block;
-					margin-bottom: 15px;
-				}
-			}
-		}
-	}
-
-	#program-code {
-		width: 10000px;
-		height: 10000px;
-		position: absolute;
-		overflow: scroll;
-		transform: scale(1);
-		transform-origin: top left;
-	}
-	#program-code-wrapper {
-		position: relative;
-		height: 100%;
-		background-color: #FDFDFD;
-		overflow: scroll;
-	}
-
-}
+	width: 240px;
 
 
-
-
-
-croset-component-in-code {
-	position: absolute;
-	height: 0;
-
-}
-
-croset-component {
-	position: relative;
-	display: inline-block;
-
-	&.ui-draggable-dragging {
-		z-index: 1000;
-		.croset-component-body {
-			@extend .shadow2
-		}
-	}
-
-	&.bottom-border {
-		border-bottom: 2px solid $ac;
-	}
-
-	&.right-border {
-		border-right: 2px solid $mc;
-	}
-
-	croset-component-function, croset-component-property, croset-component-literal, croset-component-variable {
+	.blocklyTreeRow:not(.blocklyHidden) {
+		height: 60px;
 		display: flex;
-		flex-wrap: nowrap;
-		padding: 5px 10px 7px 10px;
+		align-items: center; /* 縦方向中央揃え */
+		justify-content: center; /* 横方向中央揃え */
+		margin-bottom: 0px;
+		color: rgba(0, 0, 0, 0.87);
+		border-bottom: 1px solid #ddd;
+
+
+		.blocklyTreeLabel {
+			font-size: 14px;
+		}
 	}
-	croset-component-mat {
-		display: block;
+}
+.blocklyFlyout {
+	// transform: translate(10px, 0px) !important;
+	z-index: 100;
 
-		.croset-mat-flex {
-			display: flex;
-			padding: 5px 10px 0px 10px;
-			flex-wrap: nowrap;
-		}
-		md-divider {
-			margin-top: 7px;
-		}
-		.mat-wrapper {
-			min-width: 200px;
-			min-height: 100px;
-			background-color: #FDFDFD;
-			position: relative;
-
-			.croset-component-input-mat-card {
-				position: absolute;
-				width: 500%;
-				height: 500%;
-			}
-
-		}
-
-		.croset-mat-resizer[direction="right"] {
-			position: absolute;
-			cursor: col-resize;
-			top: 0;
-			right: -10px;
-			bottom: 0;
-			width: 20px;
-			z-index: 1;
-		}
-		.croset-mat-resizer[direction="bottom"] {
-			position: absolute;
-			cursor: row-resize;
-			left: 0;
-			right: 0;
-			bottom: -10px;
-			height: 20px;
-			z-index: 1;
-		}
+	.blocklyFlyoutBackground {
+		border-radius: 0;
+		fill: #fff;
+	}
+}
+.blocklyBubbleCanvas {
+	.blocklyFlyoutBackground {
+		fill: #ddd;
 
 
 	}
-	&[croset-component-in-list] {
-		.mat-wrapper {
-			min-height: 25px;
-		}
+	&>g>g {
+		filter: inherit;
 	}
+	.blocklyDraggable {
+		rx: 0;
+		ry: 0;
+		fill: #4696F7;
 
-
-	croset-component-property, croset-component-variable {
-		&>span {
-			align-items: center;
-		}
-
-		croset-component-property-modify-icon {
-			margin: -5px -10px -7px 5px;
-			align-items: center;
-			z-index: 0;
-			background-color: map-get(map-get($colors, white), block);
-			color: map-get(map-get($colors, white), blockWord);
-			width: 25px;
-		}
-		croset-component-property-modified {
-			margin: -5px -10px -7px 10px;
-
-			&>croset-component-in-code {
-				position: relative;
-				height: auto;
-			}
-		}
 	}
+}
 
-	croset-component-variable {
-		md-select {
-			margin: 5px 3px !important;
-		}
-	}
+.blocklyMainBackground {
+	fill: #f5f5f5 !important;
+}
 
-	.croset-component-body {
-		font-size: 12px;
-		min-height: 45px;
-		position: relative;
-		@extend .shadow1;
-		@include material-single-transition(box-shadow, 0.15s);
+.blocklyPathDark, .blocklyPathLight {
+	display: none;
+}
+.blocklySelected>.blocklyPath {
+	stroke-width: 0px !important;
+}
 
-		& > * {
-			display: flex;
-		}
+.blocklyEditableText>rect {
+	rx: 2 !important;
+	ry: 2 !important;
+}
 
-		& > .input-border {
-			border: 2px solid $ac;
-		}
 
-		croset-component-input {
-			display: flex;
-			align-items: center;
+.blocklyWidgetDiv {
+	z-index: 100 !important;
+}
 
-			&>*:nth-child(2) {
-				display: none;
-			}
-
-			croset-component-in-code {
-				position: relative;
-				height: auto;
-			}
-
-			croset-component-input-text {
-				span {
-					align-items: center;
-					white-space: nowrap;
-			   	}
-			}
-			croset-component-input-textbox, croset-component-input-expbox {
-				font-family: 'メイリオ';
-				md-input-container { padding-bottom: 0 }
-				input {
-					text-align: center;
-					margin: 0px 3px;
-					padding: 10px 5px;
-					border: 0;
-				}
-				span {
-					visibility: hidden;
-					white-space:nowrap;
-					position: absolute;
-				}
-			}
-
-			croset-component-input-screen > md-select{
-				margin: 5px 3px !important;
-			}
-		}
-	}
-	@each $colorName, $map in $colors {
-		croset-component-#{map-get($map, type)} {
-			background-color: map-get($map, block);
-			color: map-get($map, blockWord);
-
-			&>croset-component-input, &>.mat-child>.croset-mat-flex>croset-component-input {
-				&>croset-component-input-expbox input, &>croset-component-input-textbox input {
-					background-color: map-get($map, input);
-					color: map-get($map, inputWord);
-
-					&:focused {
-						outline: none;
-					}
-				}
-			}
-		}
-	}
+._md-menu-backdrop {
+	z-index: 102 !important;
 }

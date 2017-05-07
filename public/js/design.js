@@ -106,14 +106,16 @@ crosetModule.service("VisiblePropertyCards", function() {
     };
   }
 ]).controller("PropertyController", [
-  "$scope", "CurrentScreenData", "SelectedElementUUID", "VisiblePropertyCards", "$timeout", function($scope, CurrentScreenData, SelectedElementUUID, VisiblePropertyCards, $timeout) {
-    var screenElementsManager;
+  "$scope", "CurrentScreenData", "SelectedElementUUID", "VisiblePropertyCards", "$timeout", "$interval", "$rootScope", function($scope, CurrentScreenData, SelectedElementUUID, VisiblePropertyCards, $timeout, $interval, $rootScope) {
+    var resizing, screenElementsManager;
     $scope.visiblePropertyCards = [];
     $scope.elementName = null;
+    $scope.isVisibleOffsetProperty = "none";
     screenElementsManager = CurrentScreenData.elementsManager;
     VisiblePropertyCards.onchange(function(value) {
       return $timeout(function() {
         $scope.visiblePropertyCards = value;
+        $scope.isVisibleOffsetProperty = "block";
         if (screenElementsManager.get()[SelectedElementUUID.get()]) {
           return $scope.elementName = screenElementsManager.get()[SelectedElementUUID.get()].name;
         } else {
@@ -121,8 +123,57 @@ crosetModule.service("VisiblePropertyCards", function() {
         }
       }, 0);
     });
-    return $scope.onChangeName = function() {
+    $scope.onChangeName = function() {
       return $scope.elementName = screenElementsManager.get()[SelectedElementUUID.get()].name = $scope.elementName;
+    };
+    resizing = false;
+    $rootScope.$on("onResizedOrDragging", function(ev, element) {
+      resizing = true;
+      return $timeout(function() {
+        $scope.top = parseInt(element.css("top"), 10);
+        $scope.left = parseInt(element.css("left"), 10);
+        $scope.width = element.width();
+        return $scope.height = element.height();
+      });
+    });
+    $rootScope.$on("onResizedOrDraged", function(ev) {
+      return resizing = false;
+    });
+    $scope.onChangeTop = function() {
+      var ref;
+      if (!resizing) {
+        if ((ref = screenElementsManager.get()[SelectedElementUUID.get()]) != null) {
+          ref.element.css("top", $scope.top);
+        }
+        return screenElementsManager.set(SelectedElementUUID.get(), "top", $scope.top);
+      }
+    };
+    $scope.onChangeLeft = function() {
+      var ref;
+      if (!resizing) {
+        if ((ref = screenElementsManager.get()[SelectedElementUUID.get()]) != null) {
+          ref.element.css("left", $scope.left);
+        }
+        return screenElementsManager.set(SelectedElementUUID.get(), "left", $scope.left);
+      }
+    };
+    $scope.onChangeWidth = function() {
+      var ref;
+      if (!resizing) {
+        if ((ref = screenElementsManager.get()[SelectedElementUUID.get()]) != null) {
+          ref.element.width($scope.width);
+        }
+        return screenElementsManager.set(SelectedElementUUID.get(), "width", $scope.width);
+      }
+    };
+    return $scope.onChangeHeight = function() {
+      var ref;
+      if (!resizing) {
+        if ((ref = screenElementsManager.get()[SelectedElementUUID.get()]) != null) {
+          ref.element.height($scope.height);
+        }
+        return screenElementsManager.set(SelectedElementUUID.get(), "height", $scope.height);
+      }
     };
   }
 ]).directive("propertyCard", function() {
