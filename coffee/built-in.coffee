@@ -13,7 +13,39 @@ crosetModule
 			properties: [
 				{
 					title: "レイアウト"
-					icon: ""
+					icon: "settings"
+					propertyInputs: [
+						[
+							{
+								type: "select"
+								size: 100
+								options:
+									defaultValue: "free"
+									label: "配置"
+									items: {
+										"自由配置" : "free"
+										"縦型配置" : "row"
+										"横型配置" : "column"
+									}
+									result: "layout"
+							}
+						]
+						[
+							{
+								type: "select"
+								size: 100
+								options:
+									defaultValue: "hidden"
+									label: "オーバーフロー"
+									items: {
+										"隠す" : "hidden"
+										"表示" : "visible"
+										"スクロール" : "scroll"
+									}
+									result: "overflow"
+							}
+						]
+					]
 				}
 				{
 					title: "図形"
@@ -67,9 +99,9 @@ crosetModule
 								type: "slider"
 								size: 80
 								options:
-									defaultValue: 74
+									defaultValue: 100
 									min: 0
-									max: 99
+									max: 100
 									step: 1
 									result: "shadowOpacity"
 							}
@@ -363,7 +395,7 @@ crosetModule
 								options:
 									defaultValue: 74
 									min: 0
-									max: 99
+									max: 100
 									step: 1
 									result: "shadowOpacity"
 							}
@@ -518,7 +550,7 @@ crosetModule
 								options:
 									defaultValue: 74
 									min: 0
-									max: 99
+									max: 100
 									step: 1
 									result: "shadowOpacity"
 							}
@@ -656,26 +688,73 @@ crosetModule
 
 
 .factory "ScreenElementsManager", ["Elements", "ElementDatas", "$compile", "$injector", (Elements, ElementDatas, $compile, $injector) ->
-	return (screenElement) ->
+	return (screenElement, isPublic) ->
 		screenScope = null
 		screenElement.empty()
 
+		that = this
+		isPublic ?= false						# 本番環境の時はtrueにする
+
 		initScope = () ->
 			screenScope = screenElement.scope()
+			screenScope.get = that.get
 			screenScope.list = {}
 
 		this.init = () ->						# Screenが変更された場合は追加前に必ず呼ぶ
 			screenScope = null
 			screenScope.list = {}
 
-		this.get = () ->
-			return screenScope?.list
+		this.get = (id) ->						# 引数にuuidを渡した場合、そのidの要素を返す。引数がない場合、リスト全体を返す。
+			if id
+				searchInArray = (array) ->
+					for uuid, data of array
+						if uuid == id
+							return data
+						else
+							result = searchInArray data.children
+							if result
+								return result
 
-		this.set = (uuid, key, value) ->     # 指定されたオプションを対応するscopeのoptionsプロパティに適応
-			screenScope.list[uuid].options[key] = value
+					return null
+
+				result = searchInArray screenScope?.list
+				return result
+
+			else
+				return screenScope?.list
+
+		this.set = (id, key, value) ->     # 指定されたオプションを対応するscopeのoptionsプロパティに適応
+			searchInArray = (array) ->
+				for uuid, data of array
+					if uuid == id
+						array[uuid].options[key] = value
+						return true
+
+
+					else
+						result = searchInArray data.children
+						if result
+							return true
+
+			searchInArray screenScope?.list
+
+		this.setData = (id, data) ->     # 任意の要素を検索して新たなデータを代入
+			searchInArray = (array) ->
+				for uuid, data of array
+					if uuid == id
+						array[uuid] = data
+						return true
+
+
+					else
+						result = searchInArray data.children
+						if result
+							return true
+
+			searchInArray screenScope?.list
 
 		this.rename = (uuid, name) ->
-			screenScope.list[uuid].name = name
+			this.get(uuid).name = name
 
 		this.removeAll = () ->
 			screenScope.list = {}
@@ -691,10 +770,11 @@ crosetModule
 				.attr "id", uuid
 				.attr "ng-class", "{'croset-element': true}"	# 追加アニメーションに使う
 				.attr "croset-element-type", type				# タイプ。ex. Button, Text ...
-				.attr "uuid", uuid								# 固有のID
-				.attr "croset-element-editor", true				# エディタ上でのみ有効化する
+				.attr "uuid", uuid											# 固有のID
+				.attr "croset-element-editor", true			# エディタ上でのみ有効化する
 				.width ElementDatas[type].width					# 横幅を初期化
 				.height ElementDatas[type].height				# 縦幅を初期化
+				.attr "ng-style", "{zIndex: s.get(uuid).zIndex}"	# zIndexを設定
 
 
 			scope = screenScope.$new true
@@ -708,10 +788,16 @@ crosetModule
 				type: type
 				name: ElementDatas[type].name
 				element: e
-				options: {}
+				options:
+					top: "0px"
+					left: "0px"
+					width: ElementDatas[type].width
+					height: ElementDatas[type].height
+
+				zIndex: Object.keys(screenScope.list).length
 			}
 
-
+			screenScope.zIndexes?.push uuid
 
 		this.addFromData = (data, uuid) ->
 			if !screenScope 		# 初期化されてない場合初期化
@@ -722,6 +808,11 @@ crosetModule
 				.attr "id", uuid
 				.attr "croset-element-type", data.type			# タイプ。ex. Button, Text ...
 				.attr "uuid", uuid								# 固有のID
+				.attr "ng-style", "{zIndex: s.get(uuid).zIndex}"	# zIndexを設定
+
+
+			if !isPublic
+				e.attr "croset-element-editor", true	# エディタ上でのみ実行。
 
 			e.width data.options.width
 				.height data.options.height
@@ -729,6 +820,7 @@ crosetModule
 					top: data.options.top
 					left: data.options.left
 				}
+
 
 			scope = screenScope.$new true
 			scope.uuid = uuid
@@ -740,42 +832,133 @@ crosetModule
 			data.element = e
 			screenScope.list[uuid] = data
 
+		this.delete = (uuid) ->
+			this.get(uuid).element.remove()
+			VisiblePropertyCards = $injector.get("VisiblePropertyCards")		# アプリとして実行した時にVisiblePropertyCardsが存在しないとエラーが起きるので、使うときだけinjectする
+			VisiblePropertyCards.set []
 
-		this.addFromDataEditor = (data, uuid) ->
+			this.deleteData uuid
+
+		this.deleteData = (id) ->			# データのみ除去してdomは残す
+
+			deleteInArray = (array) ->
+				if array
+					if array[id]
+						delete array[id]
+
+					for uuid, data of array
+						deleteInArray data.children
+
+
+			for uuid, data of screenScope.list[id]
+				deleteInArray data.children
+
+			delete screenScope.list[id]
+
+
+		childAddedCallbacks = []
+
+		this.addChild = (parentId, childId) ->
+
+			originalParent = this.getSiblings childId
+
+			screenScope.get(parentId).children ?= {}
+			data = Object.assign {}, this.get(childId)
+			this.delete childId
+
+			# 移動する分だけzIndexを詰める
+			for id, child of originalParent
+				if child.zIndex > data.zIndex
+					child.zIndex--
+
+			screenScope.get(parentId).children[childId] = data
+			this.addChildElement parentId, childId, data
+			screenScope.get(childId).zIndex = Object.keys(this.get(parentId).children).length
+
+
+			for callback in childAddedCallbacks
+				callback childId, data
+
+
+
+
+		# 子要素のDOMを生成
+		this.addChildElement = (parentId, childId, childData) ->
 			if !screenScope 		# 初期化されてない場合初期化
 				initScope()
 
-			e = $ "<croset-element-#{data.type}>"
+			$("#" + childId).remove()					# すでにある場合最初に削除する
+
+			e = $ "<croset-element-#{childData.type}>"
 				.addClass "croset-element"
-				.attr "croset-element-editor", true				# エディタ上でのみ有効化する
-				.attr "id", uuid
-				.attr "croset-element-type", data.type			# タイプ。ex. Button, Text ...
-				.attr "uuid", uuid								# 固有のID
+				.attr "id", childId
+				.attr "croset-element-type", childData.type			# タイプ。ex. Button, Text ...
+				.attr "uuid", childId								# 固有のID
+				.attr "ng-style", "{zIndex: s.get(uuid).zIndex}"	# zIndexを設定
+
+			if !isPublic
+				e.attr "croset-element-editor", true	# エディタ上でのみ実行。
 
 
-			e.width data.options.width
-				.height data.options.height
+			e.width childData.options.width
+				.height childData.options.height
 				.css {
-					top: data.options.top
-					left: data.options.left
+					top: childData.options.top
+					left: childData.options.left
 				}
 
 
 			scope = screenScope.$new true
-			scope.uuid = uuid
+			scope.uuid = childId
 			scope.s = screenScope
+
 			e = $compile(e)(scope)								# 追加した要素にディレクティブを適応させるためにコンパイル
-			screenElement.append e							# スクリーンに追加
+			e.appendTo this.get(parentId)?.element.children(".croset-element-group-div")							# スクリーンに追加
 
-			data.element = e
-			screenScope.list[uuid] = data
+			childData.element = e
 
 
-		this.delete = (uuid) ->
-			screenScope.list[uuid].element.remove()
-			VisiblePropertyCards = $injector.get("VisiblePropertyCards")		# アプリとして実行した時にVisiblePropertyCardsが存在しないとエラーが起きるので、使うときだけinjectする
-			VisiblePropertyCards.set []
-			delete screenScope.list[uuid]
+		# 特定の要素に子要素を追加すると呼ばれるコールバックを設定。
+		# 引数に　子要素のデータ、　子要素のID
+		this.setAddChildCallback = (fnc) ->
+			childAddedCallbacks.push fnc
+
+		# 特定の要素の兄弟要素を取得
+		this.getSiblings = (id) ->
+			searchParent = (array) ->
+				for uuid, data of array
+					if uuid == id
+						return array
+					else
+						result = searchParent data.children
+						if result
+							return result
+
+				return null
+
+			return searchParent screenScope?.list
+
+
+
+		this.changeZIndex = (fromUUID, toZIndex) ->
+			fromZIndex = this.get(fromUUID).zIndex
+
+			this.getSiblings fromUUID
+
+			if fromZIndex <= toZIndex
+				for id, child of parent
+					if (child.zIndex <= toZIndex) && (child.zIndex > fromZIndex)
+						console.log child.zIndex
+						child.zIndex--
+
+			else
+				for id, child of parent
+					if (child.zIndex >= toZIndex) && (child.zIndex < fromZIndex)
+						child.zIndex++
+
+			this.get(fromUUID).zIndex = toZIndex
+
+			screenScope.$apply()
 
 
 		this.initialize = () ->
@@ -788,14 +971,29 @@ crosetModule
 ]
 
 
-.directive "crosetElement", ["$interval", ($interval)->
+.directive "crosetElement", [()->
 	return {
 		restrict: "C"
 		scope: false
 		link: (scope, element, attrs) ->
-			# $interval () ->
-			# 	console.log scope
-			# , 1000
+			# scope.options = scope.s.list[uuid].options.fontSize
+
+	}
+]
+
+
+.directive "crosetElementGroup", ["CurrentScreenData", (CurrentScreenData)->
+	return {
+		restrict: "E"
+		templateUrl: "template-group.html"
+		link: (scope, element, attrs) ->
+
+			screenElementsManager = CurrentScreenData.elementsManager
+
+
+			for id, data of scope.s.get(scope.uuid)?.children
+				screenElementsManager.addChildElement scope.uuid, id, data
+
 	}
 ]
 
@@ -805,7 +1003,7 @@ crosetModule
 		templateUrl: "template-button.html"
 		link: (scope, element, attrs) ->
 			scope.click = () ->
-				fnc = scope.s.list[scope.uuid].options.click
+				fnc = scope.s.get(scope.uuid).options.click
 				if fnc
 					fnc()
 	}
@@ -823,7 +1021,7 @@ crosetModule
 		templateUrl: "template-textbox.html"
 		link: (scope, element, attrs) ->
 			console.log(scope, "suko-pu")
-			scope.s.list[scope.uuid].options.text = options.default
+			scope.s.get(scope.uuid).options.text = options.default
 	}
 
 .directive "crosetElementSquare", ()->

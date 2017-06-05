@@ -1,0 +1,24 @@
+
+md-list-item(croset-hierarchy-item ng-click="onclick(element)" ng-class="{'hierarchy-item-selected' : element.$$key === selectedElementUUID, '{{\'hierarchy-item-\' + element.type}}' : true}")
+  
+  md-icon(md-font-icon="menu" aria-label="Type") {{elementDatas[element.type].icon}}
+  p.hierarcy-text {{element.name}}
+  md-icon.md-secondary(ng-click="showPromptRename($event)" aria-label="Rename") edit
+  md-icon.md-secondary(ng-click="showConfirmDelete($event)" aria-label="Delete") delete
+
+.hierarchy-children(style="padding-left: 40px")
+  hierarchy-child-item(ng-repeat="element in element.children | toArray | orderBy: 'zIndex'")
+
+
+
+
+
+  //- hierarchy-list(ng-repeat="")
+  
+  //- 
+  //- md-list(ng-cloak)
+  //-   md-list-item
+  //-     md-icon(md-font-icon="menu" aria-label="Type") setting
+  //-     p.hierarcy-text ｺﾄﾞﾓ
+  //-     md-icon.md-secondary(ng-click="showPromptRename($event)" aria-label="Rename") edit
+  //-     md-icon.md-secondary(ng-click="showConfirmDelete($event)" aria-label="Delete") delete

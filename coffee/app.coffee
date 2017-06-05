@@ -385,3 +385,16 @@ crosetModule.directive "ngContextMenu", ["$parse", "$compile", ($parse, $compile
 		# if scope.$last
 		$timeout () ->
 			scope.$emit "repeatFinishedEventFired", element  #イベント発火
+
+
+# このフィルタを使用することでオブジェクトでも並べ順を指定してソートできる
+.filter "toArray", () ->
+	return (input) ->
+		if !input
+			return
+		if input instanceof Array
+			return input;
+
+		return $.map input, (val, key) ->
+			val.$$key = key
+			return val

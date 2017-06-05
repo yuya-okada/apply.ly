@@ -355,4 +355,17 @@ crosetModule.directive("ngContextMenu", [
       return scope.$emit("repeatFinishedEventFired", element);
     });
   };
+}).filter("toArray", function() {
+  return function(input) {
+    if (!input) {
+      return;
+    }
+    if (input instanceof Array) {
+      return input;
+    }
+    return $.map(input, function(val, key) {
+      val.$$key = key;
+      return val;
+    });
+  };
 });

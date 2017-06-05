@@ -1,8 +1,8 @@
-div(ng-class="{crosetBold: s.list[uuid].options.formatBold, crosetItalic: s.list[uuid].options.formatItalic}"
+div(ng-class="{crosetBold: s.get(uuid).options.formatBold, crosetItalic: s.get(uuid).options.formatItalic}"
     ng-style="{ \
-    color: s.list[uuid].options.textColor, \
-    fontSize: s.list[uuid].options.fontSize, \
-    alignItems: s.list[uuid].options.verticalAlign, \
-    justifyContent: s.list[uuid].options.textAlign \
+    color: s.get(uuid).options.textColor, \
+    fontSize: s.get(uuid).options.fontSize, \
+    alignItems: s.get(uuid).options.verticalAlign, \
+    justifyContent: s.get(uuid).options.textAlign \
     }")  
-    span {{s.list[uuid].options.text}}
+    span {{s.get(uuid).options.text}}

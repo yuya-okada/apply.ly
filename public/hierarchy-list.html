@@ -1,0 +1,14 @@
+
+<md-list ng-cloak="ng-cloak">
+  <div ng-repeat="(uuid, element) in screenElements">
+    <md-list-item croset-hierarchy-item="croset-hierarchy-item" ng-click="onclick(element)" ng-class="{'hierarchy-item-selected' : uuid === selectedElementUUID, '{{'hierarchy-item-' + element.type}}' : true}">
+      <md-icon md-font-icon="menu" aria-label="Type">{{elementDatas[element.type].icon}}</md-icon>
+      <p class="hierarcy-text">{{element.name}}</p>
+      <md-icon ng-click="showPromptRename($event)" aria-label="Rename" class="md-secondary">edit</md-icon>
+      <md-icon ng-click="showConfirmDelete($event)" aria-label="Delete" class="md-secondary">delete</md-icon>
+    </md-list-item>
+    <div ng-if="element.children" style="padding-left: 40px" class="hierarchy-children">
+      <hierarchy-list></hierarchy-list>
+    </div>
+  </div>
+</md-list>

@@ -91,7 +91,7 @@ crosetModule
 			elements: CurrentScreenData.elementsManager.get()
 			cards: cards
 			sourceCode: sourceCode
-		}
+			}
 
 	# 当たらな画面を追加する。
 	# 同名画面がすでにある場合falseを返し処理を中断し、成功した場合trueを返す
@@ -194,17 +194,20 @@ crosetModule
 	this.get = () -> return uuid
 
 	this.set = (val) ->
-		screenElements = CurrentScreenData.elementsManager
-		if uuid && screenElements.get()[uuid]
 
-			selectedElement = $(screenElements.get()[uuid].element)
+		screenElements = CurrentScreenData.elementsManager
+		if uuid && screenElements.get(uuid)
+
+			selectedElement = $(screenElements.get(uuid).element)
 			if selectedElement.data("ui-resizable")							# 今選択されているElementのリサイザブルを削除
 				selectedElement.resizable "destroy"
+
+		$(".croset-resizable-parent").removeClass "croset-resizable-parent"
 
 		uuid = val
 		SetElementProperty val
 
-		element = screenElements.get()[uuid].element
+		element = screenElements.get(uuid).element
 
 		onResizedOrDraged = (ev, ui) ->
 			screenElements.set uuid, "top", element.css "top"
@@ -260,6 +263,12 @@ crosetModule
 					$rootScope.$broadcast "onResizedOrDraged"
 
 			}
+
+		# もしも親要素が存在するなら、
+		parentElement = $(element).parent().parent()
+		if parentElement.get(0).tagName == "CROSET-ELEMENT-GROUP"
+			parentElement.addClass "croset-resizable-parent"
+
 
 		if CurrentScreenData.workspace
 			CurrentScreenData.workspace.toolbox_.refreshSelection()
@@ -566,6 +575,7 @@ crosetModule
 	Elements.set "screen", angular.element "#screen"
 
 	projectData = projectDataRes.data
+	console.log "プロジェクト読み込み", projectData
 
 	ProjectData.init()
 	ProjectData.screens = projectData.screens
@@ -593,7 +603,7 @@ crosetModule
 		newScreenElementsManager = new ScreenElementsManager($("#screen"))
 		CurrentScreenData.elementsManager = newScreenElementsManager
 		angular.forEach elements, (data, uuid) ->
-			newScreenElementsManager.addFromDataEditor data, uuid
+			newScreenElementsManager.addFromData data, uuid
 
 		ScreenCards.list = cards
 
@@ -644,6 +654,8 @@ crosetModule
 			# クリック時
 			$element.bind "mousedown", (e) ->
 				SelectedElementUUID.set $attrs.uuid
+				e.stopPropagation()
+				console.log "マウスダウン"
 				return
 
 			SelectedElementUUID.set $attrs.uuid						# 追加した要素を選択された状態

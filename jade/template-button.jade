@@ -1,13 +1,27 @@
+//- md-button.md-raised(
+//- 	ng-class="{crosetItalic: options.formatItalic}"
+//- 	
+//- 	ng-click="click()"
+//- 	
+//- 	ng-style="{ \
+//- 	fontSize: options.fontSize, \
+//- 	color: options.textColor, \
+//- 	backgroundColor: options.bgColor, \
+//- 	boxShadow: options.shadowX + 'px ' + options.shadowY + 'px ' + options.shadowGradation + 'px rgba(0,0,0,' + (100-options.shadowOpacity)/100 + ')', \
+//- 	border: options.borderWidth + 'px solid ' + options.borderColor, \
+//- 	borderRadius: options.borderRadius + 'px' \
+//- 	}") {{options.text}}  
+	
 md-button.md-raised(
-	ng-class="{crosetItalic: s.list[uuid].options.formatItalic}"
+	ng-class="{crosetItalic: s.get(uuid).options.formatItalic}"
 	
 	ng-click="click()"
 	
 	ng-style="{ \
-	fontSize: s.list[uuid].options.fontSize, \
-	color: s.list[uuid].options.textColor, \
-	backgroundColor: s.list[uuid].options.bgColor, \
-	boxShadow: s.list[uuid].options.shadowX + 'px ' + s.list[uuid].options.shadowY + 'px ' + s.list[uuid].options.shadowGradation + 'px rgba(0,0,0,' + (100-s.list[uuid].options.shadowOpacity)/100 + ')', \
-	border: s.list[uuid].options.borderWidth + 'px solid ' + s.list[uuid].options.borderColor, \
-	borderRadius: s.list[uuid].options.borderRadius + 'px' \
-	}") {{s.list[uuid].options.text}}  
+	fontSize: s.get(uuid).options.fontSize, \
+	color: s.get(uuid).options.textColor, \
+	backgroundColor: s.get(uuid).options.bgColor, \
+	boxShadow: s.get(uuid).options.shadowX + 'px ' + s.get(uuid).options.shadowY + 'px ' + s.get(uuid).options.shadowGradation + 'px rgba(0,0,0,' + (100-s.get(uuid).options.shadowOpacity)/100 + ')', \
+	border: s.get(uuid).options.borderWidth + 'px solid ' + s.get(uuid).options.borderColor, \
+	borderRadius: s.get(uuid).options.borderRadius + 'px' \
+	}") {{s.get(uuid).options.text}}  

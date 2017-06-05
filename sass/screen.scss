@@ -34,6 +34,18 @@ croset-element-text {
 	}
 }
 
+
+// Square
+croset-element-group {
+	div {
+		display: flex;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+	}
+}
+
+
 // Square
 croset-element-square {
 	div {

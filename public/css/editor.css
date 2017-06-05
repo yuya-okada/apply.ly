@@ -176,32 +176,34 @@ md-progress-linear ._md-mode-indeterminate {
 #editor #screen .croset-element {
   transform-origin: 0 0;
   position: absolute !important;
-  top: 50%;
-  left: 50%;
 }
-/* line 91, ../../sass/editor.scss */
+/* line 89, ../../sass/editor.scss */
 #editor #screen .croset-element.ui-resizable {
   outline: 1px solid #4696F7;
 }
-/* line 98, ../../sass/editor.scss */
+/* line 92, ../../sass/editor.scss */
+#editor #screen .croset-element.croset-resizable-parent {
+  outline: 1px dashed #4696F7;
+}
+/* line 99, ../../sass/editor.scss */
 #editor #left-zone > div {
   transition-delay: .5s;
   order: 0;
 }
-/* line 105, ../../sass/editor.scss */
+/* line 106, ../../sass/editor.scss */
 #editor #right-zone > div {
   transition-delay: .5s;
   order: 2;
   overflow-y: scroll;
 }
-/* line 112, ../../sass/editor.scss */
+/* line 113, ../../sass/editor.scss */
 #editor #left-zone, #editor #right-zone {
   -moz-transition: flex 0.5s cubic-bezier(0.55, 0, 0.1, 1);
   -o-transition: flex 0.5s cubic-bezier(0.55, 0, 0.1, 1);
   -webkit-transition: flex 0.5s cubic-bezier(0.55, 0, 0.1, 1);
   transition: flex 0.5s cubic-bezier(0.55, 0, 0.1, 1);
 }
-/* line 116, ../../sass/editor.scss */
+/* line 117, ../../sass/editor.scss */
 #editor .editor-card {
   position: relative;
   height: 100%;
@@ -210,7 +212,7 @@ md-progress-linear ._md-mode-indeterminate {
   padding-right: 30px;
 }
 
-/* line 128, ../../sass/editor.scss */
+/* line 129, ../../sass/editor.scss */
 .ui-resizable-handle {
   width: 10px;
   height: 10px;
@@ -220,7 +222,7 @@ md-progress-linear ._md-mode-indeterminate {
   z-index: 101;
 }
 
-/* line 139, ../../sass/editor.scss */
+/* line 140, ../../sass/editor.scss */
 .ui-resizable-se {
   right: -5px;
   bottom: -5px;

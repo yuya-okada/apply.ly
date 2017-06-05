@@ -740,6 +740,8 @@ crosetModule.value("GeneralComponents", {
           xmlList.push(block);
         }
         return xmlList;
+      } else {
+        return [];
       }
     });
     blocklyArea = $("#program-zone");

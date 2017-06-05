@@ -10,7 +10,7 @@ crosetModule.controller("DashboardController", [
     $scope.$on('repeatFinishedEventFired', function(ev, element) {
       var data, project, ref, ref1, results, screenElementsManager, uuid;
       project = ev.targetScope.project;
-      screenElementsManager = new ScreenElementsManager(element.find(".project-preview"));
+      screenElementsManager = new ScreenElementsManager(element.find(".project-preview"), true);
       ref1 = (ref = project.screens[project.defaultScreen]) != null ? ref.elements : void 0;
       results = [];
       for (uuid in ref1) {

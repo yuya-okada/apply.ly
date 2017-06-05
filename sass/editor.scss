@@ -85,11 +85,12 @@ md-progress-linear {
         .croset-element {
 						transform-origin: 0 0;
             position: absolute !important;
-            top: 50%;
-            left: 50%;
 
 						&.ui-resizable {
 							outline: 1px solid #4696F7;
+						}
+						&.croset-resizable-parent {
+							outline: 1px dashed #4696F7;
 						}
         }
     }

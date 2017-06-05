@@ -184,17 +184,18 @@ crosetModule.service("ServiceConfig", [
       return uuid;
     };
     this.set = function(val) {
-      var click, element, onResizedOrDraged, screenElements, selectedElement;
+      var click, element, onResizedOrDraged, parentElement, screenElements, selectedElement;
       screenElements = CurrentScreenData.elementsManager;
-      if (uuid && screenElements.get()[uuid]) {
-        selectedElement = $(screenElements.get()[uuid].element);
+      if (uuid && screenElements.get(uuid)) {
+        selectedElement = $(screenElements.get(uuid).element);
         if (selectedElement.data("ui-resizable")) {
           selectedElement.resizable("destroy");
         }
       }
+      $(".croset-resizable-parent").removeClass("croset-resizable-parent");
       uuid = val;
       SetElementProperty(val);
-      element = screenElements.get()[uuid].element;
+      element = screenElements.get(uuid).element;
       onResizedOrDraged = function(ev, ui) {
         screenElements.set(uuid, "top", element.css("top"));
         screenElements.set(uuid, "left", element.css("left"));
@@ -238,6 +239,10 @@ crosetModule.service("ServiceConfig", [
           return $rootScope.$broadcast("onResizedOrDraged");
         }
       });
+      parentElement = $(element).parent().parent();
+      if (parentElement.get(0).tagName === "CROSET-ELEMENT-GROUP") {
+        parentElement.addClass("croset-resizable-parent");
+      }
       if (CurrentScreenData.workspace) {
         return CurrentScreenData.workspace.toolbox_.refreshSelection();
       }
@@ -481,6 +486,7 @@ crosetModule.service("ServiceConfig", [
     };
     Elements.set("screen", angular.element("#screen"));
     projectData = projectDataRes.data;
+    console.log("プロジェクト読み込み", projectData);
     ProjectData.init();
     ProjectData.screens = projectData.screens;
     ProjectData.name = projectData.name;
@@ -508,7 +514,7 @@ crosetModule.service("ServiceConfig", [
       newScreenElementsManager = new ScreenElementsManager($("#screen"));
       CurrentScreenData.elementsManager = newScreenElementsManager;
       angular.forEach(elements, function(data, uuid) {
-        return newScreenElementsManager.addFromDataEditor(data, uuid);
+        return newScreenElementsManager.addFromData(data, uuid);
       });
       return ScreenCards.list = cards;
     };
@@ -548,6 +554,8 @@ crosetModule.service("ServiceConfig", [
       "$scope", "$element", "$attrs", "$compile", "ElementDatas", "SelectedElementUUID", function($scope, $element, $attrs, $compile, ElementDatas, SelectedElementUUID) {
         $element.bind("mousedown", function(e) {
           SelectedElementUUID.set($attrs.uuid);
+          e.stopPropagation();
+          console.log("マウスダウン");
         });
         return SelectedElementUUID.set($attrs.uuid);
       }
