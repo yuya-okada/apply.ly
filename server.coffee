@@ -192,7 +192,8 @@ app.put "/project", (req, res) ->
 app.get "/project", (req, res) ->
 	Project.findOne req.query, (err, project) ->
 		console.log "GET PROJ:", project
-		delete project["_id"]
+		if project
+			delete project["_id"]
 		res.send project
 
 app.delete "/project", (req, res) ->
@@ -278,7 +279,7 @@ app.get "/build", (req, res) ->
 				if stderr
 					console.log "StdErr" + stderr
 					return
-					
+
 				# 成功した場合
 				buildingTask.remove (err, buildingTask) ->
 					console.log "removed"

@@ -136,7 +136,11 @@
   right: 15px;
   bottom: 15px;
 }
-/* line 48, ../../sass/design.scss */
+/* line 47, ../../sass/design.scss */
+#hierarchy-zone #hierarchy-body .md-subheader {
+  background-color: white !important;
+}
+/* line 52, ../../sass/design.scss */
 #hierarchy-zone #new-elements {
   overflow-y: scroll;
   height: 100%;
@@ -154,11 +158,11 @@
   -webkit-transition: 0.25s, cubic-bezier(0.55, 0, 0.1, 1);
   transition: 0.25s, cubic-bezier(0.55, 0, 0.1, 1);
 }
-/* line 60, ../../sass/design.scss */
+/* line 64, ../../sass/design.scss */
 #hierarchy-zone #new-elements #new-element-title {
   font-size: 16px;
 }
-/* line 65, ../../sass/design.scss */
+/* line 69, ../../sass/design.scss */
 #hierarchy-zone #new-elements #new-element-title #new-element-title-ripple {
   display: flex;
   width: 100%;
@@ -166,26 +170,26 @@
   height: 70px;
   align-items: center;
 }
-/* line 71, ../../sass/design.scss */
+/* line 75, ../../sass/design.scss */
 #hierarchy-zone #new-elements #new-element-title #new-element-title-ripple md-icon {
   margin: 0 15 0 25;
 }
-/* line 74, ../../sass/design.scss */
+/* line 78, ../../sass/design.scss */
 #hierarchy-zone #new-elements #new-element-title #new-element-title-ripple p {
   font-size: 19px;
 }
-/* line 82, ../../sass/design.scss */
+/* line 86, ../../sass/design.scss */
 #hierarchy-zone #new-elements #new-element-body .md-avatar-icon {
   width: 100%;
   height: 100%;
   background-color: #4696F7;
 }
-/* line 87, ../../sass/design.scss */
+/* line 91, ../../sass/design.scss */
 #hierarchy-zone #new-elements #new-element-body .md-title {
   line-height: 40px;
   text-align: center;
 }
-/* line 94, ../../sass/design.scss */
+/* line 98, ../../sass/design.scss */
 #hierarchy-zone #new-elements.animationOn {
   -moz-transform: translateY(0%);
   -ms-transform: translateY(0%);
@@ -193,34 +197,34 @@
   transform: translateY(0%);
 }
 
-/* line 101, ../../sass/design.scss */
+/* line 105, ../../sass/design.scss */
 #property-zone {
   overflow-y: scroll;
 }
-/* line 108, ../../sass/design.scss */
+/* line 112, ../../sass/design.scss */
 #property-zone #property-title md-input-container {
   padding: 0;
 }
-/* line 111, ../../sass/design.scss */
+/* line 115, ../../sass/design.scss */
 #property-zone #property-title md-input-container input {
   text-align: center;
   color: white;
   border-color: white;
 }
-/* line 119, ../../sass/design.scss */
+/* line 123, ../../sass/design.scss */
 #property-zone #property-preview {
   width: 100%;
   height: 200px;
   margin-bottom: 10px;
 }
-/* line 126, ../../sass/design.scss */
+/* line 130, ../../sass/design.scss */
 #property-zone #property-body {
   -webkit-flex: 1;
   flex: 1;
   padding: 0px 30px 20px 30px;
   overflow-y: scroll;
 }
-/* line 131, ../../sass/design.scss */
+/* line 135, ../../sass/design.scss */
 #property-zone #property-body .property-card {
   position: relative;
   padding: 10px 5px 10px 5px;
@@ -229,44 +233,44 @@
   -webkit-transition: 0.25s, cubic-bezier(0.55, 0, 0.1, 1);
   transition: 0.25s, cubic-bezier(0.55, 0, 0.1, 1);
 }
-/* line 137, ../../sass/design.scss */
+/* line 141, ../../sass/design.scss */
 #property-zone #property-body .property-card .property-card-title {
   padding: 5px 0px 5px 8px;
 }
-/* line 140, ../../sass/design.scss */
+/* line 144, ../../sass/design.scss */
 #property-zone #property-body .property-card .property-card-title:focus {
   outline: none;
 }
-/* line 144, ../../sass/design.scss */
+/* line 148, ../../sass/design.scss */
 #property-zone #property-body .property-card .property-card-title md-icon {
   fill: #666;
   margin: 0 15px 0 0;
 }
-/* line 149, ../../sass/design.scss */
+/* line 153, ../../sass/design.scss */
 #property-zone #property-body .property-card .property-card-title span {
   font-size: 18px;
   color: #666;
 }
-/* line 156, ../../sass/design.scss */
+/* line 160, ../../sass/design.scss */
 #property-zone #property-body .property-card .property-card-body {
   display: none;
   margin-top: 20px;
   padding: 0 20px;
 }
-/* line 163, ../../sass/design.scss */
+/* line 167, ../../sass/design.scss */
 #property-zone #property-body .property-card croset-text span {
   font-size: 13px;
 }
-/* line 169, ../../sass/design.scss */
+/* line 173, ../../sass/design.scss */
 #property-zone #property-body .property-card croset-headline span {
   font-size: 15px;
   font-weight: bold;
 }
-/* line 177, ../../sass/design.scss */
+/* line 181, ../../sass/design.scss */
 #property-zone #property-body .property-card-open {
   margin: 20px -10px;
 }
-/* line 180, ../../sass/design.scss */
+/* line 184, ../../sass/design.scss */
 #property-zone #property-body .property-card-open .property-card-body {
   display: block;
 }

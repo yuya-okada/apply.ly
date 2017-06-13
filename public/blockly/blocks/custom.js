@@ -62,6 +62,9 @@ Blockly.defineBlocksWithJsonArray([  // BEGIN JSON EXTRACT
 
 //########################################################################
 CrosetBlock = {}
+Blockly.Blocks.element = {
+  HUE: "#3F51B5"
+}
 
 // 画面遷移
 CrosetBlock.intentBlock = {
@@ -77,6 +80,32 @@ CrosetBlock.intentBlock = {
   "previousStatement": null,
   "nextStatement": null,
   "colour": Blockly.Constants.Logic.HUE,
+  "tooltip": "",
+  "helpUrl": ""
+};
+
+CrosetBlock.instantiateBlock = {
+  "type": "instantiate",
+  "message0": "テンプレート %1 を %2 に追加 %3",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "TEMPLATE",
+      "options": []
+    },
+    {
+      "type": "field_element",
+      "name": "TARGET",
+      "colour": "#fff"
+    },
+    {
+      "type": "field_colour",
+      "name": "TARGET",
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": Blockly.Blocks.element.HUE,
   "tooltip": "",
   "helpUrl": ""
 };

@@ -2,15 +2,13 @@
 <md-card id="hierarchy-zone" ng-controller="HierarchyController">
   <div id="hierarchy-body">
     <md-list ng-cloak="ng-cloak">
+      <md-subheader>画面要素</md-subheader>
       <hierarchy-item ng-repeat="element in screenElements | toArray | orderBy: 'zIndex'"></hierarchy-item>
+      <md-divider ng-show="templates"></md-divider>
+      <md-subheader>テンプレート</md-subheader>
+      <hierarchy-item ng-repeat="element in templates | toArray" istemplate="true"></hierarchy-item>
     </md-list>
-    <div id="hierarchy-help"></div>
-    <!--
-    #hierarchy-help-icon(md-ink-ripple ng-click="animationTriggers.showNewElements=true" ng-show="screenElements.length == 0")
-    	ng-md-icon(icon="playlist_add" style="fill:#fff" size="40")
     
-    
-    -->
     <md-button id="add-element" ng-click="animationTriggers.showNewElements=true" class="md-fab md-accent"> 
       <ng-md-icon icon="add" style="fill: white" size="30"></ng-md-icon>
     </md-button>

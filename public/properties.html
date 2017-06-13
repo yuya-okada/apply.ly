@@ -1,7 +1,7 @@
 
 <div id="property-zone" ng-controller="PropertyController">
   <div id="property-body">
-    <md-card ng-class="{'property-card-open': !cardToggle}" ng-style="{display: isVisibleOffsetProperty}" class="property-card">
+    <md-card ng-class="{'property-card-open': !cardToggle}" ng-style="{display: isVisibleOffsetProperty}" ng-hide="isTemplate" class="property-card">
       <div layout="row" ng-click="cardToggle=!cardToggle" md-ink-ripple="md-ink-ripple" class="property-card-title">
         <md-icon aria-label="icon" class="material-icons">format_shapes</md-icon><span>位置</span>
       </div>
@@ -20,7 +20,7 @@
             </md-input-container>
           </div>
         </div>
-        <div layout="row">
+        <div layout="row" ng-show="element.unresizable != 'xy'">
           <div layout="row" layout-align="center" flex="flex" class="flex-50">
             <md-input-container text-align="left" class="md-block">
               <label>幅</label>

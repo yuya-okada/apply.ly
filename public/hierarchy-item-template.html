@@ -1,0 +1,26 @@
+
+<md-list-item croset-hierarchy-item="croset-hierarchy-item" ng-click="onClickTemplate(element)" ng-class="{'hierarchy-item-selected' : element.$$key === selectedElementUUID, '{{'hierarchy-item-' + element.type}}' : true}">
+  <md-icon md-font-icon="menu" aria-label="Type">{{elementDatas[element.type].icon}}</md-icon>
+  <p class="hierarcy-text">{{element.name}}</p>
+  <md-icon ng-click="showConfirmDelete($event)" aria-label="Delete" class="md-secondary">delete</md-icon>
+  <md-menu class="md-secondary">
+    <md-button aria-label="Open phone interactions menu" ng-click="$mdOpenMenu($event)" class="md-icon-button">
+      <md-icon md-menu-origin="md-menu-origin" aria-label="Menu">more_vert</md-icon>
+    </md-button>
+    <md-menu-content width="4">
+      <md-menu-item>
+        <md-button ng-click="showPromptRename($event)">
+          <md-icon md-menu-align-target="md-menu-align-target" aria-label="Rename">edit</md-icon><span>名前を変更</span>
+        </md-button>
+      </md-menu-item>
+      <md-menu-item>
+        <md-button ng-click="addTemplate($event)">
+          <md-icon md-menu-align-target="md-menu-align-target" aria-label="Template">burst_mode</md-icon><span>テンプレート化</span>
+        </md-button>
+      </md-menu-item>
+    </md-menu-content>
+  </md-menu>
+</md-list-item>
+<div style="padding-left: 40px" class="hierarchy-children">
+  <hierarchy-child-item ng-repeat="element in element.children | toArray | orderBy: 'zIndex'"></hierarchy-child-item>
+</div>

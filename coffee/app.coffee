@@ -9,6 +9,7 @@ crosetModule = angular.module "Croset", [
 	"ngMdIcons"				# マテリアルデザインのアイコン
 	"ngDragDrop"			# ドラッグ＆ドロップ
 	"mdColorPicker"			# カラーピッカー
+	"angular.filter"		# フィルター集
 ]
 # crosetModule.factory "ScreenFunctions", ["Elements", (Elements) ->
 #	 return {
@@ -34,13 +35,6 @@ crosetModule.service "Elements", [() ->
 	return
 ]
 
-crosetModule.factory "getUUID", () ->
-	return () ->
-		'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) ->
-			r = Math.random() * 16 | 0
-			v = if c is 'x' then r else (r & 0x3|0x8)
-			v.toString(16)
-	)
 
 crosetModule.factory "GetDistance", () ->
 	return (p1, p2) ->

@@ -27,7 +27,7 @@ crosetModule.service("ServiceConfig", [
     };
   }
 ]).service("ProjectData", [
-  "$http", "$rootScope", "$stateParams", "$state", "ScreenCards", "ScreenElementsManager", "Build", "ServiceConfig", "getUUID", "CurrentScreenData", function($http, $rootScope, $stateParams, $state, ScreenCards, ScreenElementsManager, Build, ServiceConfig, getUUID, CurrentScreenData) {
+  "$http", "$rootScope", "$stateParams", "$state", "ScreenElementsManager", "ServiceConfig", "getUUID", "CurrentScreenData", function($http, $rootScope, $stateParams, $state, ScreenElementsManager, ServiceConfig, getUUID, CurrentScreenData) {
     var callbacksVal, saveCurrentScreen, that, trigerCallback;
     this.projectId = null;
     this.name = null;
@@ -72,6 +72,7 @@ crosetModule.service("ServiceConfig", [
       }
       return angular.extend(that.screens[CurrentScreenData.id], {
         elements: CurrentScreenData.elementsManager.get(),
+        templates: CurrentScreenData.elementsManager.getTemplates(),
         cards: cards,
         sourceCode: sourceCode
       });
@@ -174,7 +175,7 @@ crosetModule.service("ServiceConfig", [
     };
   }
 ]).service("SelectedElementUUID", [
-  "Elements", "SetElementProperty", "CurrentScreenData", "$rootScope", function(Elements, SetElementProperty, CurrentScreenData, $rootScope) {
+  "SetElementProperty", "CurrentScreenData", "$rootScope", function(SetElementProperty, CurrentScreenData, $rootScope) {
     var uuid;
     uuid = null;
     this.init = function() {
@@ -184,7 +185,8 @@ crosetModule.service("ServiceConfig", [
       return uuid;
     };
     this.set = function(val) {
-      var click, element, onResizedOrDraged, parentElement, screenElements, selectedElement;
+      var click, element, handleRatio, onResizedOrDraged, parentElement, screenElements, selectedElement;
+      $("#screen-wrapper").removeClass("show-template");
       screenElements = CurrentScreenData.elementsManager;
       if (uuid && screenElements.get(uuid)) {
         selectedElement = $(screenElements.get(uuid).element);
@@ -193,32 +195,25 @@ crosetModule.service("ServiceConfig", [
         }
       }
       $(".croset-resizable-parent").removeClass("croset-resizable-parent");
+      $(".ui-resizable").removeClass("ui-resizable");
       uuid = val;
       SetElementProperty(val);
       element = screenElements.get(uuid).element;
       onResizedOrDraged = function(ev, ui) {
+        var ref;
         screenElements.set(uuid, "top", element.css("top"));
         screenElements.set(uuid, "left", element.css("left"));
-        screenElements.set(uuid, "width", element.width());
-        screenElements.set(uuid, "height", element.height());
+        if (((ref = screenElements.get(uuid)) != null ? ref.unresizable : void 0) !== "xy") {
+          screenElements.set(uuid, "width", element.width());
+          screenElements.set(uuid, "height", element.height());
+        }
       };
       $rootScope.$broadcast("onResizedOrDragging", element);
       click = {
         x: 0,
         y: 0
       };
-      $(element).resizable({
-        handles: "ne, se, sw, nw",
-        minHeight: 3,
-        minWidth: 3,
-        stop: onResizedOrDraged,
-        resize: function() {
-          return $rootScope.$broadcast("onResizedOrDragging", element);
-        },
-        stop: function() {
-          return $rootScope.$broadcast("onResizedOrDraged");
-        }
-      }).draggable({
+      $(element).draggable({
         cancel: null,
         start: function(ev) {
           click.x = ev.clientX;
@@ -235,17 +230,56 @@ crosetModule.service("ServiceConfig", [
           };
         },
         stop: function() {
+          var ref;
           onResizedOrDraged();
-          return $rootScope.$broadcast("onResizedOrDraged");
+          $rootScope.$broadcast("onResizedOrDraged", element);
+          if (((ref = screenElements.get(uuid)) != null ? ref.unresizable : void 0) === "xy") {
+            $(element).css("width", "");
+            return $(element).css("height", "");
+          }
         }
       });
-      parentElement = $(element).parent().parent();
-      if (parentElement.get(0).tagName === "CROSET-ELEMENT-GROUP") {
+      if (screenElements.get(uuid).unresizable === "xy") {
+        element.addClass("ui-resizable");
+      } else {
+        $(element).resizable({
+          handles: "ne, se, sw, nw",
+          minHeight: 3,
+          minWidth: 3,
+          resize: function() {
+            return $rootScope.$broadcast("onResizedOrDragging", element);
+          },
+          stop: function() {
+            onResizedOrDraged();
+            return $rootScope.$broadcast("onResizedOrDraged", element);
+          }
+        });
+        handleRatio = 1 / $("#screen").scope().screenScaleRatio;
+        $(".ui-resizable-handle").css("transform", "scale(" + handleRatio + ")");
+      }
+      parentElement = $(element).parent();
+      if (parentElement.hasClass("croset-element-group-div")) {
         parentElement.addClass("croset-resizable-parent");
       }
       if (CurrentScreenData.workspace) {
         return CurrentScreenData.workspace.toolbox_.refreshSelection();
       }
+    };
+  }
+]).service("SelectedTemplate", [
+  "SetElementProperty", "CurrentScreenData", function(SetElementProperty, CurrentScreenData) {
+    var uuid;
+    uuid = "";
+    this.get = function() {
+      return uuid;
+    };
+    this.set = function(id) {
+      var screenElementsManager;
+      uuid = id;
+      $("#screen-wrapper").addClass("show-template");
+      screenElementsManager = CurrentScreenData.elementsManager;
+      SetElementProperty(id, true);
+      return screenElementsManager.showTemplate(id);
     };
   }
 ]).controller("HeaderController", [
@@ -450,7 +484,7 @@ crosetModule.service("ServiceConfig", [
     };
   }
 ]).controller("EditorController", [
-  "$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElementsManager", "ScreenCards", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes", function($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElementsManager, ScreenCards, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) {
+  "$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElementsManager", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes", function($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElementsManager, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) {
     var changeScreen, projectData;
     SelectedElementUUID.init();
     $scope.settings = {
@@ -505,18 +539,23 @@ crosetModule.service("ServiceConfig", [
       if (nextScreen.card == null) {
         nextScreen.card = "";
       }
-      changeScreen(nextScreen.elements, nextScreen.cards);
+      if (nextScreen.templates == null) {
+        nextScreen.templates = {};
+      }
+      changeScreen(nextScreen.elements, nextScreen.cards, nextScreen.templates);
       $scope.progress.isLoading = false;
       return $scope.progress.determinateValue += 100;
     });
-    changeScreen = function(elements, cards) {
+    changeScreen = function(elements, cards, templates) {
       var newScreenElementsManager;
       newScreenElementsManager = new ScreenElementsManager($("#screen"));
       CurrentScreenData.elementsManager = newScreenElementsManager;
       angular.forEach(elements, function(data, uuid) {
         return newScreenElementsManager.addFromData(data, uuid);
       });
-      return ScreenCards.list = cards;
+      return angular.forEach(templates, function(data, uuid) {
+        return newScreenElementsManager.addTemplateFromData(data, uuid);
+      });
     };
     return $rootScope.$broadcast("onChangedScreen", $stateParams.screenId || ProjectData.defaultScreen);
   }
@@ -538,11 +577,12 @@ crosetModule.service("ServiceConfig", [
     });
     return $(window).on("resize", function() {
       return $timeout(function() {
-        var height;
+        var handleRatio, height;
         height = editor.height() - 20;
         $scope.screenScaleRatio = height / screenDefaultHeight;
         $scope.marginRight = -1 * (screenDefaultWidth * (1 - $scope.screenScaleRatio));
-        return console.log($scope.screenScale);
+        handleRatio = 1 / $scope.screenScaleRatio;
+        return $(".ui-resizable-handle").css("transform", "scale(" + handleRatio + ")");
       }, 0);
     }).trigger("resize");
   }
@@ -551,204 +591,21 @@ crosetModule.service("ServiceConfig", [
     restrict: "A",
     scope: false,
     controller: [
-      "$scope", "$element", "$attrs", "$compile", "ElementDatas", "SelectedElementUUID", function($scope, $element, $attrs, $compile, ElementDatas, SelectedElementUUID) {
+      "$scope", "$element", "$attrs", "$compile", "ElementDatas", "SelectedElementUUID", "SelectedTemplate", function($scope, $element, $attrs, $compile, ElementDatas, SelectedElementUUID, SelectedTemplate) {
         $element.bind("mousedown", function(e) {
-          SelectedElementUUID.set($attrs.uuid);
+          if (!$scope.isTemplate) {
+            SelectedElementUUID.set($attrs.uuid);
+          } else {
+            SelectedTemplate.set($attrs.uuid);
+          }
           e.stopPropagation();
-          console.log("マウスダウン");
         });
-        return SelectedElementUUID.set($attrs.uuid);
+        if (!$scope.isTemplate) {
+          return SelectedElementUUID.set($attrs.uuid);
+        } else {
+          return SelectedTemplate.set($attrs.uuid);
+        }
       }
     ]
   };
-}).directive("crosetDynamicInput", [
-  "$compile", function($compile) {
-    return {
-      restrict: "E",
-      scope: {
-        tag: "=",
-        options: "="
-      },
-      compile: function(element, attributes) {
-        return {
-          pre: function(scope, el, attrs) {
-            var compiled, newEl;
-            newEl = angular.element("<" + scope.tag + ">").attr("options", angular.toJson(scope.options));
-            compiled = $compile(newEl[0])(scope);
-            return el.append(compiled);
-          }
-        };
-      },
-      controller: [
-        "$scope", "$attrs", "CurrentScreenData", "SelectedElementUUID", function($scope, $attrs, CurrentScreenData, SelectedElementUUID) {
-          this.onchange = function(value) {
-            return CurrentScreenData.elementsManager.set(SelectedElementUUID.get(), $scope.options.result, value);
-          };
-          this.onchange($scope.options.defaultValue);
-        }
-      ]
-    };
-  }
-]).directive("crosetText", function() {
-  return {
-    restirct: "E",
-    scope: {
-      options: "="
-    },
-    templateUrl: "input-text.html"
-  };
-}).directive("crosetHeadline", function() {
-  return {
-    restirct: "E",
-    scope: {
-      options: "="
-    },
-    templateUrl: "input-headline.html"
-  };
-}).directive("crosetColorIcon", [
-  "showColorPicker", "GetTextColor", "HexToRgb", function(showColorPicker, GetTextColor, HexToRgb) {
-    return {
-      restrict: "E",
-      scope: {
-        options: "="
-      },
-      require: "^crosetDynamicInput",
-      templateUrl: "input-color-icon.html",
-      link: function(scope, element, attrs, dynamicInput) {
-        var setColor;
-        scope.onclick = function() {
-          return showColorPicker.showColorPicker(function(value) {
-            return setColor(value);
-          }, scope.color);
-        };
-        setColor = function(value) {
-          scope.color = value;
-          scope.textColor = GetTextColor(HexToRgb(value));
-          return dynamicInput.onchange(scope.color);
-        };
-        return setColor(scope.options.defaultValue);
-      }
-    };
-  }
-]).directive("crosetToggleIcon", [
-  "ColorPallet", function(ColorPallet) {
-    return {
-      restrict: "E",
-      scope: {
-        options: "="
-      },
-      require: "^crosetDynamicInput",
-      templateUrl: "input-toggle-icon.html",
-      link: function(scope, element, attrs, dynamicInput) {
-        var getColor;
-        getColor = function() {
-          if (scope.disabled) {
-            return "#888";
-          } else {
-            return ColorPallet.mc;
-          }
-        };
-        if (angular.isUndefined(scope.options.disabled)) {
-          scope.disabled = true;
-        } else {
-          scope.disabled = scope.options.disabled;
-        }
-        scope.color = getColor();
-        return scope.onclick = function() {
-          scope.disabled = !scope.disabled;
-          scope.color = getColor();
-          return dynamicInput.onchange(!scope.disabled);
-        };
-      }
-    };
-  }
-]).directive("crosetTextbox", function() {
-  return {
-    restrict: "E",
-    require: "^crosetDynamicInput",
-    scope: {
-      options: "="
-    },
-    templateUrl: "input-textbox.html",
-    link: function(scope, element, attrs, dynamicInput) {
-      scope.value = scope.options.defaultValue;
-      return scope.onchange = function() {
-        return dynamicInput.onchange(scope.value);
-      };
-    }
-  };
-}).directive("crosetTextarea", function() {
-  return {
-    restrict: "E",
-    require: "^crosetDynamicInput",
-    scope: {
-      options: "="
-    },
-    templateUrl: "input-textarea.html",
-    link: function(scope, element, attrs, dynamicInput) {
-      scope.value = scope.options.defaultValue;
-      return scope.onchange = function() {
-        return dynamicInput.onchange(scope.value);
-      };
-    }
-  };
-}).directive("crosetNumber", function() {
-  return {
-    restrict: "E",
-    require: "^crosetDynamicInput",
-    scope: {
-      options: "="
-    },
-    templateUrl: "input-number.html",
-    link: function(scope, element, attrs, dynamicInput) {
-      scope.value = scope.options.defaultValue;
-      return scope.onchange = function() {
-        return dynamicInput.onchange(scope.value);
-      };
-    }
-  };
-}).directive("crosetSlider", [
-  "getUUID", function(getUUID) {
-    return {
-      restrict: "E",
-      require: "^crosetDynamicInput",
-      scope: {
-        options: "="
-      },
-      templateUrl: "input-slider.html",
-      link: function(scope, element, attrs, dynamicInput) {
-        scope.id = getUUID();
-        scope.value = scope.options.defaultValue;
-        return scope.onchange = function() {
-          return dynamicInput.onchange(scope.value);
-        };
-      }
-    };
-  }
-]).directive("crosetSelect", [
-  "getUUID", function(getUUID) {
-    return {
-      restrict: "E",
-      require: "^crosetDynamicInput",
-      scope: {
-        options: "="
-      },
-      templateUrl: "input-select.html",
-      link: function(scope, element, attrs, dynamicInput) {
-        scope.id = getUUID();
-        scope.value = scope.options.defaultValue;
-        return scope.onchange = function() {
-          return dynamicInput.onchange(scope.value);
-        };
-      }
-    };
-  }
-]).directive("resizer", [
-  function() {
-    return {
-      restrict: "E",
-      templateUrl: "resizer.html",
-      link: function(scope, element, attrs) {}
-    };
-  }
-]);
+});

@@ -123,6 +123,11 @@ Blockly.FieldElement.prototype.setSpellcheck = function(check) {
   this.spellcheck_ = check;
 };
 
+
+
+// CrosetBlockInjector = angular.injector("Croset")
+
+
 /**
  * Show the inline free-text editor on top of the text.
  * @param {boolean=} opt_quietInput True if editor should be created without
@@ -168,7 +173,13 @@ Blockly.FieldElement.prototype.showEditor_ = function(opt_quietInput) {
     htmlInput.focus();
     htmlInput.select();
   }
-
+  
+  CrosetBlockInjector.invoke(["ShowElementDialog"], function(ShowElementDialog) {
+    ShowElementDialog(function(uuid, data) {
+      
+    });
+  });
+      
   // Bind to keydown -- trap Enter without IME and Esc to hide.
   htmlInput.onKeyDownWrapper_ =
       Blockly.bindEventWithChecks_(htmlInput, 'keydown', this,
@@ -185,24 +196,40 @@ Blockly.FieldElement.prototype.showEditor_ = function(opt_quietInput) {
   this.workspace_.addChangeListener(htmlInput.onWorkspaceChangeWrapper_);
 };
 
+
 /**
  * Handle key down to the editor.
  * @param {!Event} e Keyboard event.
  * @private
  */
 Blockly.FieldElement.prototype.onHtmlInputKeyDown_ = function(e) {
+
   var htmlInput = Blockly.FieldElement.htmlInput_;
-  var tabKey = 9, enterKey = 13, escKey = 27;
-  if (e.keyCode == enterKey) {
-    Blockly.WidgetDiv.hide();
-  } else if (e.keyCode == escKey) {
-    htmlInput.value = htmlInput.defaultValue;
-    Blockly.WidgetDiv.hide();
-  } else if (e.keyCode == tabKey) {
-    Blockly.WidgetDiv.hide();
-    this.sourceBlock_.tab(this, !e.shiftKey);
-    e.preventDefault();
+  // Update source block
+  var text = htmlInput.value;
+  if (text !== htmlInput.oldValue_) {
+    htmlInput.oldValue_ = text;
+    this.setValue(uuid);
+    this.validate_();
+  } else if (goog.userAgent.WEBKIT) {
+    // Cursor key.  Render the source block to show the caret moving.
+    // Chrome only (version 26, OS X).
+    this.sourceBlock_.render();
   }
+  this.resizeEditor_();
+  Blockly.svgResize(this.sourceBlock_.workspace);
+//   var htmlInput = Blockly.FieldElement.htmlInput_;
+//   var tabKey = 9, enterKey = 13, escKey = 27;
+//   if (e.keyCode == enterKey) {
+//     Blockly.WidgetDiv.hide();
+//   } else if (e.keyCode == escKey) {
+//     htmlInput.value = htmlInput.defaultValue;
+//     Blockly.WidgetDiv.hide();
+//   } else if (e.keyCode == tabKey) {
+//     Blockly.WidgetDiv.hide();
+//     this.sourceBlock_.tab(this, !e.shiftKey);
+//     e.preventDefault();
+//   }
 };
 
 /**

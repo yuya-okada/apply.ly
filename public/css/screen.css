@@ -1,20 +1,27 @@
 /* line 1, ../../sass/screen.scss */
+croset-element-listgroup > .croset-element-group-div > .croset-element {
+  position: relative !important;
+  left: 0 !important;
+  top: 0 !important;
+}
+
+/* line 7, ../../sass/screen.scss */
 .crosetBold {
   font-weight: bold;
 }
 
-/* line 5, ../../sass/screen.scss */
+/* line 11, ../../sass/screen.scss */
 .crosetItalic {
   font-style: italic !important;
 }
 
-/* line 9, ../../sass/screen.scss */
+/* line 15, ../../sass/screen.scss */
 .croset-element {
   display: block;
   position: absolute;
 }
 
-/* line 16, ../../sass/screen.scss */
+/* line 22, ../../sass/screen.scss */
 croset-element-button button {
   width: 100%;
   height: 100%;
@@ -23,7 +30,7 @@ croset-element-button button {
   min-height: 0px !important;
 }
 
-/* line 27, ../../sass/screen.scss */
+/* line 33, ../../sass/screen.scss */
 croset-element-text div {
   width: 100%;
   height: 100%;
@@ -33,7 +40,7 @@ croset-element-text div {
   display: flex;
 }
 
-/* line 40, ../../sass/screen.scss */
+/* line 46, ../../sass/screen.scss */
 croset-element-group div {
   display: flex;
   position: absolute;
@@ -41,7 +48,7 @@ croset-element-group div {
   height: 100%;
 }
 
-/* line 51, ../../sass/screen.scss */
+/* line 57, ../../sass/screen.scss */
 croset-element-square div {
   width: 100%;
   height: 100%;

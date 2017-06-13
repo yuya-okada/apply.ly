@@ -71,29 +71,70 @@ md-progress-linear {
 		}
 	}
 
+
+	#screen-wrapper {
+		position: relative;
+
+		&.show-template {
+			#screen-zone {
+				opacity: 0;
+			}
+			#template-preview-wrapper {
+				transform: translateY(0%);
+			}
+		}
+	}
 	#screen-zone {
-        transform-origin: top left;
+    transform-origin: top left;
+		opacity: 1;
+		@include material-single-transition(opacity , .5s);
+
+
 		&:before, &:after {
 			pointer-events: none;
 		}
-    }
+  }
 
 	#screen {
-        background-color: white;
+		background-color: white;
 		overflow: hidden;
 
-        .croset-element {
-						transform-origin: 0 0;
-            position: absolute !important;
+    .croset-element {
+				transform-origin: 0 0;
 
-						&.ui-resizable {
-							outline: 1px solid #4696F7;
-						}
-						&.croset-resizable-parent {
-							outline: 1px dashed #4696F7;
-						}
-        }
-    }
+				&.ui-resizable {
+					outline: 1px solid #4696F7;
+				}
+				&.croset-resizable-parent {
+					outline: 1px dashed #4696F7;
+				}
+		}
+	}
+
+	#template-preview-wrapper {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		transform: translateY(150%);
+		transition-delay: .5s;
+		@include material-single-transition(transform, .5s);
+
+	}
+
+	#template-preview {
+		height: 100%;
+		width: 100%;
+		background-color: #fffcfc;
+
+		& > .croset-element {
+			top: auto !important;
+			left: auto !important;
+			outline: 1px solid #4696F7;
+		}
+	}
+
 
 	#left-zone {
 		&>div {
@@ -114,14 +155,12 @@ md-progress-linear {
 		@include material-single-transition(flex, .5s);
 	}
 
-    .editor-card {
-        position: relative;
-        height: 100%;
-        flex: 1;
+  .editor-card {
+    position: relative;
+    height: 100%;
+    flex: 1;
 		padding-left: 30px;
 		padding-right: 30px;
-
-
 	}
 }
 
@@ -129,16 +168,22 @@ md-progress-linear {
 .ui-resizable-handle
 {
 
-    width: 10px;
-    height: 10px;
-	border-radius: 5px;
+  width: 15px;
+  height: 15px;
+	border-radius: 1px;
 	background-color: #EEE;
-	border: 1px solid #00CCFF;
-    z-index: 101;
-	@extend .shadow1;
+	background-image: none;
+	border: 1px solid #4696F7;
+  z-index: 101;
 }
 .ui-resizable-se
 {
     right: -5px;
     bottom: -5px;
+}
+
+
+.icon-select-dialog {
+	width: 60%;
+	height: 60%;
 }

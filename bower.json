@@ -17,5 +17,8 @@
   ],
   "dependencies": {
     "angular-material": "master"
+  },
+  "devDependencies": {
+    "angular-filter": "~0.5.16"
   }
 }

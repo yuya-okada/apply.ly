@@ -1,6 +1,6 @@
 var crosetModule;
 
-crosetModule = angular.module("Croset", ["ui.router", "uiRouterStyles", "ngAria", "ngMaterial", "ngAnimate", "ngMessages", "ngMdIcons", "ngDragDrop", "mdColorPicker"]);
+crosetModule = angular.module("Croset", ["ui.router", "uiRouterStyles", "ngAria", "ngMaterial", "ngAnimate", "ngMessages", "ngMdIcons", "ngDragDrop", "mdColorPicker", "angular.filter"]);
 
 crosetModule.service("Elements", [
   function() {
@@ -16,17 +16,6 @@ crosetModule.service("Elements", [
     };
   }
 ]);
-
-crosetModule.factory("getUUID", function() {
-  return function() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r, v;
-      r = Math.random() * 16 | 0;
-      v = c === 'x' ? r : r & 0x3 | 0x8;
-      return v.toString(16);
-    });
-  };
-});
 
 crosetModule.factory("GetDistance", function() {
   return function(p1, p2) {

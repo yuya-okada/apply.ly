@@ -55,21 +55,28 @@ md-toolbar#header(ng-controller="HeaderController")
 	//- 			#screen
 					
 
-					
-	#screen-zone.marvel-device.iphone6.silver(ng-controller="ScreenController" ng-style="{transform: 'scale(' + screenScaleRatio + ')', marginRight: marginRight}")
-		.top-bar
-		.sleep
-		.volume
-		.camera
-		.sensor
-		.speaker
-		#screen.screen
-		.home
-		.bottom-bar
+	#screen-wrapper
+		#screen-zone.marvel-device.iphone6.silver(ng-controller="ScreenController" ng-style="{transform: 'scale(' + screenScaleRatio + ')', marginRight: marginRight}")
+			.top-bar
+			.sleep
+			.volume
+			.camera
+			.sensor
+			.speaker
+			#screen.screen
+			.home
+			.bottom-bar
+			
+		
+		div(layout="column")#template-preview-wrapper
+			md-card#template-preview(layout="column" layout-align="center center")
+		
+			
 
 	#right-zone.editor-card.flex
 		.ui-view-fade(ui-view="right")
-		
+	
+	
 		
 		
 		

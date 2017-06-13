@@ -33,16 +33,21 @@
   <div id="left-zone" class="editor-card flex">
     <div ui-view="left" class="ui-view-fade"></div>
   </div>
-  <div id="screen-zone" ng-controller="ScreenController" ng-style="{transform: 'scale(' + screenScaleRatio + ')', marginRight: marginRight}" class="marvel-device iphone6 silver">
-    <div class="top-bar"></div>
-    <div class="sleep"></div>
-    <div class="volume"></div>
-    <div class="camera"></div>
-    <div class="sensor"></div>
-    <div class="speaker"></div>
-    <div id="screen" class="screen"></div>
-    <div class="home"></div>
-    <div class="bottom-bar"></div>
+  <div id="screen-wrapper">
+    <div id="screen-zone" ng-controller="ScreenController" ng-style="{transform: 'scale(' + screenScaleRatio + ')', marginRight: marginRight}" class="marvel-device iphone6 silver">
+      <div class="top-bar"></div>
+      <div class="sleep"></div>
+      <div class="volume"></div>
+      <div class="camera"></div>
+      <div class="sensor"></div>
+      <div class="speaker"></div>
+      <div id="screen" class="screen"></div>
+      <div class="home"></div>
+      <div class="bottom-bar"></div>
+    </div>
+    <div layout="column" id="template-preview-wrapper">
+      <md-card id="template-preview" layout="column" layout-align="center center"></md-card>
+    </div>
   </div>
   <div id="right-zone" class="editor-card flex">
     <div ui-view="right" class="ui-view-fade"></div>

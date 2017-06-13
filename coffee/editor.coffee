@@ -31,7 +31,7 @@ crosetModule
 ]
 
 
-.service "ProjectData", ["$http", "$rootScope", "$stateParams", "$state", "ScreenCards", "ScreenElementsManager", "Build", "ServiceConfig", "getUUID", "CurrentScreenData", ($http, $rootScope, $stateParams, $state, ScreenCards, ScreenElementsManager, Build, ServiceConfig, getUUID, CurrentScreenData) ->
+.service "ProjectData", ["$http", "$rootScope", "$stateParams", "$state", "ScreenElementsManager", "ServiceConfig", "getUUID", "CurrentScreenData", ($http, $rootScope, $stateParams, $state, ScreenElementsManager, ServiceConfig, getUUID, CurrentScreenData) ->
 
 
 	this.projectId = null
@@ -89,6 +89,7 @@ crosetModule
 
 		angular.extend that.screens[CurrentScreenData.id], {
 			elements: CurrentScreenData.elementsManager.get()
+			templates: CurrentScreenData.elementsManager.getTemplates()
 			cards: cards
 			sourceCode: sourceCode
 			}
@@ -184,7 +185,7 @@ crosetModule
 
 
 # 現在選択されている要素のUUID
-.service "SelectedElementUUID", ["Elements", "SetElementProperty", "CurrentScreenData", "$rootScope", (Elements, SetElementProperty, CurrentScreenData, $rootScope) ->
+.service "SelectedElementUUID", ["SetElementProperty", "CurrentScreenData", "$rootScope", (SetElementProperty, CurrentScreenData, $rootScope) ->
 
 	uuid = null
 
@@ -195,6 +196,8 @@ crosetModule
 
 	this.set = (val) ->
 
+		$("#screen-wrapper").removeClass "show-template"
+
 		screenElements = CurrentScreenData.elementsManager
 		if uuid && screenElements.get(uuid)
 
@@ -203,6 +206,7 @@ crosetModule
 				selectedElement.resizable "destroy"
 
 		$(".croset-resizable-parent").removeClass "croset-resizable-parent"
+		$(".ui-resizable").removeClass "ui-resizable"
 
 		uuid = val
 		SetElementProperty val
@@ -212,8 +216,9 @@ crosetModule
 		onResizedOrDraged = (ev, ui) ->
 			screenElements.set uuid, "top", element.css "top"
 			screenElements.set uuid, "left", element.css "left"
-			screenElements.set uuid, "width", element.width()
-			screenElements.set uuid, "height", element.height()
+			if screenElements.get(uuid)?.unresizable != "xy"
+				screenElements.set uuid, "width", element.width()
+				screenElements.set uuid, "height", element.height()
 
 
 			return
@@ -227,18 +232,6 @@ crosetModule
 		}
 
 		$ element															# 選択
-			.resizable {
-				handles: "ne, se, sw, nw"
-				minHeight: 3
-				minWidth: 3
-				stop: onResizedOrDraged
-				resize: () ->
-					# design.jsのPropertyController内で受け取り
-					$rootScope.$broadcast "onResizedOrDragging", element
-				stop: () ->
-					# design.jsのPropertyController内で受け取り
-					$rootScope.$broadcast "onResizedOrDraged"
-			}
 			.draggable {
 				cancel: null
 				start: (ev) ->
@@ -260,13 +253,37 @@ crosetModule
 				stop: () ->
 					onResizedOrDraged()
 					# design.jsのPropertyController内で受け取り
-					$rootScope.$broadcast "onResizedOrDraged"
+					$rootScope.$broadcast "onResizedOrDraged", element
+
+					if screenElements.get(uuid)?.unresizable == "xy"
+						$(element).css "width", ""
+						$(element).css "height", ""
 
 			}
 
+		if screenElements.get(uuid).unresizable == "xy"
+			element.addClass "ui-resizable"
+		else
+			$ element
+				.resizable {
+					handles: "ne, se, sw, nw"
+					minHeight: 3
+					minWidth: 3
+					resize: () ->
+						# design.jsのPropertyController内で受け取り
+						$rootScope.$broadcast "onResizedOrDragging", element
+					stop: () ->
+						onResizedOrDraged()
+						# design.jsのPropertyController内で受け取り
+						$rootScope.$broadcast "onResizedOrDraged", element
+				}
+			
+			handleRatio = 1 / $("#screen").scope().screenScaleRatio
+			$(".ui-resizable-handle").css "transform", "scale(#{handleRatio})"
+				
 		# もしも親要素が存在するなら、
-		parentElement = $(element).parent().parent()
-		if parentElement.get(0).tagName == "CROSET-ELEMENT-GROUP"
+		parentElement = $(element).parent()
+		if parentElement.hasClass "croset-element-group-div"
 			parentElement.addClass "croset-resizable-parent"
 
 
@@ -277,6 +294,21 @@ crosetModule
 	return
 ]
 
+
+
+# テンプレートを画面に表示
+.service "SelectedTemplate", ["SetElementProperty", "CurrentScreenData", (SetElementProperty, CurrentScreenData) ->
+	uuid = ""
+	this.get = ()-> return uuid
+	this.set = (id) ->
+		uuid = id
+		$("#screen-wrapper").addClass "show-template"
+		screenElementsManager = CurrentScreenData.elementsManager
+		SetElementProperty id, true
+		screenElementsManager.showTemplate id
+
+	return
+]
 
 .controller "HeaderController", ["$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$interval", "$injector", "$stateParams", "$mdToast", "ProjectData", ($scope, $http, $mdDialog, $mdSidenav, $timeout, $interval, $injector, $stateParams, $mdToast, ProjectData) ->
 
@@ -533,8 +565,8 @@ crosetModule
 
 # エディタ画面のコントローラー
 # projectDataResはresolveからinjectされる
-.controller "EditorController", ["$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElementsManager", "ScreenCards", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes",
-($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElementsManager, ScreenCards, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) ->
+.controller "EditorController", ["$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElementsManager", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes",
+($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElementsManager, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) ->
 
 	SelectedElementUUID.init()
 
@@ -591,7 +623,8 @@ crosetModule
 		nextScreen = ProjectData.getScreens()[screenId]
 		nextScreen.elements ?= {}
 		nextScreen.card ?= ""
-		changeScreen nextScreen.elements, nextScreen.cards
+		nextScreen.templates ?= {}
+		changeScreen nextScreen.elements, nextScreen.cards, nextScreen.templates
 
 		# 読み込みのプログレスバー削除
 		$scope.progress.isLoading = false
@@ -599,13 +632,15 @@ crosetModule
 
 
 	# 表示されている画面を変更
-	changeScreen = (elements, cards) ->
-		newScreenElementsManager = new ScreenElementsManager($("#screen"))
+	changeScreen = (elements, cards, templates) ->
+		newScreenElementsManager = new ScreenElementsManager $("#screen")
 		CurrentScreenData.elementsManager = newScreenElementsManager
 		angular.forEach elements, (data, uuid) ->
 			newScreenElementsManager.addFromData data, uuid
 
-		ScreenCards.list = cards
+		angular.forEach templates, (data, uuid) ->
+			newScreenElementsManager.addTemplateFromData data, uuid
+
 
 
 	$rootScope.$broadcast "onChangedScreen", $stateParams.screenId || ProjectData.defaultScreen
@@ -635,7 +670,9 @@ crosetModule
 			height = editor.height() - 20
 			$scope.screenScaleRatio = height / screenDefaultHeight
 			$scope.marginRight = -1 * (screenDefaultWidth * (1 - $scope.screenScaleRatio))
-			console.log $scope.screenScale
+
+			handleRatio = 1 / $scope.screenScaleRatio
+			$(".ui-resizable-handle").css "transform", "scale(#{handleRatio})"
 		, 0
 	).trigger("resize")
 
@@ -648,215 +685,27 @@ crosetModule
 		restrict: "A"
 		scope: false
 
-		controller: ["$scope", "$element", "$attrs", "$compile", "ElementDatas", "SelectedElementUUID",
-		($scope, $element, $attrs, $compile, ElementDatas, SelectedElementUUID) ->
+		controller: ["$scope", "$element", "$attrs", "$compile", "ElementDatas", "SelectedElementUUID", "SelectedTemplate",
+		($scope, $element, $attrs, $compile, ElementDatas, SelectedElementUUID, SelectedTemplate) ->
 
 			# クリック時
 			$element.bind "mousedown", (e) ->
-				SelectedElementUUID.set $attrs.uuid
+				if !$scope.isTemplate
+					SelectedElementUUID.set $attrs.uuid
+				else
+					SelectedTemplate.set $attrs.uuid
+
 				e.stopPropagation()
-				console.log "マウスダウン"
 				return
 
-			SelectedElementUUID.set $attrs.uuid						# 追加した要素を選択された状態
-
-
-		]
-
-	}
-
-
-# tag属性に書いてある値をタグとする空要素を作ってコンパイルする
-.directive "crosetDynamicInput", ["$compile", ($compile) ->
-	return {
-		restrict: "E"
-		scope: {
-			tag: "="
-			options: "="     # それぞれのインプットのデータ
-		}
-		compile: (element, attributes) ->
-			return {
-				pre: (scope, el, attrs) ->
-					# make a new element having given tag name
-					newEl = angular.element("<#{scope.tag}>").attr "options", angular.toJson scope.options
-					# compile
-					compiled = $compile(newEl[0]) scope
-					el.append compiled
-			}
-		controller: ["$scope", "$attrs", "CurrentScreenData", "SelectedElementUUID"
-		($scope, $attrs, CurrentScreenData, SelectedElementUUID) ->
-
-			this.onchange = (value) ->
-				CurrentScreenData.elementsManager.set SelectedElementUUID.get(), $scope.options.result, value
-
-			this.onchange $scope.options.defaultValue
-			return
-		]
-	}
-]
-
-.directive "crosetText", () ->
-	return {
-		restirct: "E"
-		scope: {
-			options: "="
-		}
-		templateUrl: "input-text.html"
-	}
-
-.directive "crosetHeadline", () ->
-	return {
-		restirct: "E"
-		scope: {
-			options: "="
-		}
-		templateUrl: "input-headline.html"
-	}
-
-.directive("crosetColorIcon", ["showColorPicker", "GetTextColor", "HexToRgb", (showColorPicker, GetTextColor, HexToRgb) ->
-	return {
-		restrict: "E"
-		scope: {
-			options: "="
-		}
-		require: "^crosetDynamicInput"
-		templateUrl: "input-color-icon.html"
-		link: (scope, element, attrs, dynamicInput) ->
-			scope.onclick = ()->
-				showColorPicker.showColorPicker (value)->
-					setColor value
-				, scope.color
-
-			setColor = (value)->
-				scope.color = value
-				scope.textColor = GetTextColor HexToRgb value
-
-				dynamicInput.onchange scope.color
-
-
-			setColor(scope.options.defaultValue)
-
-	}
-])
-
-.directive("crosetToggleIcon", ["ColorPallet", (ColorPallet) ->
-	return {
-		restrict: "E"
-		scope: {
-			options: "="
-		}
-		require: "^crosetDynamicInput"
-		templateUrl: "input-toggle-icon.html"
-		link: (scope, element, attrs, dynamicInput) ->
-
-			getColor = () ->
-				if scope.disabled
-					return "#888"
-				else
-					return ColorPallet.mc
-
-			if angular.isUndefined scope.options.disabled
-				scope.disabled = true
+			if !$scope.isTemplate
+				SelectedElementUUID.set $attrs.uuid						# 追加した要素を選択された状態
 			else
-				scope.disabled = scope.options.disabled
-
-			scope.color = getColor()
-
-			scope.onclick = ()->
-				scope.disabled = !scope.disabled
-				scope.color = getColor()
-				dynamicInput.onchange(!scope.disabled)				# 変更イベントを呼び出し
-
-	}
-])
-
-.directive "crosetTextbox", ()->
-	return {
-		restrict: "E"
-		require: "^crosetDynamicInput"
-		scope: {
-			options: "="
-		}
-		templateUrl: "input-textbox.html"
-		link: (scope, element, attrs, dynamicInput) ->
-			scope.value = scope.options.defaultValue
-			scope.onchange = () ->
-				dynamicInput.onchange scope.value
-	}
-
-.directive "crosetTextarea", ()->
-	return {
-		restrict: "E"
-		require: "^crosetDynamicInput"
-		scope: {
-			options: "="
-		}
-		templateUrl: "input-textarea.html"
-		link: (scope, element, attrs, dynamicInput) ->
-			scope.value = scope.options.defaultValue
-			scope.onchange = () ->
-				dynamicInput.onchange scope.value
-	}
+				SelectedTemplate.set $attrs.uuid
 
 
-
-.directive "crosetNumber", ()->
-	return {
-		restrict: "E"
-		require: "^crosetDynamicInput"
-		scope: {
-			options: "="
-		}
-		templateUrl: "input-number.html"
-		link: (scope, element, attrs, dynamicInput) ->
-			scope.value = scope.options.defaultValue
-			scope.onchange = () ->
-				dynamicInput.onchange scope.value
-	}
-
-.directive "crosetSlider", ["getUUID", (getUUID)->
-	return {
-		restrict: "E"
-		require: "^crosetDynamicInput"
-		scope: {
-			options: "="
-		}
-		templateUrl: "input-slider.html"
-
-		link: (scope, element, attrs, dynamicInput) ->
-			scope.id = getUUID()
-			scope.value = scope.options.defaultValue
-			scope.onchange = () ->
-				dynamicInput.onchange scope.value
-	}
-]
-
-.directive "crosetSelect", ["getUUID", (getUUID)->
-	return {
-		restrict: "E"
-		require: "^crosetDynamicInput"
-		scope: {
-			options: "="
-		}
-		templateUrl: "input-select.html"
-
-		link: (scope, element, attrs, dynamicInput) ->
-			scope.id = getUUID()
-			scope.value = scope.options.defaultValue
-			scope.onchange = () ->
-				dynamicInput.onchange scope.value
-
-	}
-]
-
-
-
-.directive "resizer", [() ->
-	return {
-		restrict: "E"
-		templateUrl: "resizer.html"
-		link: (scope, element, attrs) ->
+		]
 
 	}
 
-]
+

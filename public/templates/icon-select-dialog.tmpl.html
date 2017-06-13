@@ -1,0 +1,15 @@
+
+
+
+
+
+<div class="md-padding" layout="column" style="height: 600px; width: 800px;padding: 50px;">
+  <div flex layout="column" ng-repeat="(title, row) in icons">
+    <span font-size="15px"> {{title}} </span>
+    <div flex layout="row" layout-wrap layout-align="center start">
+      <div ng-repeat="id in row" ng-click="onselect(id)" style="padding: 20px;">
+        <md-icon aria-label="" class="material-icons" style="font-size:48px;width:48px;height:48px;"> {{id}} </md-icon>
+      </div>
+    </div>
+  </div>
+</div>

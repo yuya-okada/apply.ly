@@ -28,10 +28,16 @@ setInterval(function() {
 
 // 画面遷移
 CrosetBlock.intentBlockGenerator = function() {
-  console.log("ビルド");
   Blockly.JavaScript["intent"] = function (block) {
     var code = "stateGo('screen" + block.getFieldValue("ID") + "')";
-    console.log("インテント", block.getFieldValue("ID"));
+    return code
+  }
+}
+
+// テンプレートのインスタンス化
+CrosetBlock.instantiateBlockGenerator = function() {
+  Blockly.JavaScript["instantiate"] = function (block) {
+    var code = "ElementsManager.duplicate(" + block.getFieldValue("TEMPLATE") + "', true)";
     return code
   }
 }

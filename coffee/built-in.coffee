@@ -7,6 +7,7 @@ crosetModule
 	return {
 		group:
 			name: "グループ"
+			group: true
 			icon: "folder"
 			width: 150
 			height: 150
@@ -20,12 +21,187 @@ crosetModule
 								type: "select"
 								size: 100
 								options:
-									defaultValue: "free"
+									defaultValue: "hidden"
+									label: "オーバーフロー"
+									items: {
+										"隠す" : "hidden"
+										"表示" : "visible"
+										"スクロール" : "scroll"
+									}
+									result: "overflow"
+							}
+						]
+					]
+				}
+				{
+					title: "図形"
+					icon: "border_all"
+					propertyInputs: [
+						[
+							{
+								type: "color_icon"
+								size: 30
+								options:
+									icon: "format_color_fill"
+									defaultValue: "#ffffff"
+									result: "bgColor"
+							}
+						]
+						[
+							{
+								type: "text"
+								size: 20
+								options:
+									text: "角丸"
+							}
+							{
+								type: "slider"
+								size: 80
+								options:
+									defaultValue: 3
+									min: 0
+									max: 150
+									step: 1
+									result: "borderRadius"
+							}
+						]
+						[
+							{
+								type: "headline"
+								size: 100
+								options	:
+									text: "影"
+									marginTop: 15
+							}
+						]
+						[
+							{
+								type: "text"
+								size: 20
+								options:
+									text: "透明度"
+							}
+							{
+								type: "slider"
+								size: 80
+								options:
+									defaultValue: 100
+									min: 0
+									max: 100
+									step: 1
+									result: "shadowOpacity"
+							}
+						]
+
+						[
+							{
+								type: "text"
+								size: 20
+								options:
+									text: "位置(横)"
+							}
+							{
+								type: "slider"
+								size: 80
+								options:
+									defaultValue: 0
+									min: -20
+									max: 20
+									step: 1
+									result: "shadowX"
+							}
+						]
+						[
+							{
+								type: "text"
+								size: 20
+								options:
+									text: "位置(縦)"
+							}
+							{
+								type: "slider"
+								size: 80
+								options:
+									defaultValue: 1
+									min: -20
+									max: 20
+									step: 1
+									result: "shadowY"
+							}
+						]
+						[
+							{
+								type: "text"
+								size: 20
+								options:
+									text: "ぼかし"
+							}
+							{
+								type: "slider"
+								size: 80
+								options:
+									defaultValue: 5
+									min: 0
+									max: 80
+									step: 1
+									result: "shadowGradation"
+							}
+						]
+						[
+							{
+								type: "headline"
+								size: 100
+								options:
+									text: "枠線"
+									marginTop: 15
+							}
+						]
+						[
+							{
+								type: "color_icon"
+								size: 30
+								options:
+									icon: "format_color_fill"
+									defaultValue: "#000000"
+									result: "borderColor"
+							}
+						]
+						[
+							{
+								type: "slider"
+								size: 100
+								options:
+									defaultValue: 0
+									min: 0
+									max: 20
+									step: 1
+									result: "borderWidth"
+							}
+						]
+					]
+				}
+			]
+		listGroup:
+			name: "リストグループ"
+			group: true
+			icon: "view_list"
+			width: 150
+			height: 150
+			properties: [
+				{
+					title: "レイアウト"
+					icon: "settings"
+					propertyInputs: [
+						[
+							{
+								type: "select"
+								size: 100
+								options:
+									defaultValue: "column"
 									label: "配置"
 									items: {
-										"自由配置" : "free"
-										"縦型配置" : "row"
-										"横型配置" : "column"
+										"縦型配置" : "column"
+										"横型配置" : "row"
 									}
 									result: "layout"
 							}
@@ -489,7 +665,48 @@ crosetModule
 					]
 				}
 			]
+		icon:
+			name: "アイコン"
+			icon: "insert_emoticon"
+			unresizable: "xy"
+			properties: [
+				{
+					title: "アイコン"
+					icon: "settings"
+					propertyInputs: [
+						[
+							{
+								type: "icon"
+								size: 30
+								options:
+									defaultValue: "3d_rotation"
+									result: "icon"
+							}
 
+							{
+								type: "color-icon"
+								size: 30
+								options:						# このInput特有の設定。インプットに送られる
+									icon: "text_format"
+									defaultValue: "#666666"
+									result: "textColor"
+								# col: 24
+							}
+						]
+						[
+							{
+								type: "number"
+								size: 100
+								options:
+									defaultValue: 24
+									label: "フォントサイズ"
+									step: 2
+									result: "fontSize"
+							}
+						]
+					]
+				}
+			]
 		square:
 			name: "四角系"
 			icon: "crop_square"
@@ -687,9 +904,18 @@ crosetModule
 	}
 
 
-.factory "ScreenElementsManager", ["Elements", "ElementDatas", "$compile", "$injector", (Elements, ElementDatas, $compile, $injector) ->
+.factory "getUUID", () ->
+	return () ->
+		'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace /[xy]/g, (c) ->
+			r = Math.random() * 16 | 0
+			v = if c is 'x' then r else (r & 0x3|0x8)
+			v.toString(16)
+
+.factory "ScreenElementsManager", ["Elements", "ElementDatas", "$compile", "$injector", "getUUID", (Elements, ElementDatas, $compile, $injector, getUUID) ->
 	return (screenElement, isPublic) ->
 		screenScope = null
+		templatePreviewElement = null
+		templatePreviewScope = null
 		screenElement.empty()
 
 		that = this
@@ -698,12 +924,24 @@ crosetModule
 		initScope = () ->
 			screenScope = screenElement.scope()
 			screenScope.get = that.get
+			screenScope.addChildElement = that.addChildElement
+			screenScope.getTemplate = that.getTemplate
 			screenScope.list = {}
+			screenScope.templates = {}
+
+
+		initTemplatePreview = () ->
+			templatePreviewElement = $("#template-preview")
+			templatePreviewScope = templatePreviewElement.scope()
 
 		this.init = () ->						# Screenが変更された場合は追加前に必ず呼ぶ
 			screenScope = null
 			screenScope.list = {}
-
+			screenScope.templates = {}
+		
+		this.getScope = () ->
+			return screenScope
+		
 		this.get = (id) ->						# 引数にuuidを渡した場合、そのidの要素を返す。引数がない場合、リスト全体を返す。
 			if id
 				searchInArray = (array) ->
@@ -737,6 +975,23 @@ crosetModule
 							return true
 
 			searchInArray screenScope?.list
+
+
+		# 特定の要素の兄弟要素を取得
+		this.getSiblings = (id) ->
+			searchParent = (array) ->
+				for uuid, data of array
+					if uuid == id
+						return array
+					else
+						result = searchParent data.children
+						if result
+							return result
+
+				return null
+
+			return searchParent screenScope?.list
+
 
 		this.setData = (id, data) ->     # 任意の要素を検索して新たなデータを代入
 			searchInArray = (array) ->
@@ -780,14 +1035,12 @@ crosetModule
 			scope = screenScope.$new true
 			scope.uuid = uuid
 			scope.s = screenScope
-			e = $compile(e)(scope)						# 追加した要素にディレクティブを適応させるためにコンパイル
-			screenElement.append e							# スクリーンに追加
 
 			options = {}
 			screenScope.list[uuid] = {
 				type: type
+				group: ElementDatas[type].group 
 				name: ElementDatas[type].name
-				element: e
 				options:
 					top: "0px"
 					left: "0px"
@@ -795,10 +1048,15 @@ crosetModule
 					height: ElementDatas[type].height
 
 				zIndex: Object.keys(screenScope.list).length
+				unresizable: ElementDatas[type].unresizable
 			}
 
 			screenScope.zIndexes?.push uuid
-
+	
+			e = $compile(e)(scope)						# 追加した要素にディレクティブを適応させるためにコンパイル
+			screenElement.append e							# スクリーンに追加
+			screenScope.list[uuid].element =	e
+	
 		this.addFromData = (data, uuid) ->
 			if !screenScope 		# 初期化されてない場合初期化
 				initScope()
@@ -825,12 +1083,13 @@ crosetModule
 			scope = screenScope.$new true
 			scope.uuid = uuid
 			scope.s = screenScope
+			scope.elementsManager = this
 
+			screenScope.list[uuid] = data
+	
 			e = $compile(e)(scope)								# 追加した要素にディレクティブを適応させるためにコンパイル
 			screenElement.append e							# スクリーンに追加
-
 			data.element = e
-			screenScope.list[uuid] = data
 
 		this.delete = (uuid) ->
 			this.get(uuid).element.remove()
@@ -838,7 +1097,21 @@ crosetModule
 			VisiblePropertyCards.set []
 
 			this.deleteData uuid
-
+		
+		this.duplicate = (data) ->
+			data = angular.copy data
+			changeChildName = (children) ->
+				for id, child of children
+					children[getUUID()] = child
+					delete children[id]
+					if child?.children 
+						changeChildName child.children
+			
+			data.zIndex = Object.keys(screenScope.list).lengt
+			changeChildName data.children
+			
+			this.addFromData data, getUUID()
+			
 		this.deleteData = (id) ->			# データのみ除去してdomは残す
 
 			deleteInArray = (array) ->
@@ -850,7 +1123,7 @@ crosetModule
 						deleteInArray data.children
 
 
-			for uuid, data of screenScope.list[id]
+			for uuid, data of screenScope.list
 				deleteInArray data.children
 
 			delete screenScope.list[id]
@@ -871,7 +1144,6 @@ crosetModule
 				if child.zIndex > data.zIndex
 					child.zIndex--
 
-			screenScope.get(parentId).children[childId] = data
 			this.addChildElement parentId, childId, data
 			screenScope.get(childId).zIndex = Object.keys(this.get(parentId).children).length
 
@@ -881,11 +1153,16 @@ crosetModule
 
 
 
-
+		that = this
 		# 子要素のDOMを生成
-		this.addChildElement = (parentId, childId, childData) ->
+		this.addChildElement = (parentId, childId, childData, isTemplate) ->
 			if !screenScope 		# 初期化されてない場合初期化
 				initScope()
+				
+			if !isTemplate
+				this.get(parentId).children[childId] = childData
+			else
+				this.getTemplate(parentId).children[childId] = childData
 
 			$("#" + childId).remove()					# すでにある場合最初に削除する
 
@@ -911,11 +1188,18 @@ crosetModule
 			scope = screenScope.$new true
 			scope.uuid = childId
 			scope.s = screenScope
+			scope.elementsManager = this
+			scope.isTemplate = isTemplate
 
 			e = $compile(e)(scope)								# 追加した要素にディレクティブを適応させるためにコンパイル
-			e.appendTo this.get(parentId)?.element.children(".croset-element-group-div")							# スクリーンに追加
-
 			childData.element = e
+			if !isTemplate
+				e.appendTo this.get(parentId)?.element.children(".croset-element-group-div")							# スクリーンに追加
+			else
+				e.appendTo this.getTemplate(parentId)?.element.children(".croset-element-group-div")							# スクリーンに追加
+
+			
+			
 
 
 		# 特定の要素に子要素を追加すると呼ばれるコールバックを設定。
@@ -923,27 +1207,136 @@ crosetModule
 		this.setAddChildCallback = (fnc) ->
 			childAddedCallbacks.push fnc
 
-		# 特定の要素の兄弟要素を取得
-		this.getSiblings = (id) ->
-			searchParent = (array) ->
+
+		# 与えられたidの要素をテンプレート化する
+		this.template = (uuid) ->
+			if !screenScope
+				initScope()
+			
+			element = $.extend true, {}, this.get(uuid)
+			templateId = getUUID()
+			delete element.zIndex
+			screenScope.templates[templateId] = element
+
+
+		this.addTemplateFromData = (data, uuid) ->
+			if !screenScope
+				initScope()
+
+			screenScope.templates[uuid] = data
+
+
+		this.getTemplates = () ->
+			if !screenScope
+				initScope()
+
+
+			return screenScope.templates
+
+
+		this.getTemplate = (id) ->
+			if !screenScope
+				initScope()
+
+			searchInArray = (array) ->
 				for uuid, data of array
 					if uuid == id
-						return array
+						return data
 					else
-						result = searchParent data.children
+						result = searchInArray data.children
 						if result
 							return result
 
 				return null
 
-			return searchParent screenScope?.list
+			result = searchInArray screenScope.templates
+			return result
 
+		this.setTemplateOption = (id, key, value) ->
+			searchInArray = (array) ->
+				for uuid, data of array
+					if uuid == id
+						array[uuid].options[key] = value
+						return true
+
+
+					else
+						result = searchInArray data.children
+						if result
+							return true
+
+			searchInArray screenScope?.templates
+
+
+
+		this.renameTemplate = (uuid, name) ->
+			this.getTemplate(uuid).name = name
+
+
+		this.deleteTemplate = (uuid) ->
+			this.getTemplate(uuid).element?.remove?()
+			VisiblePropertyCards = $injector.get("VisiblePropertyCards")		# アプリとして実行した時にVisiblePropertyCardsが存在しないとエラーが起きるので、使うときだけinjectする
+			VisiblePropertyCards.set []
+
+			this.deleteTemplateData uuid
+
+
+		this.deleteTemplateData = (id) ->			# データのみ除去してdomは残す
+
+			deleteInArray = (array) ->
+				if array
+					if array[id]
+						delete array[id]
+
+					for uuid, data of array
+						deleteInArray data.children
+
+
+			for uuid, data of screenScope.templates
+				deleteInArray data.children
+
+			delete screenScope.templates[id]
+
+
+		this.showTemplate = (uuid) ->
+			if !templatePreviewScope 		# 初期化されてない場合初期化
+				initTemplatePreview()
+
+			templatePreviewElement.empty()
+
+			data = this.getTemplate uuid
+
+			e = $ "<croset-element-#{data.type}>"
+				.addClass "croset-element"
+				.attr "id", uuid
+				.attr "croset-element-type", data.type			# タイプ。ex. Button, Text ...
+				.attr "uuid", uuid								# 固有のID
+
+			e.width data.options.width
+				.height data.options.height
+				.css {
+					top: data.options.top
+					left: data.options.left
+				}
+
+			scope = templatePreviewScope.$new true
+			scope.uuid = uuid
+			scope.isTemplate = true
+			scope.elementsManager = this
+			scope.s = {
+				get: this.getTemplate
+			}
+			# scope.elementsManager = this
+			e = $compile(e)(scope)											# 追加した要素にディレクティブを適応させるためにコンパイル
+			templatePreviewElement.append e							# スクリーンに追加
+	
+			this.getTemplate(uuid).element = e
 
 
 		this.changeZIndex = (fromUUID, toZIndex) ->
 			fromZIndex = this.get(fromUUID).zIndex
 
-			this.getSiblings fromUUID
+			parent = this.getSiblings fromUUID
 
 			if fromZIndex <= toZIndex
 				for id, child of parent
@@ -982,20 +1375,32 @@ crosetModule
 ]
 
 
-.directive "crosetElementGroup", ["CurrentScreenData", (CurrentScreenData)->
+.directive "crosetElementGroup", [()->
 	return {
 		restrict: "E"
 		templateUrl: "template-group.html"
 		link: (scope, element, attrs) ->
 
-			screenElementsManager = CurrentScreenData.elementsManager
-
-
 			for id, data of scope.s.get(scope.uuid)?.children
-				screenElementsManager.addChildElement scope.uuid, id, data
+				scope.elementsManager.addChildElement scope.uuid, id, data, scope.isTemplate
 
 	}
 ]
+
+
+
+.directive "crosetElementListgroup", [()->
+	return {
+		restrict: "E"
+		templateUrl: "template-listgroup.html"
+		link: (scope, element, attrs) ->
+
+			for id, data of scope.s.get(scope.uuid)?.children
+				scope.elementsManager.addChildElement scope.uuid, id, data, scope.isTemplate
+
+	}
+]
+
 
 .directive "crosetElementButton", ()->
 	return {
@@ -1012,6 +1417,14 @@ crosetModule
 	return {
 		restrict: "E"
 		templateUrl: "template-text.html"
+		link: (scope, element, attrs) ->
+	}
+
+
+.directive "crosetElementIcon", ()->
+	return {
+		restrict: "E"
+		templateUrl: "template-icon.html"
 		link: (scope, element, attrs) ->
 	}
 
