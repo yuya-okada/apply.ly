@@ -5,16 +5,19 @@ crosetModule = angular.module "Croset"
 crosetModule.service "VisiblePropertyCards", () ->
 	list = []
 	callbacks = []
+	boxes = []
 	this.onchange = (func) -> callbacks.push func    # コールバックを登録
 
 	this.get = () -> return list
 	this.set = (ls, isTemplate) ->
 		list = ls
 		callback isTemplate
+	
 	this.push = (val) ->
 		list.push val
 		callback()
-
+	
+	
 	callback = (isTemplate) ->
 		for func in callbacks
 			func list, isTemplate
@@ -24,6 +27,7 @@ crosetModule.service "VisiblePropertyCards", () ->
 # 要素のプロパティのデータを渡すことで画面にプロパティを表示する
 .service "SetElementProperty", ["VisiblePropertyCards", "ElementDatas", "CurrentScreenData", (VisiblePropertyCards, ElementDatas, CurrentScreenData) ->
 	return (uuid, isTemplate) ->
+			
 		VisiblePropertyCards.set([])
 		data = null
 		if !isTemplate		# 普通の要素の場合
@@ -58,7 +62,9 @@ crosetModule.service "VisiblePropertyCards", () ->
 	$scope.elementDatas = ElementDatas
 	$scope.templates = screenElementsManager.getTemplates()
 
-	$scope.$watch SelectedElementUUID.get, (newVal, oldVal) ->
+	$scope.$watch () ->
+		return Object.keys(screenElementsManager.get()).length
+	, (newVal, oldVal) ->
 		if newVal
 			$scope.selectedElementUUID = newVal
 			$scope.screenElements = screenElementsManager.get()
@@ -78,16 +84,6 @@ crosetModule.service "VisiblePropertyCards", () ->
 ]
 
 
-# リスト上の配置済みアイテム
-.directive "hierarchyItem", [() ->
-	return {
-		restrict: "E"
-		templateUrl: "hierarchy-item.html"
-		controller: ["$attrs", ($attrs) ->
-			this.isTemplate = $attrs.istemplate
-		]
-	}
-]
 
 # リスト上の配置済みアイテム
 .directive "hierarchyChildItem", ["$compile", ($compile) ->
@@ -104,7 +100,7 @@ crosetModule.service "VisiblePropertyCards", () ->
 ]
 
 # リスト上の配置済みアイテム
-.directive "crosetHierarchyItem", ["$mdDialog", "$compile", "ElementDatas", "SelectedElementUUID", "CurrentScreenData", "SelectedTemplate", "getUUID", ($mdDialog,  $compile, ElementDatas, SelectedElementUUID, CurrentScreenData, SelectedTemplate, getUUID) ->
+.directive "crosetHierarchyItem", ["$mdDialog", "$compile", "ElementDatas", "SelectedElementUUID", "CurrentScreenData", "SelectedTemplate", "getUUID", "ListItemSelect", ($mdDialog,  $compile, ElementDatas, SelectedElementUUID, CurrentScreenData, SelectedTemplate, getUUID, ListItemSelect) ->
 	return {
 		restrict: "A"
 		require: "^hierarchyItem"
@@ -117,6 +113,8 @@ crosetModule.service "VisiblePropertyCards", () ->
 					SelectedElementUUID.set scope.element.$$key
 				else
 					SelectedTemplate.set scope.element.$$key
+
+				ListItemSelect.close()
 
 				return
 
@@ -240,9 +238,7 @@ crosetModule.service "VisiblePropertyCards", () ->
 	return {
 		scope: true
 		link: (scope, element, attrs) ->
-			console.log "ボタン"
 			scope.onclick = () ->
-				console.log "ボタンクリックど"
 				CurrentScreenData.elementsManager.add element.attr("add-element-card"), getUUID()
 				return
 
@@ -344,18 +340,55 @@ crosetModule.service "VisiblePropertyCards", () ->
 					compiled = $compile(newEl[0]) scope
 					el.append compiled
 			}
-		controller: ["$scope", "$attrs", "CurrentScreenData", "SelectedElementUUID", "SelectedTemplate",
-		($scope, $attrs, CurrentScreenData, SelectedElementUUID, SelectedTemplate) ->
+		controller: ["$scope", "$attrs", "CurrentScreenData", "SelectedElementUUID", "SelectedTemplate", "SelectedElementOrTemplateUUID", "ProjectData",
+		($scope, $attrs, CurrentScreenData, SelectedElementUUID, SelectedTemplate, SelectedElementOrTemplateUUID, ProjectData) ->
 
 			this.onchange = (value) ->
 				if !$scope.$parent.isTemplate
 					CurrentScreenData.elementsManager.set SelectedElementUUID.get(), $scope.options.result, value
+					
 				else
 					CurrentScreenData.elementsManager.setTemplateOption SelectedTemplate.get(), $scope.options.result, value
 
 			this.onchange $scope.options.defaultValue
+			
+			boxProperty = CurrentScreenData.elementsManager?.boxProperties[SelectedElementOrTemplateUUID.get()]
+			if boxProperty
+				$scope.$parent.box = boxProperty[$scope.options.result]
+				
+				
+			$scope.$parent.onDrop = (ev, ui) ->
+				$scope.$parent.box = angular.element(ui.draggable).scope().box
+				CurrentScreenData.elementsManager.setBoxToProperty SelectedElementOrTemplateUUID.get(), $scope.options.result, $scope.$parent.box
+			
+			ProjectData.onVariableChanged = (variables) ->
+				if variables.indexOf($scope.$parent.$box) != -1
+					$scope.$parent.box = null
+					
+			$scope.$parent.removeBoxToProperty = () ->
+				CurrentScreenData.elementsManager.removeBoxToProperty SelectedElementOrTemplateUUID.get(), $scope.options.result, $scope.$parent.box
+				
 			return
 		]
+	}
+]
+
+.directive "crosetDynamicInputBorder", ["CurrentScreenData", "SelectedElementOrTemplateUUID", (CurrentScreenData, SelectedElementOrTemplateUUID) ->
+	return {
+		restrict: "C"
+		link: (scope, el) ->
+					
+			scope.removeBox = (ev) ->
+				scope.removeBoxToProperty()
+				scope.box = null
+				ev.stopPropagation()
+				
+			scope.hoverIn = () ->
+				scope.hover = true
+			
+			scope.hoverOut = () ->
+				scope.hover = false
+				
 	}
 ]
 
@@ -377,7 +410,7 @@ crosetModule.service "VisiblePropertyCards", () ->
 		templateUrl: "input-headline.html"
 	}
 
-.directive("crosetColorIcon", ["showColorPicker", "GetTextColor", "HexToRgb", (showColorPicker, GetTextColor, HexToRgb) ->
+.directive("crosetColorIcon", ["$mdColorPicker", "GetTextColor", "HexToRgb", ($mdColorPicker, GetTextColor, HexToRgb) ->
 	return {
 		restrict: "E"
 		scope: {
@@ -386,10 +419,13 @@ crosetModule.service "VisiblePropertyCards", () ->
 		require: "^crosetDynamicInput"
 		templateUrl: "input-color-icon.html"
 		link: (scope, element, attrs, dynamicInput) ->
-			scope.onclick = ()->
-				showColorPicker.showColorPicker (value)->
-					setColor value
-				, scope.color
+			scope.onclick = (ev)->
+				$mdColorPicker.show {
+					value: scope.color
+					$event: ev
+				}
+				.then (color) ->
+					setColor color
 
 			setColor = (value)->
 				scope.color = value
@@ -430,6 +466,23 @@ crosetModule.service "VisiblePropertyCards", () ->
 				scope.disabled = !scope.disabled
 				scope.color = getColor()
 				dynamicInput.onchange(!scope.disabled)				# 変更イベントを呼び出し
+
+	}
+])
+
+.directive("crosetCheckbox", [() ->
+	return {
+		restrict: "E"
+		scope: {
+			options: "="
+		}
+		require: "^crosetDynamicInput"
+		templateUrl: "input-checkbox.html"
+		link: (scope, element, attrs, dynamicInput) ->
+			
+			scope.value = scope.options.defaultValue
+			scope.onchange = ()->
+				dynamicInput.onchange scope.value				# 変更イベントを呼び出し
 
 	}
 ])

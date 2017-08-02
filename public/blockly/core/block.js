@@ -1140,7 +1140,10 @@ Blockly.Block.prototype.interpolate_ = function(message, args, lastDummyAlign) {
               field = new Blockly.FieldColour(element['colour']);
               break;
             case 'field_element':
-              field = new Blockly.FieldElement(element['colour']);
+              field = new Blockly.FieldElement(element['filter'], element['defaultId']);
+              break;
+            case 'field_template':
+              field = new Blockly.FieldTemplate(element['filter'], element['defaultId']);
               break;
             case 'field_variable':
               field = Blockly.Block.newFieldVariableFromJson_(element);

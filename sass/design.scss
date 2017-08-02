@@ -9,6 +9,12 @@
 
 }
 
+
+#full-zone {
+	flex: 0 !important;
+}
+
+
 #right-zone {
 	height: calc(100% + 60px) !important;
 	margin-top: -30px;
@@ -37,9 +43,8 @@
 
 
 		#add-element {
-			font-size: 23px;
 			position: absolute;
-			right: 15px;
+			left: 15px;
 			bottom: 15px;
 
 		}
@@ -162,7 +167,85 @@
 				margin-top: 20px;
 				padding: 0 20px;
 			}
+		
+			croset-dynamic-input {
+				position: relative;
+				
+				.croset-dynamic-input-border {
+					position: absolute;
+					top:0;
+					left:0;
+					right:0;
+					bottom:0;
 
+					&:focus {
+						outline: none !important;
+					}
+					
+					&::before {
+						box-sizing: inherit;
+						content: '';
+						position: absolute;
+						border: 2px solid transparent;
+						width: 0;
+						height: 0;
+						top: 0;
+    				left: 0;
+						transition: width 0.25s ease-out, height 0.25s ease-out 0.25s;
+					}
+					&::after {
+						box-sizing: inherit;
+						content: '';
+						position: absolute;
+						top: 0;
+						left: 0;
+						border: 2px solid transparent;
+						width: 0;
+						height: 0;
+						transition:  height 0.25s ease-out, width 0.25s ease-out 0.25s
+					}
+					
+				}
+				&.croset-dynamic-input-box-attached {
+					
+					.croset-dynamic-input-border {
+						&::before {
+							width: 100%;
+							height: 100%;
+							border-top-color: #1B96FE;
+							border-right-color: #1B96FE;
+						}
+						&::after {
+							width: 100%;
+							height: 100%;
+							border-left-color: #1B96FE;
+							border-bottom-color: #1B96FE;
+						}
+					}
+					.croset-dynamic-input-remove-border {
+						display: flex;
+						position: absolute;
+						top: 0px;
+						left: 0;
+						background-color: #1B96FE;
+						height: 20px;
+						color: white;
+						min-width: 30px;
+						align-content: center;
+						justify-content: center;
+						font-size: 14px;
+						cursor: pointer;
+						z-index: 22;
+
+						md-icon {
+							font-size: 14px;
+							color: white;		
+							text-align: center;
+						}
+					}
+				}
+			}
+			
 			croset-text {
 				span {
 					font-size: 13px;

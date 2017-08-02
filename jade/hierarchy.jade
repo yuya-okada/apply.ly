@@ -8,7 +8,7 @@ md-card#hierarchy-zone(ng-controller="HierarchyController")
 	
 			md-divider(ng-show="templates")
 			
-			md-subheader テンプレート
+			md-subheader(ng-show="templates") テンプレート
 			hierarchy-item(ng-repeat="element in templates | toArray" istemplate="true")
 
 		
@@ -17,8 +17,8 @@ md-card#hierarchy-zone(ng-controller="HierarchyController")
 
 		//- 要素を追加
 		//- クリックされたとき、「新しい要素」を表示するトリガーをONにしている
-		md-button#add-element.md-fab.md-accent(ng-click="animationTriggers.showNewElements=true") 
-			ng-md-icon(icon="add" style="fill: white" size="30")
+		md-button#add-element.md-raised.md-primary(ng-click="animationTriggers.showNewElements=true") 新しい要素を追加 
+			//- ng-md-icon(icon="add" style="fill: white" size="30")
 			//- span.icomoon-plus3
 		
 	

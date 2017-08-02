@@ -99,21 +99,27 @@
 /* line 6, ../../sass/program.scss */
 #left-zone {
   flex: 0 !important;
+  margin-top: 100%;
 }
 
-/* line 11, ../../sass/program.scss */
+/* line 12, ../../sass/program.scss */
+#full-zone {
+  flex: 0 !important;
+}
+
+/* line 17, ../../sass/program.scss */
 #program-zone {
   position: relative;
   padding: 0;
 }
 
-/* line 17, ../../sass/program.scss */
+/* line 23, ../../sass/program.scss */
 .blocklyToolboxDiv {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12);
   background-color: white;
   width: 240px;
 }
-/* line 23, ../../sass/program.scss */
+/* line 29, ../../sass/program.scss */
 .blocklyToolboxDiv .blocklyTreeRow:not(.blocklyHidden) {
   height: 60px;
   display: flex;
@@ -125,58 +131,73 @@
   color: rgba(0, 0, 0, 0.87);
   border-bottom: 1px solid #ddd;
 }
-/* line 33, ../../sass/program.scss */
+/* line 39, ../../sass/program.scss */
 .blocklyToolboxDiv .blocklyTreeRow:not(.blocklyHidden) .blocklyTreeLabel {
   font-size: 14px;
 }
 
-/* line 38, ../../sass/program.scss */
+/* line 44, ../../sass/program.scss */
 .blocklyFlyout {
   z-index: 100;
 }
-/* line 42, ../../sass/program.scss */
+/* line 48, ../../sass/program.scss */
 .blocklyFlyout .blocklyFlyoutBackground {
   border-radius: 0;
   fill: #fff;
 }
 
-/* line 48, ../../sass/program.scss */
+/* line 54, ../../sass/program.scss */
 .blocklyBubbleCanvas .blocklyFlyoutBackground {
   fill: #ddd;
 }
-/* line 53, ../../sass/program.scss */
+/* line 59, ../../sass/program.scss */
 .blocklyBubbleCanvas > g > g {
   filter: inherit;
 }
-/* line 56, ../../sass/program.scss */
+/* line 62, ../../sass/program.scss */
 .blocklyBubbleCanvas .blocklyDraggable {
   rx: 0;
   ry: 0;
   fill: #4696F7;
 }
 
-/* line 64, ../../sass/program.scss */
+/* line 70, ../../sass/program.scss */
 .blocklyMainBackground {
   fill: #f5f5f5 !important;
 }
 
-/* line 68, ../../sass/program.scss */
+/* line 74, ../../sass/program.scss */
 .blocklyPathDark, .blocklyPathLight {
   display: none;
 }
 
-/* line 71, ../../sass/program.scss */
+/* line 77, ../../sass/program.scss */
 .blocklySelected > .blocklyPath {
   stroke-width: 0px !important;
 }
 
-/* line 75, ../../sass/program.scss */
+/* line 81, ../../sass/program.scss */
 .blocklyEditableText > rect {
   rx: 2 !important;
   ry: 2 !important;
 }
 
-/* line 81, ../../sass/program.scss */
+/* line 87, ../../sass/program.scss */
 .blocklyWidgetDiv {
   z-index: 100 !important;
+}
+
+/* line 91, ../../sass/program.scss */
+._md-menu-backdrop {
+  z-index: 102 !important;
+}
+
+/* line 95, ../../sass/program.scss */
+.md-dialog-container {
+  z-index: 103 !important;
+}
+
+/* line 99, ../../sass/program.scss */
+._md-open-menu-container {
+  z-index: 102 !important;
 }

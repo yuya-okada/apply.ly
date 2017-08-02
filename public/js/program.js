@@ -1,325 +1,91 @@
 var crosetModule;
 
+if (!window.CrosetBlock) {
+  window.CrosetBlock = {};
+}
+
 crosetModule = angular.module("Croset");
 
-crosetModule.value("GeneralComponents", {
-  "onload": {
-    type: "mat",
-    appearance: [
-      {
-        type: "text",
-        options: {
-          text: "この画面は始まった時"
-        }
-      }, {
-        type: "mat",
-        result: "mat"
-      }
-    ],
-    compile: "$events.onload(function({ ${mat} })) "
-  },
-  "intentTo": {
-    type: "function",
-    appearance: [
-      {
-        type: "text",
-        options: {
-          text: "画面を移動"
-        }
-      }, {
-        type: "screen",
-        defaultValue: "",
-        result: "screen"
-      }
-    ],
-    compile: "$state.go('screen' + ${screen})"
-  },
-  "variable": {
-    type: "variable",
-    compile: "${val}"
-  },
-  "hensu": {
-    type: "property",
-    text: "変数",
-    compile: "val"
-  },
-  "exp": {
-    type: "function",
-    appearance: [
-      {
-        type: "expbox",
-        defaultValue: "式",
-        result: "exp"
-      }
-    ],
-    compile: "${exp}"
-  },
-  "text": {
-    type: "function",
-    appearance: [
-      {
-        type: "textbox",
-        defaultValue: "文字",
-        result: "text"
-      }
-    ],
-    compile: "${text}"
-  },
-  "equal": {
-    type: "function",
-    appearance: [
-      {
-        type: "expbox",
-        defaultValue: "式",
-        result: "exp1"
-      }, {
-        type: "text",
-        options: {
-          text: "="
-        }
-      }, {
-        type: "expbox",
-        defaultValue: "式",
-        result: "exp2"
-      }
-    ],
-    compile: "(${exp1} == ${exp2})"
-  },
-  "plus": {
-    type: "function",
-    appearance: [
-      {
-        type: "expbox",
-        defaultValue: "式",
-        result: "exp1"
-      }, {
-        type: "text",
-        options: {
-          text: "+"
-        }
-      }, {
-        type: "expbox",
-        defaultValue: "式",
-        result: "exp2"
-      }
-    ],
-    compile: "(${exp1} + ${exp2})"
-  },
-  "minus": {
-    type: "function",
-    appearance: [
-      {
-        type: "expbox",
-        defaultValue: "式",
-        result: "exp1"
-      }, {
-        type: "text",
-        options: {
-          text: "-"
-        }
-      }, {
-        type: "expbox",
-        defaultValue: "式",
-        result: "exp2"
-      }
-    ],
-    compile: "(${exp1} - ${exp2})"
-  },
-  "times": {
-    type: "function",
-    appearance: [
-      {
-        type: "expbox",
-        defaultValue: "式",
-        result: "exp1"
-      }, {
-        type: "text",
-        options: {
-          text: "✕"
-        }
-      }, {
-        type: "expbox",
-        defaultValue: "式",
-        result: "exp2"
-      }
-    ],
-    compile: "(${exp1} * ${exp2})"
-  },
-  "devide": {
-    type: "function",
-    appearance: [
-      {
-        type: "expbox",
-        defaultValue: "式",
-        result: "exp1"
-      }, {
-        type: "text",
-        options: {
-          text: "÷"
-        }
-      }, {
-        type: "expbox",
-        defaultValue: "式",
-        result: "exp2"
-      }
-    ],
-    compile: "(${exp1} / ${exp2})"
-  },
-  "メッセージを表示": {
-    type: "function",
-    appearance: [
-      {
-        type: "text",
-        options: {
-          text: "メッセージを表示"
-        }
-      }, {
-        type: "textbox",
-        defaultValue: "メッセージ",
-        result: "message"
-      }
-    ],
-    compile: "alert(${message})"
-  },
-  "toint": {
-    type: "function",
-    appearance: [
-      {
-        type: "text",
-        options: {
-          text: "数字に変換"
-        }
-      }, {
-        type: "textbox",
-        defaultValue: "条件",
-        result: "text"
-      }
-    ],
-    compile: "parseInt(${text})"
-  },
-  "if": {
-    type: "mat",
-    appearance: [
-      {
-        type: "text",
-        options: {
-          text: "もし"
-        }
-      }, {
-        type: "expbox",
-        defaultValue: "条件",
-        result: "exp"
-      }, {
-        type: "text",
-        options: {
-          text: "なら"
-        }
-      }, {
-        type: "mat",
-        result: "mat"
-      }
-    ],
-    compile: "if(${exp}) { ${mat} }"
-  },
-  "ifelse": {
-    type: "mat",
-    appearance: [
-      {
-        type: "text",
-        options: {
-          text: "もし"
-        }
-      }, {
-        type: "expbox",
-        defaultValue: "条件",
-        result: "exp"
-      }, {
-        type: "mat",
-        result: "mat"
-      }, {
-        type: "text",
-        options: {
-          text: "でなければ"
-        }
-      }, {
-        type: "mat",
-        result: "mat2"
-      }
-    ],
-    compile: "if(${exp}) { ${mat} } else { ${mat2} }"
-  },
-  "interval": {
-    type: "mat",
-    appearance: [
-      {
-        type: "expbox",
-        defaultValue: "1",
-        result: "exp"
-      }, {
-        type: "text",
-        options: {
-          text: "秒ごとに繰り返す"
-        }
-      }, {
-        type: "mat",
-        result: "mat"
-      }
-    ],
-    compile: "$interval(function() { ${mat} }, ${exp} * 1000)"
-  }
-}).value("ElementComponents", {
-  "button": {
-    "click": {
-      type: "mat",
-      appearance: [
-        {
-          type: "text",
-          options: {
-            text: "がクリックされたとき、"
+crosetModule.service("InitCrosetBlockMethods", [
+  "$mdDialog", "CurrentScreenData", function($mdDialog, CurrentScreenData) {
+    var SelectElementDialogController, dialogCallback, filterTypes, listFncName;
+    dialogCallback = null;
+    listFncName = "";
+    filterTypes = null;
+    SelectElementDialogController = [
+      "CurrentScreenData", "ElementDatas", "SelectedElementUUID", "$scope", "$interval", function(CurrentScreenData, ElementDatas, SelectedElementUUID, $scope, $interval) {
+        var element, id, screenElements, screenElementsManager;
+        screenElementsManager = CurrentScreenData.elementsManager;
+        screenElements = $.extend(true, {}, typeof screenElementsManager[listFncName] === "function" ? screenElementsManager[listFncName]() : void 0);
+        if (filterTypes) {
+          for (id in screenElements) {
+            element = screenElements[id];
+            if (filterTypes.indexOf(element.type) === -1) {
+              delete screenElements[id];
+            }
           }
-        }, {
-          type: "mat",
-          result: "mat"
         }
-      ],
-      compile: "${options}.click = function() { $timeout(function() { ${mat} });  }"
-    },
-    "text": {
-      type: "property",
-      text: "のテキスト",
-      compile: "${options}.text"
-    }
-  },
-  "text": {
-    "text": {
-      type: "property",
-      text: "のテキスト",
-      compile: "${options}.text"
-    }
-  },
-  "textbox": {
-    "text": {
-      type: "property",
-      text: "のテキスト",
-      compile: "${options}.value"
-    }
-  }
-}).factory("ShowElementDialog", [
-  "$mdDialog", function($mdDialog) {
-    var ShowElementDialogController;
-    ShowElementDialogController = [function() {}];
-    return function(fnc) {
-      return $mdDialog.show({
-        controller: ShowElementDialogController,
-        templateUrl: 'templates/icon-select-dialog.tmpl.html',
-        parent: angular.element(document.body),
-        clickOutsideToClose: false
-      }).then(function(answer) {}, function() {});
+        $scope.screenElements = screenElements;
+        $scope.elementDatas = ElementDatas;
+        $scope.reverse = false;
+        $interval(function() {
+          return $scope.reverse = !$scope.reverse;
+        });
+        return $scope.itemSelected = function(uuid, data) {
+          if (typeof dialogCallback === "function") {
+            dialogCallback(uuid, data);
+          }
+          return $mdDialog.hide();
+        };
+      }
+    ];
+    return function() {
+      var showDialog;
+      CrosetBlock.showSelectElementDialog = function(type, fnc) {
+        filterTypes = type;
+        listFncName = "get";
+        return showDialog(fnc, SelectElementDialogController, "templates/select-element-dialog.tmpl.html");
+      };
+      CrosetBlock.showSelectTemplateDialog = function(type, fnc) {
+        filterTypes = type;
+        listFncName = "getTemplates";
+        return showDialog(fnc, SelectElementDialogController, "templates/select-element-dialog.tmpl.html");
+      };
+      return showDialog = function(callback, controller, templateUrl) {
+        dialogCallback = callback;
+        return $mdDialog.show({
+          controller: controller,
+          templateUrl: templateUrl,
+          parent: angular.element(document.body),
+          clickOutsideToClose: true
+        }).then(function(answer) {}, function() {});
+      };
     };
   }
-]).controller("CodeController", [
-  "$scope", "$timeout", "ProjectData", "CurrentScreenData", "SelectedElementUUID", function($scope, $timeout, ProjectData, CurrentScreenData, SelectedElementUUID) {
-    var blocklyArea, blocklyDiv, cards, element, elementBlock, elementBlocks, i, id, len, onResize, onScreenChanged, options, ref, ref1, ref2, ref3, ref4, template, xml;
+]);
+
+crosetModule.directive("selectElementDialogChildItem", [
+  "$compile", function($compile) {
+    return {
+      restrict: "E",
+      link: function(scope, element, attrs) {
+        var e;
+        if (scope.element.children) {
+          e = angular.element("<select-element-dialog-item>");
+          e = $compile(e)(scope);
+          return e.appendTo(element);
+        }
+      }
+    };
+  }
+]).directive("selectElementDialogItem", function() {
+  return {
+    templateUrl: "templates/select-element-dialog-item.tmpl.html"
+  };
+}).controller("CodeController", [
+  "$scope", "$timeout", "ProjectData", "CurrentScreenData", "SelectedElementOrTemplateUUID", "InitCrosetBlockMethods", function($scope, $timeout, ProjectData, CurrentScreenData, SelectedElementOrTemplateUUID, InitCrosetBlockMethods) {
+    var blocklyArea, blocklyDiv, blocks, cards, elementBlock, i, j, len, len1, onResize, onScreenChanged, ref, ref1, ref2, ref3, ref4, templateText, type, xml;
+    InitCrosetBlockMethods();
     onScreenChanged = function() {
       var id, options, ref, screen;
       options = [];
@@ -328,9 +94,9 @@ crosetModule.value("GeneralComponents", {
         screen = ref[id];
         options.push([screen.name, id]);
       }
-      CrosetBlock.intentBlock.args0[0].options = options;
-      Blockly.defineBlocksWithJsonArray([CrosetBlock.intentBlock]);
-      return CrosetBlock.intentBlockGenerator();
+      CrosetBlock.customBlock.intentBlock.args0[0].options = options;
+      Blockly.defineBlocksWithJsonArray([CrosetBlock.customBlock.intentBlock]);
+      return CrosetBlock.customBlockGenerator.intentBlockGenerator();
     };
     ProjectData.setScreenCallback(function() {
       var block, blocks, dom, i, id, len, results;
@@ -357,15 +123,6 @@ crosetModule.value("GeneralComponents", {
       return results;
     });
     onScreenChanged();
-    options = [["テンプレートを選択", ""]];
-    ref = CurrentScreenData.elementsManager.getTemplates();
-    for (id in ref) {
-      template = ref[id];
-      options.push([template.name, id]);
-    }
-    CrosetBlock.instantiateBlock.args0[0].options = options;
-    Blockly.defineBlocksWithJsonArray([CrosetBlock.instantiateBlock]);
-    CrosetBlock.instantiateBlockGenerator();
     blocklyDiv = document.getElementById("program-code");
     CurrentScreenData.workspace = Blockly.inject(blocklyDiv, {
       toolbox: document.getElementById('toolbox'),
@@ -386,18 +143,25 @@ crosetModule.value("GeneralComponents", {
       }
     });
     CurrentScreenData.workspace.variableList = ProjectData.variables;
-    ref2 = (ref1 = CurrentScreenData.getElementsManager()) != null ? ref1.get() : void 0;
-    for (id in ref2) {
-      element = ref2[id];
-      elementBlocks = angular.copy(CrosetBlock.elementBlocks[element.type]);
-      if (elementBlocks) {
-        for (i = 0, len = elementBlocks.length; i < len; i++) {
-          elementBlock = elementBlocks[i];
-          elementBlock.type = elementBlock.type.replace("#id", id);
-          elementBlock.message0 = elementBlock.message0.replace("#name", element.name);
+    CrosetBlock.setElementBlocks();
+    ref = ["_element", "_template"];
+    for (i = 0, len = ref.length; i < len; i++) {
+      templateText = ref[i];
+      ref1 = angular.copy(CrosetBlock.elementBlocks);
+      for (type in ref1) {
+        blocks = ref1[type];
+        for (j = 0, len1 = blocks.length; j < len1; j++) {
+          elementBlock = blocks[j];
+          elementBlock.type += templateText;
+          if ((ref2 = elementBlock.args0) != null) {
+            ref2.unshift({
+              type: "field" + templateText,
+              name: "ELEMENT",
+              filter: type
+            });
+          }
           Blockly.defineBlocksWithJsonArray([elementBlock]);
         }
-        CrosetBlock.setGenerators(id, element.type);
       }
     }
     cards = (ref3 = ProjectData.screens) != null ? (ref4 = ref3[CurrentScreenData.id]) != null ? ref4.cards : void 0 : void 0;
@@ -406,16 +170,29 @@ crosetModule.value("GeneralComponents", {
       Blockly.Xml.domToWorkspace(xml, CurrentScreenData.workspace);
     }
     CurrentScreenData.workspace.registerToolboxCategoryCallback('ELEMENT', function(workspace) {
-      var block, blockText, elementsManager, j, len1, ref5, selectedElement, type, xmlList;
-      if (SelectedElementUUID.get()) {
+      var block, blockText, elementsManager, k, len2, ref5, ref6, selectedElement, xmlList;
+      if (SelectedElementOrTemplateUUID.get()) {
         elementsManager = CurrentScreenData.getElementsManager();
-        selectedElement = elementsManager.get(SelectedElementUUID.get());
+        if (!SelectedElementOrTemplateUUID.isTemplate()) {
+          selectedElement = elementsManager.get(SelectedElementOrTemplateUUID.get());
+        } else {
+          selectedElement = elementsManager.getTemplate(SelectedElementOrTemplateUUID.get());
+        }
         xmlList = [];
-        ref5 = CrosetBlock.elementBlocks[selectedElement.type];
-        for (j = 0, len1 = ref5.length; j < len1; j++) {
-          elementBlock = ref5[j];
-          type = elementBlock.type.replace("#id", SelectedElementUUID.get());
-          blockText = '<xml>' + '<block type="' + type + '">　</block>' + '</xml>';
+        ref5 = angular.copy(CrosetBlock.elementBlocks[selectedElement.type]);
+        for (k = 0, len2 = ref5.length; k < len2; k++) {
+          elementBlock = ref5[k];
+          templateText = SelectedElementOrTemplateUUID.isTemplate() ? "_template" : "_element";
+          if ((ref6 = elementBlock.args0) != null) {
+            ref6.unshift({
+              type: "field" + templateText,
+              name: "ELEMENT",
+              filter: selectedElement.type,
+              defaultId: SelectedElementOrTemplateUUID.get()
+            });
+          }
+          Blockly.defineBlocksWithJsonArray([elementBlock]);
+          blockText = '<xml>' + '<block type="' + elementBlock.type + templateText + '">　</block>' + '</xml>';
           block = Blockly.Xml.textToDom(blockText).firstChild;
           xmlList.push(block);
         }

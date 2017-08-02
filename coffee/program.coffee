@@ -1,371 +1,108 @@
+if !window.CrosetBlock
+	window.CrosetBlock = {}
+
 crosetModule = angular.module "Croset"
 
 crosetModule
-.value "GeneralComponents", {
-	"onload": {
-		type: "mat"
-		appearance: [
-
-			{
-				type: "text"
-				options:
-					text: "この画面は始まった時"
-			}
-			{
-				type: "mat"
-				result: "mat"
-			}
-		]
-		compile: "$events.onload(function({ ${mat} })) "
-	}
-	"intentTo": {
-		type: "function"
-		appearance: [
-			{
-				type: "text"
-				options:
-					text: "画面を移動"
-			}
-			{
-				type: "screen"
-				defaultValue: ""
-				result: "screen"
-			}
-		]
-		compile: "$state.go('screen' + ${screen})"
-	}
 
 
-	"variable": {
-		type: "variable"
-		compile: "${val}"
-	}
 
-	"hensu": {
-		type: "property"
-		text: "変数"
-		compile: "val"
-	}
-
-	"exp": {
-		type: "function"
-		appearance: [
-			{
-				type: "expbox"
-				defaultValue: "式"
-				result: "exp"
-			}
-		]
-		compile: "${exp}"
-	}
-	"text": {
-		type: "function"
-		appearance: [
-			{
-				type: "textbox"
-				defaultValue: "文字"
-				result: "text"
-			}
-		]
-		compile: "${text}"
-	}
-
-	"equal": {
-		type: "function"
-		appearance: [
-			{
-				type: "expbox"
-				defaultValue: "式"
-				result: "exp1"
-			}
-			{
-				type: "text"
-				options:
-					text: "="
-			}
-			{
-				type: "expbox"
-				defaultValue: "式"
-				result: "exp2"
-			}
-		]
-		compile: "(${exp1} == ${exp2})"
-	}
-
-	"plus": {
-		type: "function"
-		appearance: [
-			{
-				type: "expbox"
-				defaultValue: "式"
-				result: "exp1"
-			}
-			{
-				type: "text"
-				options:
-					text: "+"
-			}
-			{
-				type: "expbox"
-				defaultValue: "式"
-				result: "exp2"
-			}
-		]
-		compile: "(${exp1} + ${exp2})"
-	}
-
-	"minus": {
-		type: "function"
-		appearance: [
-			{
-				type: "expbox"
-				defaultValue: "式"
-				result: "exp1"
-			}
-			{
-				type: "text"
-				options:
-					text: "-"
-			}
-			{
-				type: "expbox"
-				defaultValue: "式"
-				result: "exp2"
-			}
-		]
-		compile: "(${exp1} - ${exp2})"
-	}
-
-	"times": {
-		type: "function"
-		appearance: [
-			{
-				type: "expbox"
-				defaultValue: "式"
-				result: "exp1"
-			}
-			{
-				type: "text"
-				options:
-					text: "✕"
-			}
-			{
-				type: "expbox"
-				defaultValue: "式"
-				result: "exp2"
-			}
-		]
-		compile: "(${exp1} * ${exp2})"
-	}
-
-	"devide": {
-		type: "function"
-		appearance: [
-			{
-				type: "expbox"
-				defaultValue: "式"
-				result: "exp1"
-			}
-			{
-				type: "text"
-				options:
-					text: "÷"
-			}
-			{
-				type: "expbox"
-				defaultValue: "式"
-				result: "exp2"
-			}
-		]
-		compile: "(${exp1} / ${exp2})"
-	}
-
-	"メッセージを表示": {
-		type: "function"
-		appearance: [
-			{
-				type: "text"
-				options:
-					text: "メッセージを表示"
-			}
-			{
-				type: "textbox"
-				defaultValue: "メッセージ"
-				result: "message"
-			}
-		]
-		compile: "alert(${message})"
-	}
-	"toint": {
-		type: "function"
-		appearance: [
-
-			{
-				type: "text"
-				options:
-					text: "数字に変換"
-			}
-			{
-				type: "textbox"
-				defaultValue: "条件"
-				result: "text"
-			}
-		]
-		compile: "parseInt(${text})"
-	}
-	"if": {
-		type: "mat"
-		appearance: [
-
-			{
-				type: "text"
-				options:
-					text: "もし"
-			}
-			{
-				type: "expbox"
-				defaultValue: "条件"
-				result: "exp"
-			}
-			{
-				type: "text"
-				options:
-					text: "なら"
-			}
-			{
-				type: "mat"
-				result: "mat"
-			}
-		]
-		compile: "if(${exp}) { ${mat} }"
-	}
-	"ifelse": {
-		type: "mat"
-		appearance: [
-
-			{
-				type: "text"
-				options:
-					text: "もし"
-			}
-			{
-				type: "expbox"
-				defaultValue: "条件"
-				result: "exp"
-			}
-			{
-				type: "mat"
-				result: "mat"
-			}
-			{
-				type: "text"
-				options:
-					text: "でなければ"
-			}
-			{
-				type: "mat"
-				result: "mat2"
-			}
-		]
-		compile: "if(${exp}) { ${mat} } else { ${mat2} }"
-	}
-	"interval": {
-		type: "mat"
-		appearance: [
-			{
-				type: "expbox"
-				defaultValue: "1"
-				result: "exp"
-			}
-			{
-				type: "text"
-				options:
-					text: "秒ごとに繰り返す"
-			}
-			{
-				type: "mat"
-				result: "mat"
-			}
-		]
-		compile: "$interval(function() { ${mat} }, ${exp} * 1000)"
-	}
-	# "color": {
-	# 	type: "property"
-	# 	text: "色"
-	# 	returnType: "undefined"
-	# 	compile: "eval"
-	# }
-}
-
-.value "ElementComponents", {
-	"button": {
-		"click": {
-			type: "mat"
-			appearance: [
-				{
-					type: "text"
-					options:
-						text: "がクリックされたとき、"
-				}
-
-				{
-					type: "mat"
-					result: "mat"
-				}
-			]
-			compile: "${options}.click = function() { $timeout(function() { ${mat} });  }"
-		}
-		"text": {
-			type: "property"
-			text: "のテキスト"
-			compile: "${options}.text"
-		}
-	}
-	"text": {
-		"text": {
-			type: "property"
-			text: "のテキスト"
-			compile: "${options}.text"
-		}
-	}
-	"textbox": {
-		"text": {
-			type: "property"
-			text: "のテキスト"
-			compile: "${options}.value"
-		}
-	}
-}
+.service "InitCrosetBlockMethods", ["$mdDialog", "CurrentScreenData", ($mdDialog, CurrentScreenData) ->
+	
+	dialogCallback = null
+	listFncName = ""
+	# ここで指定されたタイプの要素のみ表示される
+	filterTypes = null
+	# ブロックを選択するダイアログのコントローラ
+	SelectElementDialogController = ["CurrentScreenData", "ElementDatas", "SelectedElementUUID", "$scope", "$interval", (CurrentScreenData, ElementDatas, SelectedElementUUID, $scope, $interval)->
+		screenElementsManager = CurrentScreenData.elementsManager
+		screenElements = $.extend true, {}, screenElementsManager[listFncName]?()
+		if filterTypes
+			for id, element of screenElements
+				if filterTypes.indexOf(element.type) == -1
+					delete screenElements[id]
+					
+		$scope.screenElements = screenElements
+			
+		$scope.elementDatas = ElementDatas
 
 
-.factory "ShowElementDialog", ["$mdDialog", ($mdDialog) ->
-	ShowElementDialogController = [()->
+		$scope.reverse = false
+		$interval () ->
+			$scope.reverse = !$scope.reverse
+			
+		$scope.itemSelected = (uuid, data) ->
+			dialogCallback?(uuid, data)
+			$mdDialog.hide()
+
 	]
-	return (fnc) ->
-		$mdDialog.show {
-			controller: ShowElementDialogController
-			templateUrl: 'templates/icon-select-dialog.tmpl.html'
-			parent: angular.element document.body
-			clickOutsideToClose: false
-		}
-		.then (answer) ->
-			return
-		, () ->
-			return
+
+
+
+	return () ->
+		
+		# 画面上の要素を選択させるダイアログを表示する関数をCrosetBlockのメソッドとして宣言
+		# fnc: ダイアログを表示したあと、実際に要素が選択されたらコールバックする
+		CrosetBlock.showSelectElementDialog = (type, fnc) ->
+			filterTypes = type
+			listFncName = "get"
+			showDialog fnc, SelectElementDialogController, "templates/select-element-dialog.tmpl.html"
+		
+		
+		# テンプレートを選択させるダイアログを表示する関数をCrosetBlockのメソッドとして宣言
+		# fnc: ダイアログを表示したあと、実際に要素が選択されたらコールバックする
+		CrosetBlock.showSelectTemplateDialog = (type, fnc) ->
+			filterTypes = type
+			listFncName = "getTemplates"
+			showDialog fnc, SelectElementDialogController, "templates/select-element-dialog.tmpl.html"
+
+			
+		showDialog = (callback, controller, templateUrl) ->
+			dialogCallback = callback
+			$mdDialog.show {
+				controller: controller
+				templateUrl: templateUrl
+				parent: angular.element document.body
+				clickOutsideToClose: true
+			}
+			.then (answer) ->
+				return
+			, () ->
+				return
 ]
 
-.controller "CodeController", ["$scope", "$timeout", "ProjectData", "CurrentScreenData", "SelectedElementUUID", ($scope, $timeout, ProjectData, CurrentScreenData, SelectedElementUUID) ->
 
+# ダイアログ内のアイテム
+crosetModule
+.directive "selectElementDialogChildItem", ["$compile", ($compile) ->
+	return {
+		restrict: "E"
+		link: (scope, element, attrs) ->
+			if scope.element.children
+				e = angular.element("<select-element-dialog-item>")
+				e = $compile(e)(scope)
+				e.appendTo element
+
+	}
+]
+.directive "selectElementDialogItem", () ->
+	return {
+		templateUrl: "templates/select-element-dialog-item.tmpl.html"		
+	}
+
+.controller "CodeController", ["$scope", "$timeout", "ProjectData", "CurrentScreenData", "SelectedElementOrTemplateUUID", "InitCrosetBlockMethods", ($scope, $timeout, ProjectData, CurrentScreenData, SelectedElementOrTemplateUUID, InitCrosetBlockMethods) ->
+	
+	InitCrosetBlockMethods()
 
 
 	onScreenChanged = () ->
 		options = []
 		for id, screen of ProjectData.screens
 			options.push [screen.name, id]
-		CrosetBlock.intentBlock.args0[0].options = options
+		CrosetBlock.customBlock.intentBlock.args0[0].options = options
 
-		Blockly.defineBlocksWithJsonArray [CrosetBlock.intentBlock]
-		CrosetBlock.intentBlockGenerator()
+		Blockly.defineBlocksWithJsonArray [CrosetBlock.customBlock.intentBlock]
+		CrosetBlock.customBlockGenerator.intentBlockGenerator()
 
 	# 画面遷移ブロックの登録
 	ProjectData.setScreenCallback () ->
@@ -385,16 +122,6 @@ crosetModule
 
 	onScreenChanged()
 	
-	
-	# テンプレートのインスタンスを生成するブロック
-	options = [["テンプレートを選択", ""]]
-	for id, template of CurrentScreenData.elementsManager.getTemplates()
-		options.push [template.name, id]
-	
-	CrosetBlock.instantiateBlock.args0[0].options = options
-	Blockly.defineBlocksWithJsonArray [CrosetBlock.instantiateBlock]
-	CrosetBlock.instantiateBlockGenerator()
-
 	
 
 
@@ -420,20 +147,20 @@ crosetModule
 
 	CurrentScreenData.workspace.variableList = ProjectData.variables
 
-
-	# 画面上の要素全てに関して関連するブロックを読み込んでおく
-	for id, element of CurrentScreenData.getElementsManager()?.get()
-		elementBlocks = angular.copy CrosetBlock.elementBlocks[element.type]
-		if elementBlocks
-			for elementBlock in elementBlocks
-				elementBlock.type = elementBlock.type.replace "#id", id
-				elementBlock.message0 = elementBlock.message0.replace "#name", element.name
+	CrosetBlock.setElementBlocks()
+	
+	for templateText in ["_element", "_template"]
+		# 画面上の要素全てに関して関連するブロックを読み込んでおく
+		for type, blocks of angular.copy CrosetBlock.elementBlocks
+			for elementBlock in blocks
+				elementBlock.type += templateText
+				elementBlock.args0?.unshift {
+					type: "field" + templateText
+					name: "ELEMENT"
+					filter: type
+				}
 				Blockly.defineBlocksWithJsonArray [elementBlock]
-
-			CrosetBlock.setGenerators id, element.type　
-
-
-
+			
 	# ブロックデータを読み込んでワークスペースに反映
 	cards = ProjectData.screens?[CurrentScreenData.id]?.cards
 	if cards && cards[0]
@@ -444,14 +171,28 @@ crosetModule
 
 	# 選択した要素のブロックを要求された時の処理
 	CurrentScreenData.workspace.registerToolboxCategoryCallback　'ELEMENT', (workspace) ->
-		if SelectedElementUUID.get()
+		if SelectedElementOrTemplateUUID.get()
 			elementsManager = CurrentScreenData.getElementsManager()
-			selectedElement = elementsManager.get SelectedElementUUID.get()
+			
+			if !SelectedElementOrTemplateUUID.isTemplate()
+				selectedElement = elementsManager.get SelectedElementOrTemplateUUID.get()
+			else
+				selectedElement = elementsManager.getTemplate SelectedElementOrTemplateUUID.get()
+			
 			xmlList = []
-			for elementBlock in CrosetBlock.elementBlocks[selectedElement.type]
-				type = elementBlock.type.replace "#id", SelectedElementUUID.get()
+			for elementBlock in angular.copy CrosetBlock.elementBlocks[selectedElement.type]
+				templateText = if SelectedElementOrTemplateUUID.isTemplate() then "_template" else "_element"
+
+				elementBlock.args0?.unshift {
+					type: "field" + templateText
+					name: "ELEMENT"
+					filter: selectedElement.type
+					defaultId: SelectedElementOrTemplateUUID.get()
+				}
+				Blockly.defineBlocksWithJsonArray [elementBlock]
+				
 				blockText = '<xml>' +
-					'<block type="' + type + '">　</block>' +
+					'<block type="' + elementBlock.type + templateText + '">　</block>' +
 					'</xml>'
 
 				block = Blockly.Xml.textToDom(blockText).firstChild
@@ -502,10 +243,344 @@ crosetModule
 	# for card in ScreenCards.get()
 	# 	scope = $scope.$new true
 	# 	scope.card = card
-	# 	GenerateElement "<croset-component-in-code>", scope, $element
+	# 	GenerateElement "<croset-component-in-code>" scope, $element
 ]
 
+# .value "GeneralComponents", {
+# 	"onload": {
+# 		type: "mat"
+# 		appearance: [
 
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "この画面は始まった時"
+# 			}
+# 			{
+# 				type: "mat"
+# 				result: "mat"
+# 			}
+# 		]
+# 		compile: "$events.onload(function({ ${mat} })) "
+# 	}
+# 	"intentTo": {
+# 		type: "function"
+# 		appearance: [
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "画面を移動"
+# 			}
+# 			{
+# 				type: "screen"
+# 				defaultValue: ""
+# 				result: "screen"
+# 			}
+# 		]
+# 		compile: "$state.go('screen' + ${screen})"
+# 	}
+
+
+# 	"variable": {
+# 		type: "variable"
+# 		compile: "${val}"
+# 	}
+
+# 	"hensu": {
+# 		type: "property"
+# 		text: "変数"
+# 		compile: "val"
+# 	}
+
+# 	"exp": {
+# 		type: "function"
+# 		appearance: [
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "式"
+# 				result: "exp"
+# 			}
+# 		]
+# 		compile: "${exp}"
+# 	}
+# 	"text": {
+# 		type: "function"
+# 		appearance: [
+# 			{
+# 				type: "textbox"
+# 				defaultValue: "文字"
+# 				result: "text"
+# 			}
+# 		]
+# 		compile: "${text}"
+# 	}
+
+# 	"equal": {
+# 		type: "function"
+# 		appearance: [
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "式"
+# 				result: "exp1"
+# 			}
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "="
+# 			}
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "式"
+# 				result: "exp2"
+# 			}
+# 		]
+# 		compile: "(${exp1} == ${exp2})"
+# 	}
+
+# 	"plus": {
+# 		type: "function"
+# 		appearance: [
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "式"
+# 				result: "exp1"
+# 			}
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "+"
+# 			}
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "式"
+# 				result: "exp2"
+# 			}
+# 		]
+# 		compile: "(${exp1} + ${exp2})"
+# 	}
+
+# 	"minus": {
+# 		type: "function"
+# 		appearance: [
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "式"
+# 				result: "exp1"
+# 			}
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "-"
+# 			}
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "式"
+# 				result: "exp2"
+# 			}
+# 		]
+# 		compile: "(${exp1} - ${exp2})"
+# 	}
+
+# 	"times": {
+# 		type: "function"
+# 		appearance: [
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "式"
+# 				result: "exp1"
+# 			}
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "✕"
+# 			}
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "式"
+# 				result: "exp2"
+# 			}
+# 		]
+# 		compile: "(${exp1} * ${exp2})"
+# 	}
+
+# 	"devide": {
+# 		type: "function"
+# 		appearance: [
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "式"
+# 				result: "exp1"
+# 			}
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "÷"
+# 			}
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "式"
+# 				result: "exp2"
+# 			}
+# 		]
+# 		compile: "(${exp1} / ${exp2})"
+# 	}
+
+# 	"メッセージを表示": {
+# 		type: "function"
+# 		appearance: [
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "メッセージを表示"
+# 			}
+# 			{
+# 				type: "textbox"
+# 				defaultValue: "メッセージ"
+# 				result: "message"
+# 			}
+# 		]
+# 		compile: "alert(${message})"
+# 	}
+# 	"toint": {
+# 		type: "function"
+# 		appearance: [
+
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "数字に変換"
+# 			}
+# 			{
+# 				type: "textbox"
+# 				defaultValue: "条件"
+# 				result: "text"
+# 			}
+# 		]
+# 		compile: "parseInt(${text})"
+# 	}
+# 	"if": {
+# 		type: "mat"
+# 		appearance: [
+
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "もし"
+# 			}
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "条件"
+# 				result: "exp"
+# 			}
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "なら"
+# 			}
+# 			{
+# 				type: "mat"
+# 				result: "mat"
+# 			}
+# 		]
+# 		compile: "if(${exp}) { ${mat} }"
+# 	}
+# 	"ifelse": {
+# 		type: "mat"
+# 		appearance: [
+
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "もし"
+# 			}
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "条件"
+# 				result: "exp"
+# 			}
+# 			{
+# 				type: "mat"
+# 				result: "mat"
+# 			}
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "でなければ"
+# 			}
+# 			{
+# 				type: "mat"
+# 				result: "mat2"
+# 			}
+# 		]
+# 		compile: "if(${exp}) { ${mat} } else { ${mat2} }"
+# 	}
+# 	"interval": {
+# 		type: "mat"
+# 		appearance: [
+# 			{
+# 				type: "expbox"
+# 				defaultValue: "1"
+# 				result: "exp"
+# 			}
+# 			{
+# 				type: "text"
+# 				options:
+# 					text: "秒ごとに繰り返す"
+# 			}
+# 			{
+# 				type: "mat"
+# 				result: "mat"
+# 			}
+# 		]
+# 		compile: "$interval(function() { ${mat} }, ${exp} * 1000)"
+# 	}
+# 	# "color": {
+# 	# 	type: "property"
+# 	# 	text: "色"
+# 	# 	returnType: "undefined"
+# 	# 	compile: "eval"
+# 	# }
+# }
+
+# .value "ElementComponents", {
+# 	"button": {
+# 		"click": {
+# 			type: "mat"
+# 			appearance: [
+# 				{
+# 					type: "text"
+# 					options:
+# 						text: "がクリックされたとき、"
+# 				}
+
+# 				{
+# 					type: "mat"
+# 					result: "mat"
+# 				}
+# 			]
+# 			compile: "${options}.click = function() { $timeout(function() { ${mat} });  }"
+# 		}
+# 		"text": {
+# 			type: "property"
+# 			text: "のテキスト"
+# 			compile: "${options}.text"
+# 		}
+# 	}
+# 	"text": {
+# 		"text": {
+# 			type: "property"
+# 			text: "のテキスト"
+# 			compile: "${options}.text"
+# 		}
+# 	}
+# 	"textbox": {
+# 		"text": {
+# 			type: "property"
+# 			text: "のテキスト"
+# 			compile: "${options}.value"
+# 		}
+# 	}
+# }
 # .service "ScreenCards", ["$interval", ($interval) ->
 # 	this.get = () ->
 # 		return this.list

@@ -57,7 +57,6 @@ crosetModule
 				}
 			}
 			.success (data, status, headers, config) ->				# 成功したら作成しtプロジェクトの編集へ遷移
-
 				$state.go "editor.design", {projectId: data.projectId}
 			.error (data) ->
 				console.log "Filed: Create Project"

@@ -1,0 +1,15 @@
+<div layout="column" class="md-dialog-content">
+  <h2 class="md-title"> 新しい行 </h2>
+  <div class="_md-dialog-content-body">
+    <p> 追加する行のフィールドの値を入力してください </p>
+  </div>
+  
+  <md-input-container ng-repeat="(id, field) in fields">
+    <label>  {{field}}  </label>
+    <input ng-model="record[id]" />
+  </md-input-container>
+  <div layout="row" layout-align~"end center">
+    <md-button ng-click="cancel()"> キャンセル </md-button>
+    <md-button class="md-raised md-primary" ng-click="ok()"> 追加 </md-button>
+  </div>   
+</div>

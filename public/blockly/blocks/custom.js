@@ -1,4 +1,10 @@
 
+Blockly.Blocks.element = {
+  HUE: "#3F51B5"
+}
+
+//##################################################
+
 
 // 独自のブロックの登録
 Blockly.defineBlocksWithJsonArray([  // BEGIN JSON EXTRACT
@@ -54,20 +60,80 @@ Blockly.defineBlocksWithJsonArray([  // BEGIN JSON EXTRACT
     "colour": Blockly.Blocks.math.HUE,
     "tooltip": "",
     "helpUrl": ""
-  }
+  },
+	{
+		"type": "instantiate",
+		"message0": "テンプレート %1 を画面に追加",
+		"args0": [
+			{
+				"type": "field_template",
+				"name": "TEMPLATE"
+			},
+		],
+		"previousStatement": null,
+		"nextStatement": null,
+		"colour": Blockly.Blocks.element.HUE,
+		"tooltip": "",
+		"helpUrl": ""
+	},
+	{
+		"type": "instantiateTo",
+		"message0": "テンプレート %1 を %2 に追加",
+		"args0": [
+			{
+				"type": "field_template",
+				"name": "TEMPLATE"
+			},
+			{
+				"type": "field_element",
+				"name": "ELEMENT",
+				"filter": ["group", "listGroup"]
+			}
+		],
+		"previousStatement": null,
+		"nextStatement": null,
+		"colour": Blockly.Blocks.element.HUE,
+		"tooltip": "",
+		"helpUrl": ""
+	},
+	{
+		"type": "watch",
+		"message0": "%1 が変わった時 %2 %3",
+		"args0": [
+			{
+				"type": "input_value",
+				"name": "ARG"
+			},
+      {
+        "type": "input_dummy"
+      },
+      {
+        "type": "input_statement",
+        "name": "DO"
+      }
+		],
+		"previousStatement": null,
+		"nextStatement": null,
+		"colour": Blockly.Blocks.logic.HUE,
+		"tooltip": "",
+		"helpUrl": ""
+	}
+
 ]);
 
 
 
 
 //########################################################################
-CrosetBlock = {}
-Blockly.Blocks.element = {
-  HUE: "#3F51B5"
-}
 
+
+if (!window.CrosetBlock) {
+	window.CrosetBlock = {}
+}
+  
+CrosetBlock.customBlock = {}
 // 画面遷移
-CrosetBlock.intentBlock = {
+CrosetBlock.customBlock.intentBlock = {
   "type": "intent",
   "message0": "画面を移動 %1",
   "args0": [
@@ -84,28 +150,3 @@ CrosetBlock.intentBlock = {
   "helpUrl": ""
 };
 
-CrosetBlock.instantiateBlock = {
-  "type": "instantiate",
-  "message0": "テンプレート %1 を %2 に追加 %3",
-  "args0": [
-    {
-      "type": "field_dropdown",
-      "name": "TEMPLATE",
-      "options": []
-    },
-    {
-      "type": "field_element",
-      "name": "TARGET",
-      "colour": "#fff"
-    },
-    {
-      "type": "field_colour",
-      "name": "TARGET",
-    }
-  ],
-  "previousStatement": null,
-  "nextStatement": null,
-  "colour": Blockly.Blocks.element.HUE,
-  "tooltip": "",
-  "helpUrl": ""
-};

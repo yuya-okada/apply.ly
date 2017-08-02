@@ -1,0 +1,53 @@
+div#server(ng-controller="DatabaseController" layout="column")
+  div(layout="row")
+    md-input-container
+      label テーブル
+      md-select(ng-model="currentTable" ng-change="onTableChanged(currentTable)")
+        md-option(ng-repeat='tableId in tables' value="{{tableId}}") {{tableId}}
+
+      
+    md-button(ng-click="addColumn($event)") 新しい行を追加
+    md-button(ng-click="addField($event)") 新しいフィールドを追加
+    
+    md-menu
+      md-button(aria-label="Open menu" class="md-icon-button" ng-click="$mdOpenMenu($event)")
+        md-icon(md-menu-origin aria-label="Menu") more_vert
+      
+      md-menu-content(width="4")
+        md-menu-item
+          md-button(ng-click="addTable($event)") 
+            md-icon(aria-label="Add") add
+            span 新しいテーブルを追加
+
+        md-menu-item
+          md-button(ng-click="removeTable($event, recordId)")
+            md-icon(aria-label="Delete") delete
+            span 現在のテーブルを削除
+            
+        
+        md-menu-item
+          md-button(ng-click="removeField($event)")
+            md-icon(aria-label="Delete") delete
+            span フィールドを削除
+
+    
+  md-card#database
+
+    div(layout="column")
+      div(layout="row")
+        div.flex(ng-repeat="(id, field) in fields")
+          md-input-container
+            input(ng-model="field" ng-change="onFieldChanged(id, field)")
+            
+      md-divider  
+      div(layout="column")
+        div(ng-repeat="(recordId, record) in records")
+          div(layout="row" style="position: relative")
+            div.flex(ng-repeat="(fieldId, field) in fields")
+              md-input-container
+                input(ng-model="record[fieldId]")
+            
+            div.add-record-button-container(layout="row" layout-align="center center")
+              md-button.md-icon-button(ng-click="removeRecord($event, recordId)")
+                md-icon(aria-label="Remove Record" class="material-icons") delete
+                

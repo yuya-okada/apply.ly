@@ -2,21 +2,6 @@ crosetModule = angular.module "Croset"
 
 crosetModule
 
-# アカウントごとのサービスの設定
-.service "ServiceConfig", [() ->
-	config = {
-		componentScale: 1							# カードのサイズ
-	}
-
-	this.get = () ->
-		return config
-
-	this.update = (key, value) ->
-		config[key] = value
-
-	return
-
-]
 
 
 .service "CurrentScreenData", [() ->
@@ -31,7 +16,7 @@ crosetModule
 ]
 
 
-.service "ProjectData", ["$http", "$rootScope", "$stateParams", "$state", "ScreenElementsManager", "ServiceConfig", "getUUID", "CurrentScreenData", ($http, $rootScope, $stateParams, $state, ScreenElementsManager, ServiceConfig, getUUID, CurrentScreenData) ->
+.service "ProjectData", ["$http", "$rootScope", "$stateParams", "$state", "ScreenElementsManager", "getUUID", "CurrentScreenData", ($http, $rootScope, $stateParams, $state, ScreenElementsManager, getUUID, CurrentScreenData) ->
 
 
 	this.projectId = null
@@ -39,6 +24,7 @@ crosetModule
 	this.screens = {}
 	this.defaultScreen = "トップ"
 	this.variables = []
+	this.config = {}
 	this.getScreens = () ->
 		return this.screens
 
@@ -60,39 +46,41 @@ crosetModule
 		that.variables = []
 
 	$rootScope.$on "$stateChangeStart", (event, toState, toParams, fromState, fromParams) ->
-
+		$state.current = toState
 		# if fromState.name.match(/program/)
 		# 	# プロジェクトは変えずに別の画面に移動した時、自動的に遷移前の画面を保存する
 		# 	that.screens[CurrentScreenData.id]?.card = Blockly.Xml.domToText Blockly.Xml.workspaceToDom CurrentScreenData.workspace
 		# 	that.screens[CurrentScreenData.id]?.sourceCode = Blockly.JavaScript.workspaceToCode CurrentScreenData.workspace
-		console.log "チェンジスタート"
 		if toState.name.match(/editor/)
 			# プロジェクトは変えずに別の画面に移動した時、自動的に遷移前の画面を保存する
 			if toParams.projectId == that.projectId + ""
 				saveCurrentScreen()
 				CurrentScreenData.workspace = null
 
-
-
+	
+		
 	# 現在の画面を保存する関数
 	saveCurrentScreen = () ->
-
+	
 		if CurrentScreenData.workspace
 			xml = Blockly.Xml.workspaceToDom CurrentScreenData.workspace
 			cards = Blockly.Xml.domToText xml
 			sourceCode = Blockly.JavaScript.workspaceToCode CurrentScreenData.workspace
 			that.variables = CurrentScreenData.workspace.variableList
+			
 
 		else
 			cards = that.screens[CurrentScreenData.id]?.cards
 			sourceCode = that.screens[CurrentScreenData.id]?.sourceCode
-
+		
+		
 		angular.extend that.screens[CurrentScreenData.id], {
 			elements: CurrentScreenData.elementsManager.get()
 			templates: CurrentScreenData.elementsManager.getTemplates()
 			cards: cards
 			sourceCode: sourceCode
-			}
+			boxProperties: CurrentScreenData.elementsManager?.boxProperties
+		}
 
 	# 当たらな画面を追加する。
 	# 同名画面がすでにある場合falseを返し処理を中断し、成功した場合trueを返す
@@ -108,22 +96,22 @@ crosetModule
 				name: name
 			}
 
-			trigerCallback()					# 画面の変更イベントをトリガー
+			triggerCallback()					# 画面の変更イベントをトリガー
 			return true
-
-
+			
+			
 	this.renameScreen = (id, newName) ->
 		if that.getScreenByName newName
 			return false
 		else
 			that.screens[id]?.name = newName
-			trigerCallback()					# 画面の変更イベントをトリガー
+			triggerCallback()					# 画面の変更イベントをトリガー
 			return true
 
 	this.removeScreen = (id) ->
 		if that.screens[id]
 			delete that.screens[id]
-			trigerCallback()					# 画面の変更イベントをトリガー
+			triggerCallback()					# 画面の変更イベントをトリガー
 			return true
 		else
 			return false
@@ -142,28 +130,47 @@ crosetModule
 		that.callbacks.push fnc
 
 	# 全てのコールバックを呼び出し
-	trigerCallback = () ->
+	triggerCallback = () ->
 		for callback in that.callbacks
 			callback()
-
-	# 新しい変数を追加
-	this.addvariable = (name) ->
-		if that.variables.indexOf(name) == -1
-			that.variables.push name
-			that.trigetCallbackVal()
-			return true
-		else
-			return false
+	
+	
+	CrosetBlock.addVariable = (newName) ->
+		
+	
+	# blockly/core/workspace.jsから
+	CrosetBlock.renameVariable = (oldName, newName) ->
+		for id, properties of	CurrentScreenData.elementsManager?.boxProperties
+			for key, boxName of properties
+				if boxName == oldName 
+					CurrentScreenData.elementsManager?.boxProperties[id][key] = newName
+					
+		that.triggerCallbackVar()
+		
+		
+	# blockly/core/workspace.jsから
+	CrosetBlock.deleteVariable = (name) ->
+		for id, properties of	CurrentScreenData.elementsManager?.boxProperties
+			for key, boxName of properties
+				if boxName == name
+					CurrentScreenData.elementsManager?.removeBoxToProperty id, key
+		
+		that.triggerCallbackVar()
 
 	# 関数を渡しておくと、変数名や変数数が変更されるたびに呼び出す
-	callbacksVal = []
-	this.onChangevariables = (fnc) ->
-		callbacksVal.push fnc
+	callbacksVar = []
+	this.onVariablesChanged = (fnc) ->
+		callbacksVar.push fnc
 	# 全てのコールバックを呼び出し
-	this.trigetCallbackVal = () ->
-		for callback in callbacksVal
-			callback(that.variables)
+	this.triggerCallbackVar = () ->
+		for callback in callbacksVar
+			if CurrentScreenData.workspace
+				callback CurrentScreenData.workspace.variableList
+			else
+				callback(that.variables)
 
+			
+			
 	this.get = () ->
 		saveCurrentScreen()
 		projectData = {
@@ -171,9 +178,8 @@ crosetModule
 			projectId: this.projectId
 			screens: this.screens
 			defaultScreen: this.defaultScreen
-			config: ServiceConfig.get()
 			variables: this.variables
-
+			config: this.config
 		}
 		console.log "Builded", projectData
 		return projectData
@@ -183,9 +189,26 @@ crosetModule
 ]
 
 
+.service "SelectedElementOrTemplateUUID", [() ->
+	uuid = null
+	isTemplate = null
+
+	this.get = () ->
+		return uuid
+	
+	this.set = (id, isTemplate_) ->
+		uuid = id
+		isTemplate = isTemplate_
+		
+	this.isTemplate = () ->
+		return isTemplate
+		
+	return 
+		
+]
 
 # 現在選択されている要素のUUID
-.service "SelectedElementUUID", ["SetElementProperty", "CurrentScreenData", "$rootScope", (SetElementProperty, CurrentScreenData, $rootScope) ->
+.service "SelectedElementUUID", ["SelectedElementOrTemplateUUID", "SetElementProperty", "CurrentScreenData", "$rootScope", (SelectedElementOrTemplateUUID, SetElementProperty, CurrentScreenData, $rootScope) ->
 
 	uuid = null
 
@@ -290,14 +313,15 @@ crosetModule
 		if CurrentScreenData.workspace
 			CurrentScreenData.workspace.toolbox_.refreshSelection()
 
-
+		SelectedElementOrTemplateUUID.set uuid
+		
 	return
 ]
 
 
 
 # テンプレートを画面に表示
-.service "SelectedTemplate", ["SetElementProperty", "CurrentScreenData", (SetElementProperty, CurrentScreenData) ->
+.service "SelectedTemplate", ["SelectedElementOrTemplateUUID", "SetElementProperty", "CurrentScreenData", (SelectedElementOrTemplateUUID, SetElementProperty, CurrentScreenData) ->
 	uuid = ""
 	this.get = ()-> return uuid
 	this.set = (id) ->
@@ -306,8 +330,23 @@ crosetModule
 		screenElementsManager = CurrentScreenData.elementsManager
 		SetElementProperty id, true
 		screenElementsManager.showTemplate id
+		
+		SelectedElementOrTemplateUUID.set id, true
 
 	return
+]
+
+
+# リスト形式でアイテムを選択するモードに変更（主にProgramタブで使用）
+.factory "ListItemSelect", ["$timeout", ($timeout) ->
+	return {
+		open: (id) ->
+			$("#screen-wrapper").addClass "list-item-select-mode"
+			return
+		close: (id) ->
+			$("#screen-wrapper").removeClass "list-item-select-mode"
+			return
+	}
 ]
 
 .controller "HeaderController", ["$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$interval", "$injector", "$stateParams", "$mdToast", "ProjectData", ($scope, $http, $mdDialog, $mdSidenav, $timeout, $interval, $injector, $stateParams, $mdToast, ProjectData) ->
@@ -444,8 +483,39 @@ crosetModule
 		, () ->
 			return
 
+	$scope.config = (ev) ->
+		
+		ConfigDialogController = ["$scope", "ProjectData", "$mdDialog", ($scope, ProjectData, $mdDialog) ->
+			$scope.headings = {
+				"server": "サーバー"
+			}
+			$scope.currentHeading = "server"
+			$scope.changeHeading = (heading) ->
+				$scope.currentHeading = heading
+				
+			$scope.config = angular.merge {
+				server: {}
+			}, ProjectData.config
+			
+			$scope.cancel = () ->
+				$mdDialog.hide()
+			
+			$scope.ok = () ->
+				ProjectData.config = $scope.config
+				$mdDialog.hide()
+		]
 
-
+		$mdDialog.show {
+			controller: ConfigDialogController
+			templateUrl: 'templates/config-dialog.tmpl.html'
+			parent: angular.element document.body
+			targetEvent: ev
+			clickOutsideToClose: false
+		}
+		.then (answer) ->
+			return
+		, () ->
+			return
 
 	# プロジェクトを保存。関数を渡すと保存時に呼び出す
 	saveProject = (fnc)->
@@ -565,8 +635,8 @@ crosetModule
 
 # エディタ画面のコントローラー
 # projectDataResはresolveからinjectされる
-.controller "EditorController", ["$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElementsManager", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes",
-($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElementsManager, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) ->
+.controller "EditorController", ["$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$timeout", "$interval", "$mdToast", "$mdSidenav", "$rootScope", "$mdDialog", "ScreenElementsManager", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes",
+($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $timeout, $interval, $mdToast, $mdSidenav, $rootScope, $mdDialog, ScreenElementsManager, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) ->
 
 	SelectedElementUUID.init()
 
@@ -594,8 +664,58 @@ crosetModule
 		program:
 			icon: "code"
 	}
+	$scope.secondModeList = {
+		server:
+			icon: "settings_ethernet"
+	}
 
 	$scope.changeMode = (name) ->
+		if name == "server"
+			if ProjectData.config?.server
+
+				# Initialize Firebase
+				config = {
+					apiKey: ProjectData.config.server.apiKey
+					authDomain:  ProjectData.config.server.authDomain
+					databaseURL:  ProjectData.config.server.databaseURL
+					projectId:  ProjectData.config.server.projectId
+					storageBucket:  ProjectData.config.server.storageBucket
+					messagingSenderId:  ProjectData.config.server.messagingSenderId
+				}
+				
+				init = () ->
+					try 
+						firebase.initializeApp config
+					catch	error
+
+						$mdToast.show(
+							$mdToast.simple()
+							.textContent 'firebaseを正しく設定してください'
+							.position "right bottom"
+							.hideDelay 3000
+						)
+						return
+
+					$state.go "editor.server", {screenId: CurrentScreenData.id}
+
+				
+				apps = firebase.apps
+				if apps.length != 0
+					firebase.app().delete().then init
+				else 
+					init()
+				
+		
+			else
+				$mdToast.show(
+					$mdToast.simple()
+					.textContent 'firebaseを設定してください'
+					.position "right bottom"
+					.hideDelay 3000
+				)
+			
+		else
+						
 		$state.go "editor." + name, {screenId: CurrentScreenData.id}
 
 	# Progress bar
@@ -614,6 +734,7 @@ crosetModule
 	ProjectData.name = projectData.name
 	ProjectData.projectId = projectData.projectId
 	ProjectData.defaultScreen = projectData.defaultScreen
+	ProjectData.config = projectData.config
 	if projectData.variables
 		ProjectData.variables = projectData.variables
 
@@ -624,7 +745,7 @@ crosetModule
 		nextScreen.elements ?= {}
 		nextScreen.card ?= ""
 		nextScreen.templates ?= {}
-		changeScreen nextScreen.elements, nextScreen.cards, nextScreen.templates
+		changeScreen nextScreen.elements, nextScreen.cards, nextScreen.templates, nextScreen.boxProperties
 
 		# 読み込みのプログレスバー削除
 		$scope.progress.isLoading = false
@@ -632,7 +753,7 @@ crosetModule
 
 
 	# 表示されている画面を変更
-	changeScreen = (elements, cards, templates) ->
+	changeScreen = (elements, cards, templates, boxProperties) ->
 		newScreenElementsManager = new ScreenElementsManager $("#screen")
 		CurrentScreenData.elementsManager = newScreenElementsManager
 		angular.forEach elements, (data, uuid) ->
@@ -640,9 +761,70 @@ crosetModule
 
 		angular.forEach templates, (data, uuid) ->
 			newScreenElementsManager.addTemplateFromData data, uuid
+		
+		boxProperties ?= {}
+		newScreenElementsManager.boxProperties = boxProperties
+			
+	$scope.isBoxToolbarOpen = false
+	$scope.openBoxToolbar = () ->
+		if $state.current.name == "editor.design"
+			if cancel
+				$timeout.cancel cancel
+			$("#box-fab-toolbar").css "width", "100%"
+			$scope.boxes = ProjectData.variables
+			$scope.isBoxToolbarOpen = true
+	
+	cancel = null
+	$scope.closeBoxToolbar = () ->
+		$scope.isBoxToolbarOpen = false
 
+		cancel = $timeout () ->
+			$("#box-fab-toolbar").css "width", ""
+		, 1000
+		
+		
+	
+	$scope.$state = $state
+	$scope.addVariable = (ev) ->
+		confirm = $mdDialog.prompt()
+			.title '新しいを変数'
+			.textContent "新しい変数を追加します。"
+			.placeholder ''
+			.ariaLabel '名前を入力'
+			.targetEvent ev
+			.ok 'OK'
+			.cancel 'キャンセル'
 
-
+		$mdDialog.show(confirm).then (result) ->
+			if ProjectData.variables.indexOf(result) == -1
+				ProjectData.variables.push result
+			else
+				$mdToast.show(
+					$mdToast.simple()
+					.textContent 'その名前の変数はすでに存在します'
+					.position "right bottom"
+					.hideDelay 3000
+				)
+		, () ->
+			return
+		
+	$scope.bindServerVariables = (ev) ->
+		if $state.current.name == "editor.server"
+			ev.stopPropagation()
+			
+			$mdDialog.show {
+				controller: "ServerBindDialogController"
+				templateUrl: 'templates/server-bind-dialog.tmpl.html'
+				parent: angular.element document.body
+				targetEvent: ev
+				clickOutsideToClose: false
+			}
+			.then (answer) ->
+				return
+			, () ->
+				return
+		
+ 		
 	$rootScope.$broadcast "onChangedScreen", $stateParams.screenId || ProjectData.defaultScreen
 ]
 
@@ -653,7 +835,7 @@ crosetModule
 
 
 # 画面
-.controller "ScreenController", ["$scope", "$timeout", ($scope, $timeout) ->
+.controller "ScreenController", ["$scope", "$timeout", "ListItemSelect", "SelectedElementUUID", "CurrentScreenData", "ElementDatas",  ($scope, $timeout, ListItemSelect, SelectedElementUUID, CurrentScreenData, ElementDatas) ->
 
 	$scope.screenScaleRatio = 1
 	editor = $ "#editor"
@@ -675,7 +857,47 @@ crosetModule
 			$(".ui-resizable-handle").css "transform", "scale(#{handleRatio})"
 		, 0
 	).trigger("resize")
+	
+	
+	$scope.elementDatas = ElementDatas
+	
+	$scope.openListItemSelect = () ->
+		$scope.selectedElementUUID = SelectedElementUUID.get()
+		$scope.screenElements = CurrentScreenData.elementsManager.get()
+		$scope.templates = CurrentScreenData.elementsManager.getTemplates()
+		ListItemSelect.open()
+		
+	$scope.closeListItemSelect = () ->
+		ListItemSelect.close()
+	
+	$scope.closeTemplatePreview = () ->
+		$("#screen-wrapper").removeClass "show-template"
+]
 
+.directive "boxButton", [() ->
+	return {
+		restrict: "C"
+		scope: true
+		link: (scope) ->
+
+			scope.boxButtonDragOptions = {
+				helper: "clone"
+				appendTo: "body"
+				cancel: ""
+			}	
+
+	}
+]
+
+# リスト上の配置済みアイテム
+.directive "hierarchyItem", [() ->
+	return {
+		restrict: "E"
+		templateUrl: "hierarchy-item.html"
+		controller: ["$attrs", ($attrs) ->
+			this.isTemplate = $attrs.istemplate
+		]
+	}
 ]
 
 
@@ -687,22 +909,24 @@ crosetModule
 
 		controller: ["$scope", "$element", "$attrs", "$compile", "ElementDatas", "SelectedElementUUID", "SelectedTemplate",
 		($scope, $element, $attrs, $compile, ElementDatas, SelectedElementUUID, SelectedTemplate) ->
+			
+			
+			eventCover = $("<div>").css("position", "absolute").css("top", "-5px").css("left", "-5px").css("bottom", "-5px").css("right", "-5px").css("zIndex", 20000)
+			$($element).append eventCover
 
 			# クリック時
 			$element.bind "mousedown", (e) ->
 				if !$scope.isTemplate
 					SelectedElementUUID.set $attrs.uuid
-				else
-					SelectedTemplate.set $attrs.uuid
 
 				e.stopPropagation()
 				return
 
 			if !$scope.isTemplate
 				SelectedElementUUID.set $attrs.uuid						# 追加した要素を選択された状態
-			else
-				SelectedTemplate.set $attrs.uuid
 
+			return 
+			
 
 		]
 

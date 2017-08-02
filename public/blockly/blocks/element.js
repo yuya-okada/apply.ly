@@ -6,8 +6,8 @@ Blockly.Blocks.element = {
 CrosetBlock.elementBlocks = {
   button: [
     {
-      "type": "button_text_set_#id",
-      "message0": "[#name] のテキストを変更 %1",
+      "type": "button_text_set",
+      "message0": "%1 のテキストを変更 %2",
       "args0": [
         {
           "type": "input_value",
@@ -21,8 +21,8 @@ CrosetBlock.elementBlocks = {
       "helpUrl": ""
     },
     {
-      "type": "button_text_get_#id",
-      "message0": "[#name] のテキスト",
+      "type": "button_text_get",
+      "message0": "%1 のテキスト",
       "args0": [],
       "output": null,
       "colour": Blockly.Blocks.element.HUE,
@@ -30,8 +30,8 @@ CrosetBlock.elementBlocks = {
       "helpUrl": ""
     },
     {
-      "type": "button_onclick_#id",
-      "message0": "[#name] がクリックされた時、 %1 %2",
+      "type": "button_onclick",
+      "message0": "%1 がクリックされた時、 %2 %3",
       "args0": [
         {
           "type": "input_dummy"
@@ -50,8 +50,8 @@ CrosetBlock.elementBlocks = {
   ],
   text: [
     {
-      "type": "text_text_set_#id",
-      "message0": "[#name] のテキストを変更 %1",
+      "type": "text_text_set",
+      "message0": "%1 のテキストを変更 %2",
       "args0": [
         {
           "type": "input_value",
@@ -65,8 +65,8 @@ CrosetBlock.elementBlocks = {
       "helpUrl": ""
     },
     {
-      "type": "text_text_get_#id",
-      "message0": "[#name] のテキスト",
+      "type": "text_text_get",
+      "message0": "%1 のテキスト",
       "args0": [],
       "output": null,
       "colour": Blockly.Blocks.element.HUE,
@@ -76,8 +76,8 @@ CrosetBlock.elementBlocks = {
   ],
   textbox: [
     {
-      "type": "textbox_text_set_#id",
-      "message0": "[#name] のテキストを変更 %1",
+      "type": "textbox_text_set",
+      "message0": "%1 のテキストを変更 %2",
       "args0": [
         {
           "type": "input_value",
@@ -91,8 +91,8 @@ CrosetBlock.elementBlocks = {
       "helpUrl": ""
     },
     {
-      "type": "textbox_text_get_#id",
-      "message0": "[#name] のテキスト",
+      "type": "textbox_text_get",
+      "message0": "%1 のテキスト",
       "args0": [],
       "output": null,
       "colour": Blockly.Blocks.element.HUE,

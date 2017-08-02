@@ -20,16 +20,19 @@ md-toolbar#header(ng-controller="HeaderController")
 		span(flex)
 		
 		
-		md-button#build-download(class="md-primary" aria-label="Run" ng-click="buildDownload($event)") 
-			md-icon.material-icons file_download
+		md-button#config.md-icon-button(aria-label="Config" ng-click="config($event)") 
+			md-icon(aria-label="Config") settings
+			
+		md-button#build-download.md-icon-button(aria-label="Download" ng-click="buildDownload($event)") 
+			md-icon(aria-label="Download") file_download
 		
 		//- 実行
-		md-button#run-fab(class="md-primary" aria-label="Run" ng-click="run($event)") 
-			md-icon.material-icons play_arrow
+		md-button#run-fab.md-icon-button(aria-label="Run" ng-click="run($event)") 
+			md-icon(aria-label="Run") play_arrow
 			
 		//- 保存
-		md-button#save-fab(class="md-fab md-primary" aria-label="Run" ng-click="save($event)") 
-			md-icon.material-icons save
+		md-button#save-fab.md-primary.md-icon-button(aria-label="Save" ng-click="save($event)") 
+			md-icon(aria-label="Save") save
 			
 #editor(layout="row")
 	
@@ -45,6 +48,11 @@ md-toolbar#header(ng-controller="HeaderController")
 	
 		md-button.selected.md-icon-button(ng-repeat="(name, modeObj) in modeList" ng-click="changeMode(name)" ng-class="{'mode-icon-active': name==mode}" aria-label="ModeIcon")
 			md-icon.material-icons {{modeObj.icon}}
+		
+		.mode-button-divider
+			
+		md-button.selected.md-icon-button(ng-repeat="(name, modeObj) in secondModeList" ng-click="changeMode(name)" ng-class="{'mode-icon-active': name==mode}" aria-label="ModeIcon")
+			md-icon.material-icons {{modeObj.icon}}
 
 	#left-zone.editor-card.flex
 		.ui-view-fade(ui-view="left")
@@ -55,8 +63,8 @@ md-toolbar#header(ng-controller="HeaderController")
 	//- 			#screen
 					
 
-	#screen-wrapper
-		#screen-zone.marvel-device.iphone6.silver(ng-controller="ScreenController" ng-style="{transform: 'scale(' + screenScaleRatio + ')', marginRight: marginRight}")
+	#screen-wrapper(ng-controller="ScreenController")
+		#screen-zone.marvel-device.iphone6.silver(ng-style="{transform: 'scale3d(' + screenScaleRatio + ',' + screenScaleRatio + ',' + screenScaleRatio + ')', marginRight: marginRight}")
 			.top-bar
 			.sleep
 			.volume
@@ -67,17 +75,69 @@ md-toolbar#header(ng-controller="HeaderController")
 			.home
 			.bottom-bar
 			
+			md-button.md-fab.md-accent.change-select-mode(ng-click="openListItemSelect()") 
+				md-icon(aria-label="Menu" class="material-icons") format_list_bulleted
+		
+
 		
 		div(layout="column")#template-preview-wrapper
-			md-card#template-preview(layout="column" layout-align="center center")
-		
+			md-card(layout="column" layout-align="center center")
+				md-card-actions(layout="row" layout-align="start start")
+					md-button.md-icon-button(ng-click="closeTemplatePreview()")
+						md-icon(aria-label="Close" class="material-icons") arrow_back
+						
+				#template-preview(layout="column" layout-align="center center")
+			
+	
+		div(layout="column")#list-item-select
+			md-card(layout="column")
+				md-card-actions(layout="row" layout-align="start start")
+					md-button.md-icon-button(ng-click="closeListItemSelect()")
+						md-icon(aria-label="Close" class="material-icons") arrow_back
+
+				md-list(ng-cloak)
+					md-subheader 画面要素
+					hierarchy-item(ng-repeat="element in screenElements | toArray | orderBy: 'zIndex'")
+
+					md-divider(ng-show="templates")
+
+					md-subheader(ng-show="templates") テンプレート
+					hierarchy-item(ng-repeat="element in templates | toArray" istemplate="true")
+
 			
 
 	#right-zone.editor-card.flex
 		.ui-view-fade(ui-view="right")
+		
 	
+	#full-zone.flex
+		.ui-view-fade(ui-view="full" layout="column")
+		
+		
 	
 		
+	
+	md-fab-toolbar#box-fab-toolbar(md-open='isBoxToolbarOpen' count='demo.count' md-direction='left' ng-mouseleave="closeBoxToolbar()")
+		md-fab-trigger.align-with-text
+			md-button.md-fab.md-primary(aria-label='menu' ng-mouseover="openBoxToolbar()" ng-click="bindServerVariables($event)")
+				md-icon(aria-label="Box") archive
+		md-toolbar(ng-show="$state.current.name == 'editor.design'")
+			md-fab-actions.md-toolbar-tools
+				md-button.box-button(ng-click="addVariable($event)")
+					md-icon(aria-label="Add" class="material-icons") add	
+				md-button.box-button(aria-label='{{box}}' ng-repeat="box in boxes" data-drag="true" jqyoui-draggable data-jqyoui-options="{{boxButtonDragOptions}}") {{box}}
+
 		
 		
-			
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		

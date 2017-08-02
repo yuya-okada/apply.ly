@@ -2,20 +2,7 @@ var crosetModule;
 
 crosetModule = angular.module("Croset");
 
-crosetModule.service("ServiceConfig", [
-  function() {
-    var config;
-    config = {
-      componentScale: 1
-    };
-    this.get = function() {
-      return config;
-    };
-    this.update = function(key, value) {
-      return config[key] = value;
-    };
-  }
-]).service("CurrentScreenData", [
+crosetModule.service("CurrentScreenData", [
   function() {
     var that;
     this.id = "";
@@ -27,13 +14,14 @@ crosetModule.service("ServiceConfig", [
     };
   }
 ]).service("ProjectData", [
-  "$http", "$rootScope", "$stateParams", "$state", "ScreenElementsManager", "ServiceConfig", "getUUID", "CurrentScreenData", function($http, $rootScope, $stateParams, $state, ScreenElementsManager, ServiceConfig, getUUID, CurrentScreenData) {
-    var callbacksVal, saveCurrentScreen, that, trigerCallback;
+  "$http", "$rootScope", "$stateParams", "$state", "ScreenElementsManager", "getUUID", "CurrentScreenData", function($http, $rootScope, $stateParams, $state, ScreenElementsManager, getUUID, CurrentScreenData) {
+    var callbacksVar, saveCurrentScreen, that, triggerCallback;
     this.projectId = null;
     this.name = null;
     this.screens = {};
     this.defaultScreen = "トップ";
     this.variables = [];
+    this.config = {};
     this.getScreens = function() {
       return this.screens;
     };
@@ -51,7 +39,7 @@ crosetModule.service("ServiceConfig", [
       return that.variables = [];
     };
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams) {
-      console.log("チェンジスタート");
+      $state.current = toState;
       if (toState.name.match(/editor/)) {
         if (toParams.projectId === that.projectId + "") {
           saveCurrentScreen();
@@ -60,7 +48,7 @@ crosetModule.service("ServiceConfig", [
       }
     });
     saveCurrentScreen = function() {
-      var cards, ref, ref1, sourceCode, xml;
+      var cards, ref, ref1, ref2, sourceCode, xml;
       if (CurrentScreenData.workspace) {
         xml = Blockly.Xml.workspaceToDom(CurrentScreenData.workspace);
         cards = Blockly.Xml.domToText(xml);
@@ -74,7 +62,8 @@ crosetModule.service("ServiceConfig", [
         elements: CurrentScreenData.elementsManager.get(),
         templates: CurrentScreenData.elementsManager.getTemplates(),
         cards: cards,
-        sourceCode: sourceCode
+        sourceCode: sourceCode,
+        boxProperties: (ref2 = CurrentScreenData.elementsManager) != null ? ref2.boxProperties : void 0
       });
     };
     this.addScreen = function(name) {
@@ -87,7 +76,7 @@ crosetModule.service("ServiceConfig", [
           sourceCode: "",
           name: name
         };
-        trigerCallback();
+        triggerCallback();
         return true;
       }
     };
@@ -99,14 +88,14 @@ crosetModule.service("ServiceConfig", [
         if ((ref = that.screens[id]) != null) {
           ref.name = newName;
         }
-        trigerCallback();
+        triggerCallback();
         return true;
       }
     };
     this.removeScreen = function(id) {
       if (that.screens[id]) {
         delete that.screens[id];
-        trigerCallback();
+        triggerCallback();
         return true;
       } else {
         return false;
@@ -127,7 +116,7 @@ crosetModule.service("ServiceConfig", [
     this.setScreenCallback = function(fnc) {
       return that.callbacks.push(fnc);
     };
-    trigerCallback = function() {
+    triggerCallback = function() {
       var callback, i, len, ref, results;
       ref = that.callbacks;
       results = [];
@@ -137,25 +126,52 @@ crosetModule.service("ServiceConfig", [
       }
       return results;
     };
-    this.addvariable = function(name) {
-      if (that.variables.indexOf(name) === -1) {
-        that.variables.push(name);
-        that.trigetCallbackVal();
-        return true;
-      } else {
-        return false;
+    CrosetBlock.renameVariable = function(oldName, newName) {
+      var boxName, id, key, properties, ref, ref1, ref2;
+      ref1 = (ref = CurrentScreenData.elementsManager) != null ? ref.boxProperties : void 0;
+      for (id in ref1) {
+        properties = ref1[id];
+        for (key in properties) {
+          boxName = properties[key];
+          if (boxName === oldName) {
+            if ((ref2 = CurrentScreenData.elementsManager) != null) {
+              ref2.boxProperties[id][key] = newName;
+            }
+          }
+        }
       }
+      return that.triggerCallbackVar();
     };
-    callbacksVal = [];
-    this.onChangevariables = function(fnc) {
-      return callbacksVal.push(fnc);
+    CrosetBlock.deleteVariable = function(name) {
+      var boxName, id, key, properties, ref, ref1, ref2;
+      ref1 = (ref = CurrentScreenData.elementsManager) != null ? ref.boxProperties : void 0;
+      for (id in ref1) {
+        properties = ref1[id];
+        for (key in properties) {
+          boxName = properties[key];
+          if (boxName === name) {
+            if ((ref2 = CurrentScreenData.elementsManager) != null) {
+              ref2.removeBoxToProperty(id, key);
+            }
+          }
+        }
+      }
+      return that.triggerCallbackVar();
     };
-    this.trigetCallbackVal = function() {
+    callbacksVar = [];
+    this.onVariablesChanged = function(fnc) {
+      return callbacksVar.push(fnc);
+    };
+    this.triggerCallbackVar = function() {
       var callback, i, len, results;
       results = [];
-      for (i = 0, len = callbacksVal.length; i < len; i++) {
-        callback = callbacksVal[i];
-        results.push(callback(that.variables));
+      for (i = 0, len = callbacksVar.length; i < len; i++) {
+        callback = callbacksVar[i];
+        if (CurrentScreenData.workspace) {
+          results.push(callback(CurrentScreenData.workspace.variableList));
+        } else {
+          results.push(callback(that.variables));
+        }
       }
       return results;
     };
@@ -167,15 +183,31 @@ crosetModule.service("ServiceConfig", [
         projectId: this.projectId,
         screens: this.screens,
         defaultScreen: this.defaultScreen,
-        config: ServiceConfig.get(),
-        variables: this.variables
+        variables: this.variables,
+        config: this.config
       };
       console.log("Builded", projectData);
       return projectData;
     };
   }
+]).service("SelectedElementOrTemplateUUID", [
+  function() {
+    var isTemplate, uuid;
+    uuid = null;
+    isTemplate = null;
+    this.get = function() {
+      return uuid;
+    };
+    this.set = function(id, isTemplate_) {
+      uuid = id;
+      return isTemplate = isTemplate_;
+    };
+    this.isTemplate = function() {
+      return isTemplate;
+    };
+  }
 ]).service("SelectedElementUUID", [
-  "SetElementProperty", "CurrentScreenData", "$rootScope", function(SetElementProperty, CurrentScreenData, $rootScope) {
+  "SelectedElementOrTemplateUUID", "SetElementProperty", "CurrentScreenData", "$rootScope", function(SelectedElementOrTemplateUUID, SetElementProperty, CurrentScreenData, $rootScope) {
     var uuid;
     uuid = null;
     this.init = function() {
@@ -262,12 +294,13 @@ crosetModule.service("ServiceConfig", [
         parentElement.addClass("croset-resizable-parent");
       }
       if (CurrentScreenData.workspace) {
-        return CurrentScreenData.workspace.toolbox_.refreshSelection();
+        CurrentScreenData.workspace.toolbox_.refreshSelection();
       }
+      return SelectedElementOrTemplateUUID.set(uuid);
     };
   }
 ]).service("SelectedTemplate", [
-  "SetElementProperty", "CurrentScreenData", function(SetElementProperty, CurrentScreenData) {
+  "SelectedElementOrTemplateUUID", "SetElementProperty", "CurrentScreenData", function(SelectedElementOrTemplateUUID, SetElementProperty, CurrentScreenData) {
     var uuid;
     uuid = "";
     this.get = function() {
@@ -279,7 +312,19 @@ crosetModule.service("ServiceConfig", [
       $("#screen-wrapper").addClass("show-template");
       screenElementsManager = CurrentScreenData.elementsManager;
       SetElementProperty(id, true);
-      return screenElementsManager.showTemplate(id);
+      screenElementsManager.showTemplate(id);
+      return SelectedElementOrTemplateUUID.set(id, true);
+    };
+  }
+]).factory("ListItemSelect", [
+  "$timeout", function($timeout) {
+    return {
+      open: function(id) {
+        $("#screen-wrapper").addClass("list-item-select-mode");
+      },
+      close: function(id) {
+        $("#screen-wrapper").removeClass("list-item-select-mode");
+      }
     };
   }
 ]).controller("HeaderController", [
@@ -387,6 +432,37 @@ crosetModule.service("ServiceConfig", [
         clickOutsideToClose: false
       }).then(function(answer) {}, function() {});
     };
+    $scope.config = function(ev) {
+      var ConfigDialogController;
+      ConfigDialogController = [
+        "$scope", "ProjectData", "$mdDialog", function($scope, ProjectData, $mdDialog) {
+          $scope.headings = {
+            "server": "サーバー"
+          };
+          $scope.currentHeading = "server";
+          $scope.changeHeading = function(heading) {
+            return $scope.currentHeading = heading;
+          };
+          $scope.config = angular.merge({
+            server: {}
+          }, ProjectData.config);
+          $scope.cancel = function() {
+            return $mdDialog.hide();
+          };
+          return $scope.ok = function() {
+            ProjectData.config = $scope.config;
+            return $mdDialog.hide();
+          };
+        }
+      ];
+      return $mdDialog.show({
+        controller: ConfigDialogController,
+        templateUrl: 'templates/config-dialog.tmpl.html',
+        parent: angular.element(document.body),
+        targetEvent: ev,
+        clickOutsideToClose: false
+      }).then(function(answer) {}, function() {});
+    };
     return saveProject = function(fnc) {
       return $http({
         method: "PUT",
@@ -484,8 +560,8 @@ crosetModule.service("ServiceConfig", [
     };
   }
 ]).controller("EditorController", [
-  "$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$interval", "$mdSidenav", "$rootScope", "ScreenElementsManager", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes", function($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $interval, $mdSidenav, $rootScope, ScreenElementsManager, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) {
-    var changeScreen, projectData;
+  "$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$timeout", "$interval", "$mdToast", "$mdSidenav", "$rootScope", "$mdDialog", "ScreenElementsManager", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes", function($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $timeout, $interval, $mdToast, $mdSidenav, $rootScope, $mdDialog, ScreenElementsManager, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) {
+    var cancel, changeScreen, projectData;
     SelectedElementUUID.init();
     $scope.settings = {
       elementDatas: ElementDatas
@@ -509,7 +585,48 @@ crosetModule.service("ServiceConfig", [
         icon: "code"
       }
     };
+    $scope.secondModeList = {
+      server: {
+        icon: "settings_ethernet"
+      }
+    };
     $scope.changeMode = function(name) {
+      var apps, config, init, ref;
+      if (name === "server") {
+        if ((ref = ProjectData.config) != null ? ref.server : void 0) {
+          config = {
+            apiKey: ProjectData.config.server.apiKey,
+            authDomain: ProjectData.config.server.authDomain,
+            databaseURL: ProjectData.config.server.databaseURL,
+            projectId: ProjectData.config.server.projectId,
+            storageBucket: ProjectData.config.server.storageBucket,
+            messagingSenderId: ProjectData.config.server.messagingSenderId
+          };
+          init = function() {
+            var error;
+            try {
+              firebase.initializeApp(config);
+            } catch (_error) {
+              error = _error;
+              $mdToast.show($mdToast.simple().textContent('firebaseを正しく設定してください').position("right bottom").hideDelay(3000));
+              return;
+            }
+            return $state.go("editor.server", {
+              screenId: CurrentScreenData.id
+            });
+          };
+          apps = firebase.apps;
+          if (apps.length !== 0) {
+            firebase.app()["delete"]().then(init);
+          } else {
+            init();
+          }
+        } else {
+          $mdToast.show($mdToast.simple().textContent('firebaseを設定してください').position("right bottom").hideDelay(3000));
+        }
+      } else {
+
+      }
       return $state.go("editor." + name, {
         screenId: CurrentScreenData.id
       });
@@ -526,6 +643,7 @@ crosetModule.service("ServiceConfig", [
     ProjectData.name = projectData.name;
     ProjectData.projectId = projectData.projectId;
     ProjectData.defaultScreen = projectData.defaultScreen;
+    ProjectData.config = projectData.config;
     if (projectData.variables) {
       ProjectData.variables = projectData.variables;
     }
@@ -542,20 +660,66 @@ crosetModule.service("ServiceConfig", [
       if (nextScreen.templates == null) {
         nextScreen.templates = {};
       }
-      changeScreen(nextScreen.elements, nextScreen.cards, nextScreen.templates);
+      changeScreen(nextScreen.elements, nextScreen.cards, nextScreen.templates, nextScreen.boxProperties);
       $scope.progress.isLoading = false;
       return $scope.progress.determinateValue += 100;
     });
-    changeScreen = function(elements, cards, templates) {
+    changeScreen = function(elements, cards, templates, boxProperties) {
       var newScreenElementsManager;
       newScreenElementsManager = new ScreenElementsManager($("#screen"));
       CurrentScreenData.elementsManager = newScreenElementsManager;
       angular.forEach(elements, function(data, uuid) {
         return newScreenElementsManager.addFromData(data, uuid);
       });
-      return angular.forEach(templates, function(data, uuid) {
+      angular.forEach(templates, function(data, uuid) {
         return newScreenElementsManager.addTemplateFromData(data, uuid);
       });
+      if (boxProperties == null) {
+        boxProperties = {};
+      }
+      return newScreenElementsManager.boxProperties = boxProperties;
+    };
+    $scope.isBoxToolbarOpen = false;
+    $scope.openBoxToolbar = function() {
+      if ($state.current.name === "editor.design") {
+        if (cancel) {
+          $timeout.cancel(cancel);
+        }
+        $("#box-fab-toolbar").css("width", "100%");
+        $scope.boxes = ProjectData.variables;
+        return $scope.isBoxToolbarOpen = true;
+      }
+    };
+    cancel = null;
+    $scope.closeBoxToolbar = function() {
+      $scope.isBoxToolbarOpen = false;
+      return cancel = $timeout(function() {
+        return $("#box-fab-toolbar").css("width", "");
+      }, 1000);
+    };
+    $scope.$state = $state;
+    $scope.addVariable = function(ev) {
+      var confirm;
+      confirm = $mdDialog.prompt().title('新しいを変数').textContent("新しい変数を追加します。").placeholder('').ariaLabel('名前を入力').targetEvent(ev).ok('OK').cancel('キャンセル');
+      return $mdDialog.show(confirm).then(function(result) {
+        if (ProjectData.variables.indexOf(result) === -1) {
+          return ProjectData.variables.push(result);
+        } else {
+          return $mdToast.show($mdToast.simple().textContent('その名前の変数はすでに存在します').position("right bottom").hideDelay(3000));
+        }
+      }, function() {});
+    };
+    $scope.bindServerVariables = function(ev) {
+      if ($state.current.name === "editor.server") {
+        ev.stopPropagation();
+        return $mdDialog.show({
+          controller: "ServerBindDialogController",
+          templateUrl: 'templates/server-bind-dialog.tmpl.html',
+          parent: angular.element(document.body),
+          targetEvent: ev,
+          clickOutsideToClose: false
+        }).then(function(answer) {}, function() {});
+      }
     };
     return $rootScope.$broadcast("onChangedScreen", $stateParams.screenId || ProjectData.defaultScreen);
   }
@@ -564,7 +728,7 @@ crosetModule.service("ServiceConfig", [
     return $rootScope.$broadcast("onChangedScreen", $stateParams.screenId || ProjectData.defaultScreen);
   }
 ]).controller("ScreenController", [
-  "$scope", "$timeout", function($scope, $timeout) {
+  "$scope", "$timeout", "ListItemSelect", "SelectedElementUUID", "CurrentScreenData", "ElementDatas", function($scope, $timeout, ListItemSelect, SelectedElementUUID, CurrentScreenData, ElementDatas) {
     var editor, screenDefaultHeight, screenDefaultWidth, screenZone;
     $scope.screenScaleRatio = 1;
     editor = $("#editor");
@@ -575,7 +739,7 @@ crosetModule.service("ServiceConfig", [
       width: screenDefaultWidth,
       height: screenDefaultHeight
     });
-    return $(window).on("resize", function() {
+    $(window).on("resize", function() {
       return $timeout(function() {
         var handleRatio, height;
         height = editor.height() - 20;
@@ -585,6 +749,45 @@ crosetModule.service("ServiceConfig", [
         return $(".ui-resizable-handle").css("transform", "scale(" + handleRatio + ")");
       }, 0);
     }).trigger("resize");
+    $scope.elementDatas = ElementDatas;
+    $scope.openListItemSelect = function() {
+      $scope.selectedElementUUID = SelectedElementUUID.get();
+      $scope.screenElements = CurrentScreenData.elementsManager.get();
+      $scope.templates = CurrentScreenData.elementsManager.getTemplates();
+      return ListItemSelect.open();
+    };
+    $scope.closeListItemSelect = function() {
+      return ListItemSelect.close();
+    };
+    return $scope.closeTemplatePreview = function() {
+      return $("#screen-wrapper").removeClass("show-template");
+    };
+  }
+]).directive("boxButton", [
+  function() {
+    return {
+      restrict: "C",
+      scope: true,
+      link: function(scope) {
+        return scope.boxButtonDragOptions = {
+          helper: "clone",
+          appendTo: "body",
+          cancel: ""
+        };
+      }
+    };
+  }
+]).directive("hierarchyItem", [
+  function() {
+    return {
+      restrict: "E",
+      templateUrl: "hierarchy-item.html",
+      controller: [
+        "$attrs", function($attrs) {
+          return this.isTemplate = $attrs.istemplate;
+        }
+      ]
+    };
   }
 ]).directive("crosetElementEditor", function() {
   return {
@@ -592,18 +795,17 @@ crosetModule.service("ServiceConfig", [
     scope: false,
     controller: [
       "$scope", "$element", "$attrs", "$compile", "ElementDatas", "SelectedElementUUID", "SelectedTemplate", function($scope, $element, $attrs, $compile, ElementDatas, SelectedElementUUID, SelectedTemplate) {
+        var eventCover;
+        eventCover = $("<div>").css("position", "absolute").css("top", "-5px").css("left", "-5px").css("bottom", "-5px").css("right", "-5px").css("zIndex", 20000);
+        $($element).append(eventCover);
         $element.bind("mousedown", function(e) {
           if (!$scope.isTemplate) {
             SelectedElementUUID.set($attrs.uuid);
-          } else {
-            SelectedTemplate.set($attrs.uuid);
           }
           e.stopPropagation();
         });
         if (!$scope.isTemplate) {
-          return SelectedElementUUID.set($attrs.uuid);
-        } else {
-          return SelectedTemplate.set($attrs.uuid);
+          SelectedElementUUID.set($attrs.uuid);
         }
       }
     ]

@@ -5,12 +5,11 @@
       <md-subheader>画面要素</md-subheader>
       <hierarchy-item ng-repeat="element in screenElements | toArray | orderBy: 'zIndex'"></hierarchy-item>
       <md-divider ng-show="templates"></md-divider>
-      <md-subheader>テンプレート</md-subheader>
+      <md-subheader ng-show="templates">テンプレート</md-subheader>
       <hierarchy-item ng-repeat="element in templates | toArray" istemplate="true"></hierarchy-item>
     </md-list>
     
-    <md-button id="add-element" ng-click="animationTriggers.showNewElements=true" class="md-fab md-accent"> 
-      <ng-md-icon icon="add" style="fill: white" size="30"></ng-md-icon>
+    <md-button id="add-element" ng-click="animationTriggers.showNewElements=true" class="md-raised md-primary">新しい要素を追加 
     </md-button>
   </div>
   <div id="new-elements" ng-class="{animationOn: animationTriggers.showNewElements}">

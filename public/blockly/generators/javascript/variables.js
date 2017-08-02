@@ -31,8 +31,7 @@ goog.require('Blockly.JavaScript');
 
 Blockly.JavaScript['variables_get'] = function(block) {
   // Variable getter.
-  var code = "variables['" + Blockly.JavaScript.variableDB_.getName(block.getFieldValue('VAR'),
-      Blockly.Variables.NAME_TYPE) + "']";
+  var code = "variables['" + block.getFieldValue('VAR') + "']";
   return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
@@ -40,7 +39,6 @@ Blockly.JavaScript['variables_set'] = function(block) {
   // Variable setter.
   var argument0 = Blockly.JavaScript.valueToCode(block, 'VALUE',
       Blockly.JavaScript.ORDER_ASSIGNMENT) || '0';
-  var varName = "variables['" + Blockly.JavaScript.variableDB_.getName(
-      block.getFieldValue('VAR'), Blockly.Variables.NAME_TYPE) + "']";
+  var varName = "variables['" + block.getFieldValue('VAR') + "']";
   return varName + ' = ' + argument0 + ';\n';
 };

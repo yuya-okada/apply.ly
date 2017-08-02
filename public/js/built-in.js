@@ -860,6 +860,7 @@ crosetModule.factory("ElementDatas", function() {
       name: "入力ボックス",
       icon: "create",
       width: 150,
+      unresizable: "y",
       properties: [
         {
           title: "入力",
@@ -869,9 +870,10 @@ crosetModule.factory("ElementDatas", function() {
               {
                 type: "textbox",
                 size: 100,
+                sync: true,
                 options: {
                   defaultValue: "入力ボックス",
-                  result: "default"
+                  result: "text"
                 }
               }
             ], [
@@ -891,11 +893,187 @@ crosetModule.factory("ElementDatas", function() {
     },
     checkbox: {
       name: "チェック",
-      icon: "check_box"
+      icon: "check_box",
+      unresizable: "xy",
+      properties: [
+        {
+          title: "テキスト",
+          icon: "mode_edit",
+          propertyInputs: [
+            [
+              {
+                type: "textbox",
+                size: 100,
+                sync: true,
+                options: {
+                  defaultValue: "チェック",
+                  result: "text"
+                }
+              }
+            ], [
+              {
+                type: "number",
+                size: 100,
+                options: {
+                  label: "フォントサイズ",
+                  defaultValue: 14,
+                  result: "fontSize"
+                }
+              }
+            ]
+          ]
+        }, {
+          title: "チェック",
+          icon: "checkbox",
+          propertyInputs: [
+            [
+              {
+                type: "checkbox",
+                size: 100,
+                sync: true,
+                options: {
+                  text: "チェック",
+                  defaultValue: true,
+                  result: "checked"
+                }
+              }
+            ], [
+              {
+                type: "checkbox",
+                size: 100,
+                options: {
+                  text: "無効化",
+                  defaultValue: false,
+                  result: "disabled"
+                }
+              }
+            ]
+          ]
+        }
+      ]
     },
     "switch": {
       name: "スイッチ",
-      icon: "swap_horizon"
+      icon: "swap_horizon",
+      unresizable: "xy",
+      properties: [
+        {
+          title: "テキスト",
+          icon: "mode_edit",
+          propertyInputs: [
+            [
+              {
+                type: "textbox",
+                size: 100,
+                sync: true,
+                options: {
+                  defaultValue: "スイッチ",
+                  result: "text"
+                }
+              }
+            ], [
+              {
+                type: "number",
+                size: 100,
+                options: {
+                  label: "フォントサイズ",
+                  defaultValue: 14,
+                  result: "fontSize"
+                }
+              }
+            ]
+          ]
+        }, {
+          title: "スイッチ",
+          icon: "checkbox",
+          propertyInputs: [
+            [
+              {
+                type: "checkbox",
+                size: 100,
+                sync: true,
+                options: {
+                  text: "スイッチ",
+                  defaultValue: true,
+                  result: "value"
+                }
+              }
+            ], [
+              {
+                type: "checkbox",
+                size: 100,
+                options: {
+                  text: "無効化",
+                  defaultValue: false,
+                  result: "disabled"
+                }
+              }
+            ]
+          ]
+        }
+      ]
+    },
+    slider: {
+      name: "スライダー",
+      icon: "swap_horizon",
+      unresizable: "y",
+      properties: [
+        {
+          title: "スライダー",
+          icon: "checkbox",
+          propertyInputs: [
+            [
+              {
+                type: "number",
+                size: 100,
+                options: {
+                  defaultValue: 0,
+                  result: "value"
+                }
+              }
+            ], [
+              {
+                type: "number",
+                size: 50,
+                options: {
+                  text: "最小",
+                  defaultValue: 0,
+                  result: "min"
+                }
+              }, {
+                type: "number",
+                size: 50,
+                options: {
+                  text: "最大",
+                  defaultValue: 100,
+                  result: "max"
+                }
+              }
+            ], [
+              {
+                type: "checkbox",
+                size: 100,
+                sync: true,
+                options: {
+                  text: "吹き出し",
+                  defaultValue: true,
+                  result: "discrete"
+                }
+              }
+            ], [
+              {
+                type: "checkbox",
+                size: 100,
+                options: {
+                  text: "無効化",
+                  defaultValue: false,
+                  result: "disabled"
+                }
+              }
+            ]
+          ]
+        }
+      ]
     }
   };
 }).factory("getUUID", function() {
@@ -910,11 +1088,12 @@ crosetModule.factory("ElementDatas", function() {
 }).factory("ScreenElementsManager", [
   "Elements", "ElementDatas", "$compile", "$injector", "getUUID", function(Elements, ElementDatas, $compile, $injector, getUUID) {
     return function(screenElement, isPublic) {
-      var childAddedCallbacks, initScope, initTemplatePreview, screenScope, templatePreviewElement, templatePreviewScope, that;
+      var childAddedCallbacks, initScope, initTemplatePreview, ref, ref1, screenScope, templatePreviewElement, templatePreviewScope, that;
       screenScope = null;
       templatePreviewElement = null;
       templatePreviewScope = null;
       screenElement.empty();
+      this.boxProperties = {};
       that = this;
       if (isPublic == null) {
         isPublic = false;
@@ -982,6 +1161,19 @@ crosetModule.factory("ElementDatas", function() {
         };
         return searchInArray(screenScope != null ? screenScope.list : void 0);
       };
+      this.setBoxToProperty = function(id, key, boxName) {
+        var base, base1;
+        if ((base = this.boxProperties)[id] == null) {
+          base[id] = {};
+        }
+        if ((base1 = this.boxProperties[id])[key] == null) {
+          base1[key] = boxName;
+        }
+      };
+      this.removeBoxToProperty = function(id, key, boxName) {
+        var ref;
+        return (ref = this.boxProperties[id]) != null ? delete ref[key] : void 0;
+      };
       this.getSiblings = function(id) {
         var searchParent;
         searchParent = function(array) {
@@ -1025,7 +1217,8 @@ crosetModule.factory("ElementDatas", function() {
       };
       this.removeAll = function() {
         screenScope.list = {};
-        return screenElement.empty();
+        screenElement.empty();
+        return this.boxProperties = {};
       };
       this.add = function(type, uuid) {
         var e, options, ref, scope;
@@ -1053,6 +1246,7 @@ crosetModule.factory("ElementDatas", function() {
         if ((ref = screenScope.zIndexes) != null) {
           ref.push(uuid);
         }
+        screenScope.list[uuid].element = e;
         e = $compile(e)(scope);
         screenElement.append(e);
         return screenScope.list[uuid].element = e;
@@ -1082,12 +1276,14 @@ crosetModule.factory("ElementDatas", function() {
       this["delete"] = function(uuid) {
         var VisiblePropertyCards;
         this.get(uuid).element.remove();
-        VisiblePropertyCards = $injector.get("VisiblePropertyCards");
-        VisiblePropertyCards.set([]);
+        if (!isPublic) {
+          VisiblePropertyCards = $injector.get("VisiblePropertyCards");
+          VisiblePropertyCards.set([]);
+        }
         return this.deleteData(uuid);
       };
       this.duplicate = function(data) {
-        var changeChildName;
+        var changeChildName, id;
         data = angular.copy(data);
         changeChildName = function(children) {
           var child, id, results;
@@ -1104,9 +1300,20 @@ crosetModule.factory("ElementDatas", function() {
           }
           return results;
         };
-        data.zIndex = Object.keys(screenScope.list).lengt;
+        data.zIndex = Object.keys(screenScope.list).length;
         changeChildName(data.children);
-        return this.addFromData(data, getUUID());
+        id = getUUID();
+        this.addFromData(data, id);
+        return id;
+      };
+      this.instantiate = function(id) {
+        return this.duplicate(this.getTemplate(id));
+      };
+      this.instantiateTo = function(id, parentId) {
+        var childData, childId;
+        childData = this.getTemplate(id);
+        childId = this.duplicate(childData);
+        return this.addChild(parentId, childId);
       };
       this.deleteData = function(id) {
         var data, deleteInArray, ref, uuid;
@@ -1129,7 +1336,8 @@ crosetModule.factory("ElementDatas", function() {
           data = ref[uuid];
           deleteInArray(data.children);
         }
-        return delete screenScope.list[id];
+        delete screenScope.list[id];
+        return delete this.boxProperties[id];
       };
       childAddedCallbacks = [];
       this.addChild = function(parentId, childId) {
@@ -1192,11 +1400,21 @@ crosetModule.factory("ElementDatas", function() {
         return childAddedCallbacks.push(fnc);
       };
       this.template = function(uuid) {
-        var element, templateId;
+        var element, ref, ref1, templateId;
         if (!screenScope) {
           initScope();
         }
         element = $.extend(true, {}, this.get(uuid));
+        if (element != null) {
+          if ((ref = element.options) != null) {
+            ref.left = "";
+          }
+        }
+        if (element != null) {
+          if ((ref1 = element.options) != null) {
+            ref1.top = "";
+          }
+        }
         templateId = getUUID();
         delete element.zIndex;
         return screenScope.templates[templateId] = element;
@@ -1290,7 +1508,8 @@ crosetModule.factory("ElementDatas", function() {
           data = ref[uuid];
           deleteInArray(data.children);
         }
-        return delete screenScope.templates[id];
+        delete screenScope.templates[id];
+        return delete this.boxProperties[id];
       };
       this.showTemplate = function(uuid) {
         var data, e, scope;
@@ -1342,6 +1561,12 @@ crosetModule.factory("ElementDatas", function() {
         screenScope.list = {};
         return screenElement.empty();
       };
+      if ((ref = window.CrosetBlock) != null) {
+        ref.get = this.get;
+      }
+      if ((ref1 = window.CrosetBlock) != null) {
+        ref1.getTemplate = this.getTemplate;
+      }
     };
   }
 ]).directive("crosetElement", [
@@ -1416,15 +1641,30 @@ crosetModule.factory("ElementDatas", function() {
   return {
     restrict: "E",
     templateUrl: "template-textbox.html",
-    link: function(scope, element, attrs) {
-      console.log(scope, "suko-pu");
-      return scope.s.get(scope.uuid).options.text = options["default"];
-    }
+    link: function(scope, element, attrs) {}
   };
 }).directive("crosetElementSquare", function() {
   return {
     restrict: "E",
     templateUrl: "template-square.html",
+    link: function(scope, element, attrs) {}
+  };
+}).directive("crosetElementCheckbox", function() {
+  return {
+    restrict: "E",
+    templateUrl: "template-checkbox.html",
+    link: function(scope, element, attrs) {}
+  };
+}).directive("crosetElementSwitch", function() {
+  return {
+    restrict: "E",
+    templateUrl: "template-switch.html",
+    link: function(scope, element, attrs) {}
+  };
+}).directive("crosetElementSlider", function() {
+  return {
+    restrict: "E",
+    templateUrl: "template-slider.html",
     link: function(scope, element, attrs) {}
   };
 });

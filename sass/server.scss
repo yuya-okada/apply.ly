@@ -1,0 +1,45 @@
+#right-zone, #left-zone, #screen-wrapper {
+  display: none;
+}
+
+#full-zone {
+  width: 100%;
+  height: 100%;
+  padding: 0px 40px;
+  
+  &>.ui-view-fade {
+    height: 100%;
+  }
+}
+
+#server {
+  height: 100%;
+}
+
+#database {
+  width: 100%;
+  height: 100%;
+  
+      
+    
+  md-input-container {
+    margin: 15px;
+    padding: 0;
+    margin-bottom: -5px;
+  }
+
+  .add-record-button-container {
+    position: absolute;
+    right: 0;
+  }
+  
+}
+
+#server-bind-dialog {
+  width: 100%;
+  
+  .input-value {
+    margin-top: 23px;
+    margin-bottom: 0;
+  }
+}

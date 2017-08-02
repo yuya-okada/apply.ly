@@ -274,13 +274,3 @@ main {
   -webkit-flex: 1;
   flex: 1;
 }
-
-/* line 184, ../../sass/index.scss */
-.md-dialog-container {
-  z-index: 103 !important;
-}
-
-/* line 188, ../../sass/index.scss */
-._md-open-menu-container {
-  z-index: 102 !important;
-}

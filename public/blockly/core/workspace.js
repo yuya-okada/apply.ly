@@ -258,6 +258,9 @@ Blockly.Workspace.prototype.renameVariable = function(oldName, newName) {
     this.variableList.push(newName);
     console.log('Tried to rename an non-existent variable.');
   }
+  
+  CrosetBlock.renameVariable(oldName, newName);
+  
 };
 
 /**
@@ -335,6 +338,9 @@ Blockly.Workspace.prototype.deleteVariable = function(name) {
     // No confirmation necessary for a single block.
     this.deleteVariableInternal_(name);
   }
+  
+  
+  CrosetBlock.deleteVariable(name);
 };
 
 /**

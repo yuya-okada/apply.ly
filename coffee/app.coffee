@@ -180,7 +180,6 @@ crosetModule.factory "IsInDiv", () ->
 				url: "/editor/:projectId"
 				controller: "EditorController"
 				templateUrl: "editor.html"
-
 				resolve:
 					# あらかじめプロジェクトのデータを取得してcontrollerにinjectする
 					projectDataRes: ["$http", "$stateParams", ($http, $stateParams) ->
@@ -200,8 +199,6 @@ crosetModule.factory "IsInDiv", () ->
 				views:
 					left:
 						templateUrl: "hierarchy.html"
-						controller: "ChildEditorController"
-
 
 					right:
 						templateUrl: "properties.html"
@@ -214,6 +211,16 @@ crosetModule.factory "IsInDiv", () ->
 				views:
 					right:
 						templateUrl: "program.html"
+
+				controller: "ChildEditorController"
+			}
+	
+			.state "editor.server", {
+				url: "/server/:screenId"
+				css: "css/server"
+				views:
+					full:
+						templateUrl: "server.html"
 
 				controller: "ChildEditorController"
 			}

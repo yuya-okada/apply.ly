@@ -1,0 +1,47 @@
+/* line 1, ../../sass/server.scss */
+#right-zone, #left-zone, #screen-wrapper {
+  display: none;
+}
+
+/* line 5, ../../sass/server.scss */
+#full-zone {
+  width: 100%;
+  height: 100%;
+  padding: 0px 40px;
+}
+/* line 10, ../../sass/server.scss */
+#full-zone > .ui-view-fade {
+  height: 100%;
+}
+
+/* line 15, ../../sass/server.scss */
+#server {
+  height: 100%;
+}
+
+/* line 19, ../../sass/server.scss */
+#database {
+  width: 100%;
+  height: 100%;
+}
+/* line 25, ../../sass/server.scss */
+#database md-input-container {
+  margin: 15px;
+  padding: 0;
+  margin-bottom: -5px;
+}
+/* line 31, ../../sass/server.scss */
+#database .add-record-button-container {
+  position: absolute;
+  right: 0;
+}
+
+/* line 38, ../../sass/server.scss */
+#server-bind-dialog {
+  width: 100%;
+}
+/* line 41, ../../sass/server.scss */
+#server-bind-dialog .input-value {
+  margin-top: 23px;
+  margin-bottom: 0;
+}

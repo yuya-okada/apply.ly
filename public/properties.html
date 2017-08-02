@@ -42,7 +42,12 @@
       </div>
       <div class="property-card-body">
         <div layout="row" ng-repeat="row in card.propertyInputs track by $index">
-          <croset-dynamic-input layout="column" layout-align="center" tag="'croset-' +  input.type" flex="flex" ng-class="'flex-'+input.size" options="input.options" ng-repeat="input in row track by $index" croset-selected-element="croset-selected-element"></croset-dynamic-input>
+          <croset-dynamic-input layout="column" layout-align="center" tag="'croset-' +  input.type" flex="flex" ng-class="['flex-'+input.size, {'croset-dynamic-input-box-attached': box}]" options="input.options" ng-repeat="input in row track by $index" croset-selected-element="croset-selected-element" data-drop="true" data-jqyoui-options="data-jqyoui-options" jqyoui-droppable="{onDrop: 'onDrop'}" after-content="{{box}}">
+            <div class="croset-dynamic-input-border"></div>
+            <div ng-show="box" ng-click="removeBox($event)" ng-mouseover="hoverIn()" ng-mouseleave="hoverOut()" md-ink-ripple="md-ink-ripple" class="croset-dynamic-input-remove-border"><span ng-hide="hover">{{box}}</span>
+              <md-icon aria-label="Remove" ng-show="hover" class="material-icons">close</md-icon>
+            </div>
+          </croset-dynamic-input>
         </div>
       </div>
     </md-card>

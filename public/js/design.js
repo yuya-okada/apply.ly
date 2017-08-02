@@ -3,9 +3,10 @@ var crosetModule;
 crosetModule = angular.module("Croset");
 
 crosetModule.service("VisiblePropertyCards", function() {
-  var callback, callbacks, list;
+  var boxes, callback, callbacks, list;
   list = [];
   callbacks = [];
+  boxes = [];
   this.onchange = function(func) {
     return callbacks.push(func);
   };
@@ -65,7 +66,9 @@ crosetModule.service("VisiblePropertyCards", function() {
     $scope.screenElements = screenElementsManager.get();
     $scope.elementDatas = ElementDatas;
     $scope.templates = screenElementsManager.getTemplates();
-    $scope.$watch(SelectedElementUUID.get, function(newVal, oldVal) {
+    $scope.$watch(function() {
+      return Object.keys(screenElementsManager.get()).length;
+    }, function(newVal, oldVal) {
       if (newVal) {
         $scope.selectedElementUUID = newVal;
         $scope.screenElements = screenElementsManager.get();
@@ -82,18 +85,6 @@ crosetModule.service("VisiblePropertyCards", function() {
       return $scope.reverse = !$scope.reverse;
     }, 1000);
   }
-]).directive("hierarchyItem", [
-  function() {
-    return {
-      restrict: "E",
-      templateUrl: "hierarchy-item.html",
-      controller: [
-        "$attrs", function($attrs) {
-          return this.isTemplate = $attrs.istemplate;
-        }
-      ]
-    };
-  }
 ]).directive("hierarchyChildItem", [
   "$compile", function($compile) {
     return {
@@ -109,7 +100,7 @@ crosetModule.service("VisiblePropertyCards", function() {
     };
   }
 ]).directive("crosetHierarchyItem", [
-  "$mdDialog", "$compile", "ElementDatas", "SelectedElementUUID", "CurrentScreenData", "SelectedTemplate", "getUUID", function($mdDialog, $compile, ElementDatas, SelectedElementUUID, CurrentScreenData, SelectedTemplate, getUUID) {
+  "$mdDialog", "$compile", "ElementDatas", "SelectedElementUUID", "CurrentScreenData", "SelectedTemplate", "getUUID", "ListItemSelect", function($mdDialog, $compile, ElementDatas, SelectedElementUUID, CurrentScreenData, SelectedTemplate, getUUID, ListItemSelect) {
     return {
       restrict: "A",
       require: "^hierarchyItem",
@@ -123,6 +114,7 @@ crosetModule.service("VisiblePropertyCards", function() {
           } else {
             SelectedTemplate.set(scope.element.$$key);
           }
+          ListItemSelect.close();
         };
         scope.showPromptRename = function(ev) {
           var confirm;
@@ -226,9 +218,7 @@ crosetModule.service("VisiblePropertyCards", function() {
     return {
       scope: true,
       link: function(scope, element, attrs) {
-        console.log("ボタン");
         return scope.onclick = function() {
-          console.log("ボタンクリックど");
           CurrentScreenData.elementsManager.add(element.attr("add-element-card"), getUUID());
         };
       }
@@ -328,7 +318,8 @@ crosetModule.service("VisiblePropertyCards", function() {
         };
       },
       controller: [
-        "$scope", "$attrs", "CurrentScreenData", "SelectedElementUUID", "SelectedTemplate", function($scope, $attrs, CurrentScreenData, SelectedElementUUID, SelectedTemplate) {
+        "$scope", "$attrs", "CurrentScreenData", "SelectedElementUUID", "SelectedTemplate", "SelectedElementOrTemplateUUID", "ProjectData", function($scope, $attrs, CurrentScreenData, SelectedElementUUID, SelectedTemplate, SelectedElementOrTemplateUUID, ProjectData) {
+          var boxProperty, ref;
           this.onchange = function(value) {
             if (!$scope.$parent.isTemplate) {
               return CurrentScreenData.elementsManager.set(SelectedElementUUID.get(), $scope.options.result, value);
@@ -337,8 +328,43 @@ crosetModule.service("VisiblePropertyCards", function() {
             }
           };
           this.onchange($scope.options.defaultValue);
+          boxProperty = (ref = CurrentScreenData.elementsManager) != null ? ref.boxProperties[SelectedElementOrTemplateUUID.get()] : void 0;
+          if (boxProperty) {
+            $scope.$parent.box = boxProperty[$scope.options.result];
+          }
+          $scope.$parent.onDrop = function(ev, ui) {
+            $scope.$parent.box = angular.element(ui.draggable).scope().box;
+            return CurrentScreenData.elementsManager.setBoxToProperty(SelectedElementOrTemplateUUID.get(), $scope.options.result, $scope.$parent.box);
+          };
+          ProjectData.onVariableChanged = function(variables) {
+            if (variables.indexOf($scope.$parent.$box) !== -1) {
+              return $scope.$parent.box = null;
+            }
+          };
+          $scope.$parent.removeBoxToProperty = function() {
+            return CurrentScreenData.elementsManager.removeBoxToProperty(SelectedElementOrTemplateUUID.get(), $scope.options.result, $scope.$parent.box);
+          };
         }
       ]
+    };
+  }
+]).directive("crosetDynamicInputBorder", [
+  "CurrentScreenData", "SelectedElementOrTemplateUUID", function(CurrentScreenData, SelectedElementOrTemplateUUID) {
+    return {
+      restrict: "C",
+      link: function(scope, el) {
+        scope.removeBox = function(ev) {
+          scope.removeBoxToProperty();
+          scope.box = null;
+          return ev.stopPropagation();
+        };
+        scope.hoverIn = function() {
+          return scope.hover = true;
+        };
+        return scope.hoverOut = function() {
+          return scope.hover = false;
+        };
+      }
     };
   }
 ]).directive("crosetText", function() {
@@ -358,7 +384,7 @@ crosetModule.service("VisiblePropertyCards", function() {
     templateUrl: "input-headline.html"
   };
 }).directive("crosetColorIcon", [
-  "showColorPicker", "GetTextColor", "HexToRgb", function(showColorPicker, GetTextColor, HexToRgb) {
+  "$mdColorPicker", "GetTextColor", "HexToRgb", function($mdColorPicker, GetTextColor, HexToRgb) {
     return {
       restrict: "E",
       scope: {
@@ -368,10 +394,13 @@ crosetModule.service("VisiblePropertyCards", function() {
       templateUrl: "input-color-icon.html",
       link: function(scope, element, attrs, dynamicInput) {
         var setColor;
-        scope.onclick = function() {
-          return showColorPicker.showColorPicker(function(value) {
-            return setColor(value);
-          }, scope.color);
+        scope.onclick = function(ev) {
+          return $mdColorPicker.show({
+            value: scope.color,
+            $event: ev
+          }).then(function(color) {
+            return setColor(color);
+          });
         };
         setColor = function(value) {
           scope.color = value;
@@ -410,6 +439,23 @@ crosetModule.service("VisiblePropertyCards", function() {
           scope.disabled = !scope.disabled;
           scope.color = getColor();
           return dynamicInput.onchange(!scope.disabled);
+        };
+      }
+    };
+  }
+]).directive("crosetCheckbox", [
+  function() {
+    return {
+      restrict: "E",
+      scope: {
+        options: "="
+      },
+      require: "^crosetDynamicInput",
+      templateUrl: "input-checkbox.html",
+      link: function(scope, element, attrs, dynamicInput) {
+        scope.value = scope.options.defaultValue;
+        return scope.onchange = function() {
+          return dynamicInput.onchange(scope.value);
         };
       }
     };

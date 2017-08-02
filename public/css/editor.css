@@ -95,39 +95,48 @@
   opacity: 1;
 }
 
-/* line 8, ../../sass/editor.scss */
+/* line 6, ../../sass/editor.scss */
+body {
+  overflow: hidden;
+}
+
+/* line 12, ../../sass/editor.scss */
 md-progress-linear ._md-mode-indeterminate {
   background-color: rgba(82, 111, 255, 0.3) !important;
 }
 
-/* line 12, ../../sass/editor.scss */
+/* line 16, ../../sass/editor.scss */
 .md-dialog-container {
   background-color: rgba(0, 0, 0, 0.4) !important;
 }
 
-/* line 16, ../../sass/editor.scss */
+/* line 20, ../../sass/editor.scss */
 #run-project-id {
   font-size: 50px;
   color: #2196F3;
   margin: 30px 0 30px 0;
 }
 
-/* line 27, ../../sass/editor.scss */
-#header .material-icons {
-  color: black;
+/* line 29, ../../sass/editor.scss */
+#header {
+  padding-right: 25px;
+  padding-left: 15px;
+  /* 	#save-fab {
+  		position: relative;
+  	    top: 25px;
+  	    right: 20px;
+  
+  		md-icon {
+  			color: white
+  		}
+  	} */
 }
-/* line 31, ../../sass/editor.scss */
-#header #save-fab {
-  position: relative;
-  top: 25px;
-  right: 20px;
-}
-/* line 36, ../../sass/editor.scss */
-#header #save-fab md-icon {
-  color: white;
+/* line 33, ../../sass/editor.scss */
+#header md-icon {
+  color: #737373;
 }
 
-/* line 42, ../../sass/editor.scss */
+/* line 47, ../../sass/editor.scss */
 #editor {
   position: absolute;
   width: 100%;
@@ -135,7 +144,7 @@ md-progress-linear ._md-mode-indeterminate {
   padding: 30px;
   background-color: #EEEEEE;
 }
-/* line 50, ../../sass/editor.scss */
+/* line 55, ../../sass/editor.scss */
 #editor #progress {
   z-index: 10000;
   position: fixed;
@@ -147,31 +156,43 @@ md-progress-linear ._md-mode-indeterminate {
   align-items: center;
   justify-content: center;
 }
-/* line 58, ../../sass/editor.scss */
+/* line 63, ../../sass/editor.scss */
 #editor #progress img {
   margin-bottom: 80px;
 }
-/* line 62, ../../sass/editor.scss */
+/* line 67, ../../sass/editor.scss */
 #editor #progress md-progress-linear {
   width: 30%;
 }
-/* line 69, ../../sass/editor.scss */
+/* line 74, ../../sass/editor.scss */
 #editor #mode-changer md-icon.selected {
   color: #2196F3;
 }
-/* line 75, ../../sass/editor.scss */
+/* line 77, ../../sass/editor.scss */
+#editor #mode-changer .mode-button-divider {
+  margin-bottom: 40px;
+}
+/* line 83, ../../sass/editor.scss */
 #editor #screen-wrapper {
   position: relative;
 }
-/* line 79, ../../sass/editor.scss */
+/* line 87, ../../sass/editor.scss */
 #editor #screen-wrapper.show-template #screen-zone {
   opacity: 0;
 }
-/* line 82, ../../sass/editor.scss */
+/* line 90, ../../sass/editor.scss */
 #editor #screen-wrapper.show-template #template-preview-wrapper {
   transform: translateY(0%);
 }
-/* line 87, ../../sass/editor.scss */
+/* line 96, ../../sass/editor.scss */
+#editor #screen-wrapper.list-item-select-mode #screen-zone {
+  opacity: 0;
+}
+/* line 99, ../../sass/editor.scss */
+#editor #screen-wrapper.list-item-select-mode #list-item-select {
+  transform: translateY(0%);
+}
+/* line 104, ../../sass/editor.scss */
 #editor #screen-zone {
   transform-origin: top left;
   opacity: 1;
@@ -180,28 +201,42 @@ md-progress-linear ._md-mode-indeterminate {
   -webkit-transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
   transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
 }
-/* line 93, ../../sass/editor.scss */
+/* line 110, ../../sass/editor.scss */
 #editor #screen-zone:before, #editor #screen-zone:after {
   pointer-events: none;
 }
-/* line 98, ../../sass/editor.scss */
+/* line 114, ../../sass/editor.scss */
+#editor #screen-zone .change-select-mode {
+  position: absolute;
+  width: 68px;
+  height: 68px;
+  left: calc(50% - 34px);
+  margin: 0;
+  bottom: 20px;
+}
+/* line 124, ../../sass/editor.scss */
 #editor #screen {
   background-color: white;
   overflow: hidden;
 }
-/* line 102, ../../sass/editor.scss */
+/* line 128, ../../sass/editor.scss */
 #editor #screen .croset-element {
   transform-origin: 0 0;
 }
-/* line 105, ../../sass/editor.scss */
+/* line 131, ../../sass/editor.scss */
 #editor #screen .croset-element.ui-resizable {
+  z-index: 20001;
   outline: 1px solid #4696F7;
 }
-/* line 108, ../../sass/editor.scss */
+/* line 135, ../../sass/editor.scss */
+#editor #screen .croset-element.ui-resizable .ui-resizable-handle {
+  z-index: 20001 !important;
+}
+/* line 139, ../../sass/editor.scss */
 #editor #screen .croset-element.croset-resizable-parent {
   outline: 1px dashed #4696F7;
 }
-/* line 114, ../../sass/editor.scss */
+/* line 147, ../../sass/editor.scss */
 #editor #template-preview-wrapper {
   position: absolute;
   top: 0;
@@ -215,37 +250,91 @@ md-progress-linear ._md-mode-indeterminate {
   -webkit-transition: -webkit-transform 0.5s cubic-bezier(0.55, 0, 0.1, 1);
   transition: transform 0.5s cubic-bezier(0.55, 0, 0.1, 1);
 }
-/* line 126, ../../sass/editor.scss */
-#editor #template-preview {
+/* line 157, ../../sass/editor.scss */
+#editor #template-preview-wrapper md-card-actions {
+  width: 100%;
+}
+/* line 161, ../../sass/editor.scss */
+#editor #template-preview-wrapper > md-card {
   height: 100%;
   width: 100%;
   background-color: #fffcfc;
 }
-/* line 131, ../../sass/editor.scss */
+/* line 168, ../../sass/editor.scss */
+#editor #template-preview {
+  height: 100%;
+  width: 100%;
+}
+/* line 172, ../../sass/editor.scss */
 #editor #template-preview > .croset-element {
   top: auto !important;
   left: auto !important;
   outline: 1px solid #4696F7;
 }
-/* line 140, ../../sass/editor.scss */
+/* line 179, ../../sass/editor.scss */
+#editor #list-item-select {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: translateY(150%);
+  transition-delay: .5s;
+  -moz-transition: -moz-transform 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  -o-transition: -o-transform 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  -webkit-transition: -webkit-transform 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  transition: transform 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+}
+/* line 189, ../../sass/editor.scss */
+#editor #list-item-select md-card-actions {
+  width: 100%;
+}
+/* line 193, ../../sass/editor.scss */
+#editor #list-item-select md-card {
+  overflow-x: visible;
+  overflow-y: hidden;
+  background-color: #fff;
+  width: 100%;
+  height: 100%;
+  -webkit-flex: 1;
+  flex: 1;
+}
+/* line 201, ../../sass/editor.scss */
+#editor #list-item-select md-card md-list {
+  width: 100%;
+  height: 100%;
+}
+/* line 206, ../../sass/editor.scss */
+#editor #list-item-select md-card .hierarchy-item-selected {
+  color: #2196F3;
+}
+/* line 210, ../../sass/editor.scss */
+#editor #list-item-select md-card .hierarchy-children {
+  padding-left: 20px;
+}
+/* line 214, ../../sass/editor.scss */
+#editor #list-item-select md-card .md-subheader {
+  background-color: white !important;
+}
+/* line 222, ../../sass/editor.scss */
 #editor #left-zone > div {
   transition-delay: .5s;
   order: 0;
 }
-/* line 147, ../../sass/editor.scss */
+/* line 229, ../../sass/editor.scss */
 #editor #right-zone > div {
   transition-delay: .5s;
   order: 2;
   overflow-y: scroll;
 }
-/* line 154, ../../sass/editor.scss */
+/* line 236, ../../sass/editor.scss */
 #editor #left-zone, #editor #right-zone {
   -moz-transition: flex 0.5s cubic-bezier(0.55, 0, 0.1, 1);
   -o-transition: flex 0.5s cubic-bezier(0.55, 0, 0.1, 1);
   -webkit-transition: flex 0.5s cubic-bezier(0.55, 0, 0.1, 1);
   transition: flex 0.5s cubic-bezier(0.55, 0, 0.1, 1);
 }
-/* line 158, ../../sass/editor.scss */
+/* line 240, ../../sass/editor.scss */
 #editor .editor-card {
   position: relative;
   height: 100%;
@@ -254,7 +343,7 @@ md-progress-linear ._md-mode-indeterminate {
   padding-right: 30px;
 }
 
-/* line 168, ../../sass/editor.scss */
+/* line 250, ../../sass/editor.scss */
 .ui-resizable-handle {
   width: 15px;
   height: 15px;
@@ -265,14 +354,49 @@ md-progress-linear ._md-mode-indeterminate {
   z-index: 101;
 }
 
-/* line 179, ../../sass/editor.scss */
+/* line 261, ../../sass/editor.scss */
 .ui-resizable-se {
   right: -5px;
   bottom: -5px;
 }
 
-/* line 186, ../../sass/editor.scss */
+/* line 268, ../../sass/editor.scss */
 .icon-select-dialog {
   width: 60%;
   height: 60%;
+}
+
+/* line 274, ../../sass/editor.scss */
+#box-fab-toolbar {
+  position: fixed;
+  right: 0px;
+  bottom: 0px;
+  z-index: 22;
+}
+/* line 280, ../../sass/editor.scss */
+#box-fab-toolbar ._md-fab-toolbar-wrapper {
+  height: 80px;
+  min-width: 80px;
+  padding-top: 6px;
+  padding-right: 15px;
+}
+/* line 288, ../../sass/editor.scss */
+#box-fab-toolbar .box-button {
+  color: white;
+  background-color: #526FFF;
+}
+
+/* line 294, ../../sass/editor.scss */
+#config {
+  overflow: hidden;
+}
+/* line 296, ../../sass/editor.scss */
+#config #config-content {
+  min-width: 600px;
+  overflow-y: scroll;
+  height: calc(100% - 119px);
+}
+/* line 302, ../../sass/editor.scss */
+#config #config-headings {
+  overflow-y: scroll;
 }

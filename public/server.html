@@ -1,0 +1,63 @@
+
+<div id="server" ng-controller="DatabaseController" layout="column">
+  <div layout="row">
+    <md-input-container>
+      <label>テーブル</label>
+      <md-select ng-model="currentTable" ng-change="onTableChanged(currentTable)">
+        <md-option ng-repeat="tableId in tables" value="{{tableId}}">{{tableId}}</md-option>
+      </md-select>
+    </md-input-container>
+    <md-button ng-click="addColumn($event)">新しい行を追加</md-button>
+    <md-button ng-click="addField($event)">新しいフィールドを追加</md-button>
+    <md-menu>
+      <md-button aria-label="Open menu" ng-click="$mdOpenMenu($event)" class="md-icon-button">
+        <md-icon md-menu-origin="md-menu-origin" aria-label="Menu">more_vert</md-icon>
+      </md-button>
+      <md-menu-content width="4">
+        <md-menu-item>
+          <md-button ng-click="addTable($event)"> 
+            <md-icon aria-label="Add">add</md-icon><span>新しいテーブルを追加</span>
+          </md-button>
+        </md-menu-item>
+        <md-menu-item>
+          <md-button ng-click="removeTable($event, recordId)">
+            <md-icon aria-label="Delete">delete</md-icon><span>現在のテーブルを削除</span>
+          </md-button>
+        </md-menu-item>
+        <md-menu-item>
+          <md-button ng-click="removeField($event)">
+            <md-icon aria-label="Delete">delete</md-icon><span>フィールドを削除</span>
+          </md-button>
+        </md-menu-item>
+      </md-menu-content>
+    </md-menu>
+  </div>
+  <md-card id="database">
+    <div layout="column">
+      <div layout="row">
+        <div ng-repeat="(id, field) in fields" class="flex">
+          <md-input-container>
+            <input ng-model="field" ng-change="onFieldChanged(id, field)"/>
+          </md-input-container>
+        </div>
+      </div>
+      <md-divider> </md-divider>
+      <div layout="column">
+        <div ng-repeat="(recordId, record) in records">
+          <div layout="row" style="position: relative">
+            <div ng-repeat="(fieldId, field) in fields" class="flex">
+              <md-input-container>
+                <input ng-model="record[fieldId]"/>
+              </md-input-container>
+            </div>
+            <div layout="row" layout-align="center center" class="add-record-button-container">
+              <md-button ng-click="removeRecord($event, recordId)" class="md-icon-button">
+                <md-icon aria-label="Remove Record" class="material-icons">delete</md-icon>
+              </md-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </md-card>
+</div>

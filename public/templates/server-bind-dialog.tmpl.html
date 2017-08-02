@@ -1,0 +1,57 @@
+<div layout="column" id="server-bind-dialog">
+  <div layout="column" class="md-dialog-content">
+
+    <div layout="column">
+      <div layout="row" layout-align="center center" ng-repeat="(fieldId, fieldName) in fields">
+        <span flex="25" class="md-padding"> {{fieldName}} </span>
+        
+        <md-input-container flex="25" class="md-padding">
+          <label>演算子</label>
+          <md-select ng-model="ope">
+            <md-option ng-repeat="operator in operators" value="{{operator.compile}}">
+              {{operator.text}}
+            </md-option>
+          </md-select>
+        </md-input-container>
+        
+        <div layout="row" layout-align="center center" flex="50" class="md-padding">
+
+          <md-input-container>
+            <label>タイプ</label>
+            <md-select ng-model="result[fieldId].type">
+              <md-option ng-repeat="type in types" value="{{type.value}}">
+                {{type.text}}
+              </md-option>
+            </md-select>
+          </md-input-container>
+
+          <md-input-container class="input-value" ng-if="result[fieldId].type != 'variable'">
+            <label>値</label>
+            <input ng-model="result[fieldId].value">
+          </md-input-container>
+
+          <md-input-container ng-if="result[fieldId].type == 'variable'">
+            <label>変数</label>
+            <md-select ng-model="result[fieldId].value">
+              <md-option ng-repeat="variable in variables" value="{{variable}}">
+                {{variable}}
+              </md-option>
+            </md-select>
+          </md-input-container>
+          
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div layout="row" layout-align="end center" class="md-padding">
+    <md-button ng-click="cancel()"> キャンセル </md-button>
+    <md-button class="md-raised md-primary" ng-click="ok()"> OK </md-button>
+  </div>
+</div>
+
+
+
+
+

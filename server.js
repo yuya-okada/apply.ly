@@ -68,7 +68,8 @@
           elements: {},
           cards: [],
           sourceCode: "",
-          name: "トップ"
+          name: "トップ",
+          boxProperties: {}
         }
       }
     },
@@ -233,7 +234,9 @@
   app.get("/project", function(req, res) {
     return Project.findOne(req.query, function(err, project) {
       console.log("GET PROJ:", project);
-      delete project["_id"];
+      if (project) {
+        delete project["_id"];
+      }
       return res.send(project);
     });
   });

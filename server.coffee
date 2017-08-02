@@ -52,6 +52,7 @@ ProjectSchema = new Schema {
 				cards: []
 				sourceCode: ""
 				name: "トップ"
+				boxProperties: {}
 			}
 		}
 	defaultScreen:

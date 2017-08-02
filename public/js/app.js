@@ -169,8 +169,7 @@ crosetModule.factory("IsInDiv", function() {
       css: "css/design",
       views: {
         left: {
-          templateUrl: "hierarchy.html",
-          controller: "ChildEditorController"
+          templateUrl: "hierarchy.html"
         },
         right: {
           templateUrl: "properties.html"
@@ -182,6 +181,15 @@ crosetModule.factory("IsInDiv", function() {
       views: {
         right: {
           templateUrl: "program.html"
+        }
+      },
+      controller: "ChildEditorController"
+    }).state("editor.server", {
+      url: "/server/:screenId",
+      css: "css/server",
+      views: {
+        full: {
+          templateUrl: "server.html"
         }
       },
       controller: "ChildEditorController"

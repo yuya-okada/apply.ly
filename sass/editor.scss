@@ -3,6 +3,10 @@
 @import "commonClass";
 @import "mixins";
 
+body {
+	overflow: hidden;
+}
+
 // ダイアログ
 md-progress-linear {
 	._md-mode-indeterminate {
@@ -24,11 +28,12 @@ md-progress-linear {
 
 #header {
 	@extend .bg-white;
-	.material-icons {
-		color: black;
+	padding-right: 25px;
+	padding-left: 15px;
+	md-icon {
+		color: #737373;
 	}
-
-	#save-fab {
+/* 	#save-fab {
 		position: relative;
 	    top: 25px;
 	    right: 20px;
@@ -36,7 +41,7 @@ md-progress-linear {
 		md-icon {
 			color: white
 		}
-	}
+	} */
 }
 
 #editor {
@@ -69,6 +74,9 @@ md-progress-linear {
 		md-icon.selected {
 			color: $mc;
 		}
+		.mode-button-divider {
+			margin-bottom: 40px;
+		}
 	}
 
 
@@ -83,6 +91,15 @@ md-progress-linear {
 				transform: translateY(0%);
 			}
 		}
+		
+		&.list-item-select-mode {
+			#screen-zone {
+				opacity: 0;
+			}
+			#list-item-select {
+				transform: translateY(0%);
+			}
+		}
 	}
 	#screen-zone {
     transform-origin: top left;
@@ -92,6 +109,15 @@ md-progress-linear {
 
 		&:before, &:after {
 			pointer-events: none;
+		}
+		
+		.change-select-mode {
+			position: absolute;
+			width: 68px;
+			height: 68px;
+			left: calc(50% - 34px);
+			margin: 0;
+			bottom: 20px;
 		}
   }
 
@@ -103,12 +129,19 @@ md-progress-linear {
 				transform-origin: 0 0;
 
 				&.ui-resizable {
+					z-index: 20001;
 					outline: 1px solid #4696F7;
+					
+					.ui-resizable-handle {
+						z-index: 20001 !important;	
+					}
 				}
 				&.croset-resizable-parent {
 					outline: 1px dashed #4696F7;
 				}
 		}
+		
+		
 	}
 
 	#template-preview-wrapper {
@@ -120,13 +153,21 @@ md-progress-linear {
 		transform: translateY(150%);
 		transition-delay: .5s;
 		@include material-single-transition(transform, .5s);
-
+		
+		md-card-actions {
+			width: 100%;
+		}
+		
+		& > md-card {
+			height: 100%;
+			width: 100%;
+			background-color: #fffcfc;
+		}
 	}
 
 	#template-preview {
 		height: 100%;
 		width: 100%;
-		background-color: #fffcfc;
 
 		& > .croset-element {
 			top: auto !important;
@@ -135,6 +176,47 @@ md-progress-linear {
 		}
 	}
 
+	#list-item-select {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		transform: translateY(150%);
+		transition-delay: .5s;
+		@include material-single-transition(transform, .5s);
+		
+		md-card-actions {
+			width: 100%;	
+		}
+		
+		md-card {
+			overflow-x: visible;
+			overflow-y: hidden;
+			background-color: #fff;
+			width: 100%;
+			height: 100%;
+			@include flex(1);
+			
+			md-list {
+				width: 100%;
+				height: 100%;			
+			}
+			
+			.hierarchy-item-selected {
+				color: $mc
+			}
+
+			.hierarchy-children {
+				padding-left: 20px;
+			}
+
+			.md-subheader {
+				background-color: white !important;
+			}
+		
+		}
+	}
 
 	#left-zone {
 		&>div {
@@ -187,3 +269,39 @@ md-progress-linear {
 	width: 60%;
 	height: 60%;
 }
+
+
+#box-fab-toolbar {
+	position: fixed;
+	right: 0px;
+	bottom: 0px;
+	z-index: 22;
+	
+	._md-fab-toolbar-wrapper {
+		height: 80px;
+		min-width: 80px;
+		padding-top: 6px;
+		padding-right: 15px;
+	
+	}
+	
+	.box-button {
+		color: white;
+		background-color: #526FFF;
+	}
+}
+
+#config {
+	overflow: hidden;
+	#config-content {
+		min-width: 600px;
+		overflow-y: scroll;
+		height: calc(100% - 119px)
+	}
+
+	#config-headings {
+		overflow-y: scroll;
+	}
+}
+
+

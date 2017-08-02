@@ -49,5 +49,15 @@
 			div.property-card-body
 				//- リピートして設定用のインプットを増やす 
 				div(layout="row" ng-repeat="row in card.propertyInputs track by $index")
-					croset-dynamic-input(layout="column" layout-align="center" tag="'croset-' +  input.type" flex ng-class="'flex-'+input.size" options="input.options" ng-repeat="input in row track by $index" croset-selected-element)
+					croset-dynamic-input(layout="column" layout-align="center" tag="'croset-' +  input.type" flex ng-class="['flex-'+input.size, {'croset-dynamic-input-box-attached': box}]" options="input.options" ng-repeat="input in row track by $index" croset-selected-element data-drop="true" data-jqyoui-options jqyoui-droppable="{onDrop: 'onDrop'}" after-content="{{box}}")
+						.croset-dynamic-input-border
+						
+						.croset-dynamic-input-remove-border(ng-show="box" ng-click="removeBox($event)" ng-mouseover="hoverIn()" ng-mouseleave="hoverOut()" md-ink-ripple)
+							span(ng-hide="hover") {{box}}
+							md-icon(aria-label="Remove" class="material-icons" ng-show="hover") close
+						
+						
+						
+						
+						
 						

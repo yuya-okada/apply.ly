@@ -866,6 +866,7 @@ crosetModule
 			name: "入力ボックス"
 			icon: "create"
 			width: 150
+			unresizable: "y"
 			properties: [
 				{
 					title: "入力"
@@ -875,9 +876,10 @@ crosetModule
 							{
 								type: "textbox"
 								size: 100
+								sync: true		# 相互バインディングする
 								options:
 									defaultValue: "入力ボックス"
-									result: "default"
+									result: "text"
 							}
 						]
 						[
@@ -897,10 +899,183 @@ crosetModule
 		checkbox:
 			name: "チェック"
 			icon: "check_box"
+			unresizable: "xy"
+			properties: [
+				{
+					title: "テキスト"
+					icon: "mode_edit"
+					propertyInputs: [
+						[
+							{
+								type: "textbox"
+								size: 100
+								sync: true		# 相互バインディングする
+								options:
+									defaultValue: "チェック"
+									result: "text"
+							}
+						]
+						[
+							{
+								type: "number"
+								size: 100
+								options:
+									label: "フォントサイズ"
+									defaultValue: 14
+									result: "fontSize"
+							}
+						]
+					]
+				}
+				{
+						title: "チェック"
+						icon: "checkbox"
+						propertyInputs: [
+							[
+								{
+									type: "checkbox"
+									size: 100
+									sync: true		# 相互バインディングする
+									options:
+										text: "チェック"
+										defaultValue: true
+										result: "checked"
+								}
+							]
+							[
+								{
+									type: "checkbox"
+									size: 100
+									options:
+										text: "無効化"
+										defaultValue: false
+										result: "disabled"
+								}
+							]
+						]
+					}
+			]
 
 		switch:
 			name: "スイッチ"
 			icon: "swap_horizon"
+			unresizable: "xy"
+			properties: [
+				{
+					title: "テキスト"
+					icon: "mode_edit"
+					propertyInputs: [
+						[
+							{
+								type: "textbox"
+								size: 100
+								sync: true		# 相互バインディングする
+								options:
+									defaultValue: "スイッチ"
+									result: "text"
+							}
+						]
+						[
+							{
+								type: "number"
+								size: 100
+								options:
+									label: "フォントサイズ"
+									defaultValue: 14
+									result: "fontSize"
+							}
+						]
+					]
+				}
+				{
+						title: "スイッチ"
+						icon: "checkbox"
+						propertyInputs: [
+							[
+								{
+									type: "checkbox"
+									size: 100
+									sync: true		# 相互バインディングする
+									options:
+										text: "スイッチ"
+										defaultValue: true
+										result: "value"
+								}
+							]
+							[
+								{
+									type: "checkbox"
+									size: 100
+									options:
+										text: "無効化"
+										defaultValue: false
+										result: "disabled"
+								}
+							]
+						]
+					}
+			]
+		
+		slider:
+			name: "スライダー"
+			icon: "swap_horizon"
+			unresizable: "y"
+			properties: [
+				{
+						title: "スライダー"
+						icon: "checkbox"
+						propertyInputs: [
+							[
+								{
+									type: "number"
+									size: 100
+									options:
+										defaultValue: 0
+										result: "value"
+								}
+							]
+							[
+								{
+									type: "number"
+									size: 50
+									options:
+										text: "最小"
+										defaultValue: 0
+										result: "min"
+								}
+								{
+									type: "number"
+									size: 50
+									options:
+										text: "最大"
+										defaultValue: 100
+										result: "max"
+								}
+							]
+							[
+								{
+									type: "checkbox"
+									size: 100
+									sync: true		# 相互バインディングする
+									options:
+										text: "吹き出し"
+										defaultValue: true
+										result: "discrete"
+								}
+							]
+							[
+								{
+									type: "checkbox"
+									size: 100
+									options:
+										text: "無効化"
+										defaultValue: false
+										result: "disabled"
+								}
+							]
+						]
+					}
+			]
 	}
 
 
@@ -917,6 +1092,7 @@ crosetModule
 		templatePreviewElement = null
 		templatePreviewScope = null
 		screenElement.empty()
+		this.boxProperties = {}
 
 		that = this
 		isPublic ?= false						# 本番環境の時はtrueにする
@@ -976,6 +1152,17 @@ crosetModule
 
 			searchInArray screenScope?.list
 
+		this.setBoxToProperty = (id, key, boxName) ->
+			this.boxProperties[id] ?= {}
+			this.boxProperties[id][key] ?= boxName
+			
+			return
+		
+			
+	
+		this.removeBoxToProperty = (id, key, boxName) ->
+			delete this.boxProperties[id]?[key]
+			
 
 		# 特定の要素の兄弟要素を取得
 		this.getSiblings = (id) ->
@@ -1014,6 +1201,7 @@ crosetModule
 		this.removeAll = () ->
 			screenScope.list = {}
 			screenElement.empty()
+			this.boxProperties = {}
 
 		this.add = (type, uuid) ->
 			if !screenScope 		# 初期化されてない場合初期化
@@ -1052,10 +1240,12 @@ crosetModule
 			}
 
 			screenScope.zIndexes?.push uuid
-	
+			
+			screenScope.list[uuid].element = e
 			e = $compile(e)(scope)						# 追加した要素にディレクティブを適応させるためにコンパイル
 			screenElement.append e							# スクリーンに追加
-			screenScope.list[uuid].element =	e
+			screenScope.list[uuid].element = e
+	
 	
 		this.addFromData = (data, uuid) ->
 			if !screenScope 		# 初期化されてない場合初期化
@@ -1093,11 +1283,13 @@ crosetModule
 
 		this.delete = (uuid) ->
 			this.get(uuid).element.remove()
-			VisiblePropertyCards = $injector.get("VisiblePropertyCards")		# アプリとして実行した時にVisiblePropertyCardsが存在しないとエラーが起きるので、使うときだけinjectする
-			VisiblePropertyCards.set []
+
+			if !isPublic
+				VisiblePropertyCards = $injector.get("VisiblePropertyCards")		# アプリとして実行した時にVisiblePropertyCardsが存在しないとエラーが起きるので、使うときだけinjectする
+				VisiblePropertyCards.set []
 
 			this.deleteData uuid
-		
+			
 		this.duplicate = (data) ->
 			data = angular.copy data
 			changeChildName = (children) ->
@@ -1107,10 +1299,25 @@ crosetModule
 					if child?.children 
 						changeChildName child.children
 			
-			data.zIndex = Object.keys(screenScope.list).lengt
+			data.zIndex = Object.keys(screenScope.list).length
 			changeChildName data.children
 			
-			this.addFromData data, getUUID()
+			id = getUUID()
+			this.addFromData data, id
+			
+			return id
+		
+		
+		# 指定されたidのテンプレートを画面に追加
+		this.instantiate = (id) ->
+			this.duplicate this.getTemplate(id)
+
+		# 指定されたidのテンプレートを特定の要素に追加
+		this.instantiateTo = (id, parentId) ->
+			childData = this.getTemplate(id)
+			childId = this.duplicate childData
+			this.addChild parentId, childId
+			
 			
 		this.deleteData = (id) ->			# データのみ除去してdomは残す
 
@@ -1127,6 +1334,8 @@ crosetModule
 				deleteInArray data.children
 
 			delete screenScope.list[id]
+			delete this.boxProperties[id]
+		
 
 
 		childAddedCallbacks = []
@@ -1214,6 +1423,8 @@ crosetModule
 				initScope()
 			
 			element = $.extend true, {}, this.get(uuid)
+			element?.options?.left = ""
+			element?.options?.top = ""
 			templateId = getUUID()
 			delete element.zIndex
 			screenScope.templates[templateId] = element
@@ -1296,6 +1507,8 @@ crosetModule
 				deleteInArray data.children
 
 			delete screenScope.templates[id]
+			delete this.boxProperties[id]
+		
 
 
 		this.showTemplate = (uuid) ->
@@ -1358,7 +1571,9 @@ crosetModule
 			screenScope.list = {}
 			screenElement.empty()
 
-
+		
+		window.CrosetBlock?.get = this.get
+		window.CrosetBlock?.getTemplate = this.getTemplate
 		return
 
 ]
@@ -1433,13 +1648,33 @@ crosetModule
 		restrict: "E"
 		templateUrl: "template-textbox.html"
 		link: (scope, element, attrs) ->
-			console.log(scope, "suko-pu")
-			scope.s.get(scope.uuid).options.text = options.default
 	}
 
 .directive "crosetElementSquare", ()->
 	return {
 		restrict: "E"
 		templateUrl: "template-square.html"
+		link: (scope, element, attrs) ->
+	}
+
+.directive "crosetElementCheckbox", ()->
+	return {
+		restrict: "E"
+		templateUrl: "template-checkbox.html"
+		link: (scope, element, attrs) ->
+	}
+
+
+.directive "crosetElementSwitch", ()->
+	return {
+		restrict: "E"
+		templateUrl: "template-switch.html"
+		link: (scope, element, attrs) ->
+	}
+
+.directive "crosetElementSlider", ()->
+	return {
+		restrict: "E"
+		templateUrl: "template-slider.html"
 		link: (scope, element, attrs) ->
 	}

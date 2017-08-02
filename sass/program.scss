@@ -5,8 +5,14 @@
 
 #left-zone {
 	flex: 0 !important;
-
+	margin-top: 100%;
 }
+
+
+#full-zone {
+	flex: 0 !important;
+}
+
 
 #program-zone {
 
@@ -83,5 +89,13 @@
 }
 
 ._md-menu-backdrop {
+	z-index: 102 !important;
+}
+
+.md-dialog-container {
+	z-index: 103 !important;
+}
+
+._md-open-menu-container {
 	z-index: 102 !important;
 }
