@@ -1,6 +1,6 @@
 var crosetModule;
 
-crosetModule = angular.module("Croset", ["ui.router", "uiRouterStyles", "ngAria", "ngMaterial", "ngAnimate", "ngMessages", "ngMdIcons", "ngDragDrop", "mdColorPicker", "angular.filter"]);
+crosetModule = angular.module("Croset", ["ui.router", "uiRouterStyles", "oc.lazyLoad", "ngAria", "ngMaterial", "ngAnimate", "ngMessages", "ngDragDrop", "mdColorPicker", "angular.filter", "ui.ace"]);
 
 crosetModule.service("Elements", [
   function() {
@@ -86,7 +86,9 @@ crosetModule.factory("IsInDiv", function() {
       }
       ev.preventDefault();
       console.log("Change");
-      return $http.get("/profile").success(function(data, status, headers, config) {
+      return $http.get("/profile").then(function(result) {
+        var data;
+        data = result.data;
         console.log(data);
         if (data) {
           stateChangeBypass = true;
@@ -96,8 +98,8 @@ crosetModule.factory("IsInDiv", function() {
           ev.preventDefault();
           return $state.go("login");
         }
-      }).error(function(data, status, headers, config) {
-        return console.log("Failed", data);
+      }, function(result) {
+        return console.log("Failed", result);
       });
     });
   }
@@ -162,6 +164,11 @@ crosetModule.factory("IsInDiv", function() {
               }
             });
           }
+        ],
+        files: [
+          "$ocLazyLoad", function($ocLazyLoad) {
+            return $ocLazyLoad.load(["blockly/blockly_uncompressed.js", "blockly/generators/javascript.js", "blockly/blocks/logic.js", "blockly/blocks/math.js", "blockly/blocks/lists.js", "blockly/blocks/colour.js", "blockly/blocks/loops.js", "blockly/blocks/variables.js", "blockly/blocks/text.js", "blockly/blocks/procedures.js", "blockly/blocks/custom.js", "blockly/blocks/element.js", "blockly/generators/javascript/logic.js", "blockly/generators/javascript/math.js", "blockly/generators/javascript/lists.js", "blockly/generators/javascript/colour.js", "blockly/generators/javascript/loops.js", "blockly/generators/javascript/variables.js", "blockly/generators/javascript/text.js", "blockly/generators/javascript/procedures.js", "blockly/generators/javascript/custom.js", "blockly/generators/javascript/element.js", "blockly/msg/js/ja.js"]);
+          }
         ]
       }
     }).state("editor.design", {
@@ -177,22 +184,31 @@ crosetModule.factory("IsInDiv", function() {
       }
     }).state("editor.program", {
       url: "/program/:screenId",
-      css: "css/program",
+      css: ["css/program", "css/workspace"],
       views: {
         right: {
-          templateUrl: "program.html"
+          templateUrl: "program.html",
+          controller: "ChildEditorController"
         }
-      },
-      controller: "ChildEditorController"
+      }
     }).state("editor.server", {
       url: "/server/:screenId",
       css: "css/server",
       views: {
         full: {
-          templateUrl: "server.html"
+          templateUrl: "server.html",
+          controller: "ChildEditorController"
         }
-      },
-      controller: "ChildEditorController"
+      }
+    }).state("editor.script", {
+      url: "/script/:screenId",
+      css: ["css/script", "css/workspace"],
+      views: {
+        full: {
+          templateUrl: "script.html",
+          controller: "ChildEditorController"
+        }
+      }
     }).state("login", {
       url: "/login",
       css: "css/login",

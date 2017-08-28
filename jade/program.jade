@@ -1,17 +1,20 @@
 //- ドラッグによる選択をjsでキャンセルしている
-#program-zone(layout="row") 
+#program-zone(layout="row" ng-controller="CodeController") 
 	
-	#program-code.croset-mat(style="height: 100%; width: 100%;" ng-controller="CodeController")
+	#program-code.croset-mat(style="height: 100%; width: 100%;" workspace="cards" workspace-changed="onWorkspaceChanged")
 			//- (card="card" ng-repeat="card in cards")
 			
 			
 	xml#toolbox(style="display: none").
 		
 		<category name="基本">
+			<block type="server"> </block>
+
 			<block type="log"> </block>
 			<block type="intent"> </block>
 			<block type="instantiate"> </block>
 			<block type="instantiateTo"> </block>
+			
 			
 			<block type="watch"> </block>
 			<block type="controls_if"> </block>
@@ -94,4 +97,4 @@
 			<block type="colour_blend"> </block>
 		</category>
 		
-		<category name="選択されている画面部品" custom="ELEMENT"></category>
+		<category name="画面部品" custom="ELEMENT"></category>

@@ -100,4 +100,32 @@ CrosetBlock.elementBlocks = {
       "helpUrl": ""
     }
   ]
-}
+};
+
+(function() {
+
+  // for templateText in ["_element", "_template"]
+  function defineBlock (templateText) {  
+    elementBlocks = angular.copy(CrosetBlock.elementBlocks)
+    for(type in elementBlocks) {
+        var blocks = elementBlocks[type]
+        for(var i = 0; i < blocks.length; i++) {
+          elementBlock = blocks[i]
+          elementBlock.type += templateText
+          if (elementBlock.args0) {
+            elementBlock.args0.unshift({
+              type: "field" + templateText,
+              name: "ELEMENT",
+              filter: type
+            });
+          }
+          Blockly.defineBlocksWithJsonArray([elementBlock])
+      }
+    }
+  }
+
+
+  defineBlock("_element")
+  defineBlock("_template")
+  
+})();

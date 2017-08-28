@@ -64,14 +64,14 @@ md-toolbar#header(ng-controller="HeaderController")
 					
 
 	#screen-wrapper(ng-controller="ScreenController")
-		#screen-zone.marvel-device.iphone6.silver(ng-style="{transform: 'scale3d(' + screenScaleRatio + ',' + screenScaleRatio + ',' + screenScaleRatio + ')', marginRight: marginRight}")
+		#screen-zone.marvel-device.iphone6.silver(ng-mousedown="onclick()" ng-style="{transform: 'scale3d(' + screenScaleRatio + ',' + screenScaleRatio + ',' + screenScaleRatio + ')', marginRight: marginRight}")
 			.top-bar
 			.sleep
 			.volume
 			.camera
 			.sensor
 			.speaker
-			#screen.screen
+			#screen.screen(ng-style="{overflowY: currentScreenData.style.overflowY}")
 			.home
 			.bottom-bar
 			
@@ -117,19 +117,21 @@ md-toolbar#header(ng-controller="HeaderController")
 	
 		
 	
-	md-fab-toolbar#box-fab-toolbar(md-open='isBoxToolbarOpen' count='demo.count' md-direction='left' ng-mouseleave="closeBoxToolbar()")
+	md-fab-toolbar#var-fab-toolbar(md-open='isVarToolbarOpen' count='demo.count' md-direction='left' ng-mouseleave="closeVarToolbar()")
 		md-fab-trigger.align-with-text
-			md-button.md-fab.md-primary(aria-label='menu' ng-mouseover="openBoxToolbar()" ng-click="bindServerVariables($event)")
-				md-icon(aria-label="Box") archive
-		md-toolbar(ng-show="$state.current.name == 'editor.design'")
+			md-button.md-fab.md-primary(aria-label='menu' ng-mouseover="openVarToolbar()")
+				md-icon(aria-label="Var") archive
+		md-toolbar(ng-show="$state.current.name != 'editor.program'")
 			md-fab-actions.md-toolbar-tools
-				md-button.box-button(ng-click="addVariable($event)")
+				md-button.var-button(ng-click="addVariable($event)")
 					md-icon(aria-label="Add" class="material-icons") add	
-				md-button.box-button(aria-label='{{box}}' ng-repeat="box in boxes" data-drag="true" jqyoui-draggable data-jqyoui-options="{{boxButtonDragOptions}}") {{box}}
+				md-button.var-button(ng-click="onVariableClicked($event, varId)" aria-label='{{var.name}}' ng-repeat="(varId, var) in vars" data-drag="{{$state.current.name == 'editor.design'}}" jqyoui-draggable data-jqyoui-options="{{varButtonDragOptions}}") {{var.name}}
 
 		
 		
-		
+
+
+
 		
 		
 		

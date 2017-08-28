@@ -1,15 +1,16 @@
 
 crosetModule = angular.module "Croset", [
 	"ui.router"				# ルーティング
-	"uiRouterStyles"				# - スタイルをつけられるようにする奴
+	"uiRouterStyles"	# ルーティングごとにcssを切り替え
+	"oc.lazyLoad"			# あとからjsを読み込む
 	"ngAria"
 	"ngMaterial"			# マテリアルデザイン
 	"ngAnimate"					# - required
 	"ngMessages"				# - required
-	"ngMdIcons"				# マテリアルデザインのアイコン
 	"ngDragDrop"			# ドラッグ＆ドロップ
 	"mdColorPicker"			# カラーピッカー
 	"angular.filter"		# フィルター集
+	"ui.ace"					# JS製エディタ
 ]
 # crosetModule.factory "ScreenFunctions", ["Elements", (Elements) ->
 #	 return {
@@ -109,7 +110,8 @@ crosetModule.factory "IsInDiv", () ->
 
 		console.log "Change"
 		$http.get "/profile"
-		.success (data, status, headers, config) ->
+		.then (result) ->
+			data = result.data
 			console.log data
 			if data
 				stateChangeBypass = true;
@@ -119,8 +121,8 @@ crosetModule.factory "IsInDiv", () ->
 				ev.preventDefault()
 				$state.go "login"
 
-		.error (data, status, headers, config) ->
-			console.log "Failed", data
+		, (result) ->
+			console.log "Failed", result
 
 
 ]
@@ -175,7 +177,11 @@ crosetModule.factory "IsInDiv", () ->
 				'default': '500'
 			})
 
+				
+			
+			
 		$stateProvider
+			
 			.state "editor", {
 				url: "/editor/:projectId"
 				controller: "EditorController"
@@ -192,6 +198,9 @@ crosetModule.factory "IsInDiv", () ->
 							}
 						}
 					]
+# 					files: ["$ocLazyLoad", ($ocLazyLoad) ->
+# 						return $ocLazyLoad.load ["blockly/blockly_uncompressed.js", "blockly/generators/javascript.js", "blockly/blocks/logic.js", "blockly/blocks/math.js", "blockly/blocks/lists.js", "blockly/blocks/colour.js", "blockly/blocks/loops.js", "blockly/blocks/variables.js", "blockly/blocks/text.js", "blockly/blocks/procedures.js", "blockly/blocks/custom.js", "blockly/blocks/element.js", "blockly/generators/javascript/logic.js", "blockly/generators/javascript/math.js", "blockly/generators/javascript/lists.js", "blockly/generators/javascript/colour.js", "blockly/generators/javascript/loops.js", "blockly/generators/javascript/variables.js", "blockly/generators/javascript/text.js", "blockly/generators/javascript/procedures.js", "blockly/generators/javascript/custom.js", "blockly/generators/javascript/element.js", "blockly/msg/js/ja.js"]
+# 					]
 			}
 			.state "editor.design", {
 				url: "/design/:screenId"
@@ -207,12 +216,12 @@ crosetModule.factory "IsInDiv", () ->
 			}
 			.state "editor.program", {
 				url: "/program/:screenId"
-				css: "css/program"
+				css: ["css/program", "css/workspace"]
 				views:
 					right:
 						templateUrl: "program.html"
 
-				controller: "ChildEditorController"
+						controller: "ChildEditorController"
 			}
 	
 			.state "editor.server", {
@@ -222,7 +231,16 @@ crosetModule.factory "IsInDiv", () ->
 					full:
 						templateUrl: "server.html"
 
-				controller: "ChildEditorController"
+						controller: "ChildEditorController"
+			}
+			.state "editor.script", {
+				url: "/script/:screenId"
+				css: ["css/script", "css/workspace"]
+				views:
+					full:
+						templateUrl: "script.html"
+
+						controller: "ChildEditorController"
 			}
 			.state "login", {
 				url: "/login"
@@ -237,7 +255,7 @@ crosetModule.factory "IsInDiv", () ->
 				controller: "DashboardController"
 			}
 
-		# $urlRouterProvider.otherwise "editor"
+# 		$urlRouterProvider.otherwise "/login"
 	]
 
 crosetModule.controller "LoginController", ["$scope", ($scope) ->

@@ -10,7 +10,7 @@
 	#property-body
 	
 		//- 座標の設定項目
-		md-card.property-card(ng-class="{'property-card-open': !cardToggle}" ng-style="{display: isVisibleOffsetProperty}" ng-hide="isTemplate")
+		md-card.property-card(ng-class="{'property-card-open': !cardToggle}" ng-style="{display: isVisibleOffsetProperty}" ng-show="visiblePropertyCards.length != 0 && !isTemplate")
 			div.property-card-title(layout="row" ng-click="cardToggle=!cardToggle" md-ink-ripple)
 				md-icon(aria-label="icon" class="material-icons") format_shapes
 				span 位置
@@ -49,15 +49,54 @@
 			div.property-card-body
 				//- リピートして設定用のインプットを増やす 
 				div(layout="row" ng-repeat="row in card.propertyInputs track by $index")
-					croset-dynamic-input(layout="column" layout-align="center" tag="'croset-' +  input.type" flex ng-class="['flex-'+input.size, {'croset-dynamic-input-box-attached': box}]" options="input.options" ng-repeat="input in row track by $index" croset-selected-element data-drop="true" data-jqyoui-options jqyoui-droppable="{onDrop: 'onDrop'}" after-content="{{box}}")
+					croset-dynamic-input(layout="column" layout-align="center" tag="'croset-' +  input.type" flex ng-class="['flex-'+input.size, {'croset-dynamic-input-var-attached': var}]" options="input.options" ng-repeat="input in row track by $index" croset-selected-element data-drop="true" data-jqyoui-options jqyoui-droppable="{onDrop: 'onDrop'}")
 						.croset-dynamic-input-border
 						
-						.croset-dynamic-input-remove-border(ng-show="box" ng-click="removeBox($event)" ng-mouseover="hoverIn()" ng-mouseleave="hoverOut()" md-ink-ripple)
-							span(ng-hide="hover") {{box}}
+						.croset-dynamic-input-remove-border(ng-show="var" ng-click="removeVar($event)" ng-mouseover="hoverIn()" ng-mouseleave="hoverOut()" md-ink-ripple)
+							span(ng-hide="hover") {{var.name}}
 							md-icon(aria-label="Remove" class="material-icons" ng-show="hover") close
 						
-						
-						
-						
-						
-						
+		
+		
+		//- 画面に関する設定
+		md-card.property-card.property-card-open(ng-if="visiblePropertyCards.length == 0")
+			div.property-card-title(layout="row")
+				md-icon(aria-label="Screen" class="material-icons") smartphone
+				span 画面
+			
+			
+			div.property-card-body(layout="column")
+				div(layout="row")
+					div.flex-100(layout="row" layout-align="center" flex)
+						md-input-container.md-block
+							label オーバーフロー(縦)
+							md-select(ng-model="currentScreenData.style.overflowY || 'hidden'" ng-change="onChangeScreenOverflowY()")
+								md-option(value="hidden") 隠す
+								md-option(value="scroll") スクロール
+								
+		
+		//- 画面に関する設定
+		md-card.property-card.property-card-open(ng-repeat="(scriptName, scriptOptions) in element.scripts")
+			div.property-card-title(layout="row")
+				md-icon(aria-label="Script" class="material-icons") description
+				span {{ scriptName }}
+				
+				md-menu.script-card-menu
+					md-button.md-icon-button(ng-click='$mdOpenMenu(ev)')
+						md-icon(aria-label="menu" class="material-icons") more_vert
+					md-menu-content(width='4')
+						md-menu-item(ng-click="dettachScript(scriptName)") 
+							md-button
+								md-icon(aria-label="delete" class="material-icons") delete
+								|	削除
+
+					
+		div(layout="column" layout-align="center center")			
+			md-menu
+				md-button.md-raised.md-accent(ng-click='$mdOpenMenu(ev)') スクリプトを追加
+
+				md-menu-content(width='4')
+					md-menu-item(ng-repeat="(scriptName, script) in scripts" ng-click="attachScript(scriptName)") 
+						md-button {{scriptName}}
+
+

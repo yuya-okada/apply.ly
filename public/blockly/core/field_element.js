@@ -48,14 +48,13 @@ goog.require('goog.userAgent');
  * @extends {Blockly.Field}
  * @constructor
  */
-Blockly.FieldElement = function(filter, defaultId, opt_validator) {
+Blockly.FieldElement = function(filter, opt_validator) {
   this.filter_ = filter;
   this.trimOptions_();
 
   // Call parent's constructor.
-  Blockly.FieldElement.superClass_.constructor.call(this, defaultId, opt_validator);
+  Blockly.FieldElement.superClass_.constructor.call(this, opt_validator);
   
-  this.value_ = defaultId;
 };
 goog.inherits(Blockly.FieldElement, Blockly.Field);
 

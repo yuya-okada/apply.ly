@@ -45,3 +45,7 @@
   margin-top: 23px;
   margin-bottom: 0;
 }
+/* line 46, ../../sass/server.scss */
+#server-bind-dialog md-checkbox {
+  margin: 0 !important;
+}

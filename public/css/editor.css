@@ -196,16 +196,17 @@ md-progress-linear ._md-mode-indeterminate {
 #editor #screen-zone {
   transform-origin: top left;
   opacity: 1;
+  outline: none !important;
   -moz-transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
   -o-transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
   -webkit-transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
   transition: opacity 0.5s cubic-bezier(0.55, 0, 0.1, 1);
 }
-/* line 110, ../../sass/editor.scss */
+/* line 111, ../../sass/editor.scss */
 #editor #screen-zone:before, #editor #screen-zone:after {
   pointer-events: none;
 }
-/* line 114, ../../sass/editor.scss */
+/* line 115, ../../sass/editor.scss */
 #editor #screen-zone .change-select-mode {
   position: absolute;
   width: 68px;
@@ -214,25 +215,25 @@ md-progress-linear ._md-mode-indeterminate {
   margin: 0;
   bottom: 20px;
 }
-/* line 124, ../../sass/editor.scss */
+/* line 125, ../../sass/editor.scss */
 #editor #screen {
   background-color: white;
   overflow: hidden;
 }
-/* line 128, ../../sass/editor.scss */
+/* line 129, ../../sass/editor.scss */
 #editor #screen .croset-element {
   transform-origin: 0 0;
 }
-/* line 131, ../../sass/editor.scss */
+/* line 132, ../../sass/editor.scss */
 #editor #screen .croset-element.ui-resizable {
   z-index: 20001;
   outline: 1px solid #4696F7;
 }
-/* line 135, ../../sass/editor.scss */
+/* line 136, ../../sass/editor.scss */
 #editor #screen .croset-element.ui-resizable .ui-resizable-handle {
   z-index: 20001 !important;
 }
-/* line 139, ../../sass/editor.scss */
+/* line 140, ../../sass/editor.scss */
 #editor #screen .croset-element.croset-resizable-parent {
   outline: 1px dashed #4696F7;
 }
@@ -367,21 +368,21 @@ md-progress-linear ._md-mode-indeterminate {
 }
 
 /* line 274, ../../sass/editor.scss */
-#box-fab-toolbar {
+#var-fab-toolbar {
   position: fixed;
   right: 0px;
   bottom: 0px;
   z-index: 22;
 }
 /* line 280, ../../sass/editor.scss */
-#box-fab-toolbar ._md-fab-toolbar-wrapper {
+#var-fab-toolbar ._md-fab-toolbar-wrapper {
   height: 80px;
   min-width: 80px;
   padding-top: 6px;
   padding-right: 15px;
 }
 /* line 288, ../../sass/editor.scss */
-#box-fab-toolbar .box-button {
+#var-fab-toolbar .var-button {
   color: white;
   background-color: #526FFF;
 }

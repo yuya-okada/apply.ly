@@ -29,11 +29,13 @@ crosetModule.controller("DashboardController", [
         params: {
           projectId: project
         }
-      }).success(function(data, status, headers, config) {
+      }).then(function(result) {
+        var data;
+        data = result.data;
         console.log("データ", data);
         return $scope.projects.push(data);
-      }).error(function(data, status, headers, config) {
-        return console.log("Failed:", data);
+      }, function(result) {
+        return console.log("Failed:", result);
       });
     }
     $scope.newProject = function(ev) {
@@ -44,14 +46,14 @@ crosetModule.controller("DashboardController", [
           data: {
             name: name
           }
-        }).success(function(data, status, headers, config) {
+        }).then(function(result) {
+          var data;
+          data = result.data;
           return $state.go("editor.design", {
             projectId: data.projectId
           });
-        }).error(function(data) {
+        }, function(result) {
           return console.log("Filed: Create Project");
-        })["catch"](function(error) {
-          return console.log('catch', error);
         });
       }, function() {});
     };
@@ -63,13 +65,13 @@ crosetModule.controller("DashboardController", [
           url: '/project',
           method: "PUT",
           data: project
-        }).success(function(data, status, headers, config) {
+        }).then(function(result) {
+          var data;
+          data = result;
           console.log("成功");
           return $state.reload();
-        }).error(function(data) {
+        }, function(result) {
           return console.log("Filed: Rename");
-        })["catch"](function(error) {
-          return console.log('catch', error);
         });
       });
     };
@@ -87,12 +89,10 @@ crosetModule.controller("DashboardController", [
           headers: {
             "Content-Type": "application/json;charset=utf-8"
           }
-        }).success(function(data, status, headers, config) {
+        }).then(function(result) {
           return location.reload();
-        }).error(function(data) {
+        }, function(result) {
           return console.log("Filed: Deleting");
-        })["catch"](function(error) {
-          return console.log('catch', error);
         });
       }, function() {});
     };

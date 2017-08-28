@@ -272,6 +272,7 @@ Blockly.Workspace.prototype.createVariable = function(name) {
   var index = this.variableIndexOf(name);
   if (index == -1) {
     this.variableList.push(name);
+    CrosetBlock.addVariable(name);
   }
 };
 

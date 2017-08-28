@@ -1,0 +1,68 @@
+
+.blocklyToolboxDiv {
+	box-shadow: 0 1px 3px 0 rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 2px 1px -1px rgba(0,0,0,.12);
+	background-color: white;
+	width: 240px;
+
+
+	.blocklyTreeRow:not(.blocklyHidden) {
+		height: 60px;
+		display: flex;
+		align-items: center; /* 縦方向中央揃え */
+		justify-content: center; /* 横方向中央揃え */
+		margin-bottom: 0px;
+		color: rgba(0, 0, 0, 0.87);
+		border-bottom: 1px solid #ddd;
+
+
+		.blocklyTreeLabel {
+			font-size: 14px;
+		}
+	}
+}
+.blocklyFlyout {
+	// transform: translate(10px, 0px) !important;
+	z-index: 100;
+
+	.blocklyFlyoutBackground {
+		border-radius: 0;
+		fill: #fff;
+	}
+}
+.blocklyBubbleCanvas {
+	.blocklyFlyoutBackground {
+		fill: #ddd;
+
+
+	}
+	&>g>g {
+		filter: inherit;
+	}
+	.blocklyDraggable {
+		rx: 0;
+		ry: 0;
+		fill: #4696F7;
+
+	}
+}
+
+.blocklyMainBackground {
+	fill: #f5f5f5 !important;
+}
+
+.blocklyPathDark, .blocklyPathLight {
+	display: none;
+}
+.blocklySelected>.blocklyPath {
+	stroke-width: 0px !important;
+}
+
+.blocklyEditableText>rect {
+	rx: 2 !important;
+	ry: 2 !important;
+}
+
+
+.blocklyWidgetDiv {
+	z-index: 100 !important;
+}

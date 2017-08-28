@@ -1,7 +1,7 @@
 
 <div id="property-zone" ng-controller="PropertyController">
   <div id="property-body">
-    <md-card ng-class="{'property-card-open': !cardToggle}" ng-style="{display: isVisibleOffsetProperty}" ng-hide="isTemplate" class="property-card">
+    <md-card ng-class="{'property-card-open': !cardToggle}" ng-style="{display: isVisibleOffsetProperty}" ng-show="visiblePropertyCards.length != 0 &amp;&amp; !isTemplate" class="property-card">
       <div layout="row" ng-click="cardToggle=!cardToggle" md-ink-ripple="md-ink-ripple" class="property-card-title">
         <md-icon aria-label="icon" class="material-icons">format_shapes</md-icon><span>位置</span>
       </div>
@@ -42,14 +42,59 @@
       </div>
       <div class="property-card-body">
         <div layout="row" ng-repeat="row in card.propertyInputs track by $index">
-          <croset-dynamic-input layout="column" layout-align="center" tag="'croset-' +  input.type" flex="flex" ng-class="['flex-'+input.size, {'croset-dynamic-input-box-attached': box}]" options="input.options" ng-repeat="input in row track by $index" croset-selected-element="croset-selected-element" data-drop="true" data-jqyoui-options="data-jqyoui-options" jqyoui-droppable="{onDrop: 'onDrop'}" after-content="{{box}}">
+          <croset-dynamic-input layout="column" layout-align="center" tag="'croset-' +  input.type" flex="flex" ng-class="['flex-'+input.size, {'croset-dynamic-input-var-attached': var}]" options="input.options" ng-repeat="input in row track by $index" croset-selected-element="croset-selected-element" data-drop="true" data-jqyoui-options="data-jqyoui-options" jqyoui-droppable="{onDrop: 'onDrop'}">
             <div class="croset-dynamic-input-border"></div>
-            <div ng-show="box" ng-click="removeBox($event)" ng-mouseover="hoverIn()" ng-mouseleave="hoverOut()" md-ink-ripple="md-ink-ripple" class="croset-dynamic-input-remove-border"><span ng-hide="hover">{{box}}</span>
+            <div ng-show="var" ng-click="removeVar($event)" ng-mouseover="hoverIn()" ng-mouseleave="hoverOut()" md-ink-ripple="md-ink-ripple" class="croset-dynamic-input-remove-border"><span ng-hide="hover">{{var.name}}</span>
               <md-icon aria-label="Remove" ng-show="hover" class="material-icons">close</md-icon>
             </div>
           </croset-dynamic-input>
         </div>
       </div>
     </md-card>
+    <md-card ng-if="visiblePropertyCards.length == 0" class="property-card property-card-open">
+      <div layout="row" class="property-card-title">
+        <md-icon aria-label="Screen" class="material-icons">smartphone</md-icon><span>画面</span>
+      </div>
+      <div layout="column" class="property-card-body">
+        <div layout="row">
+          <div layout="row" layout-align="center" flex="flex" class="flex-100">
+            <md-input-container class="md-block">
+              <label>オーバーフロー(縦)</label>
+              <md-select ng-model="currentScreenData.style.overflowY || 'hidden'" ng-change="onChangeScreenOverflowY()">
+                <md-option value="hidden">隠す</md-option>
+                <md-option value="scroll">スクロール</md-option>
+              </md-select>
+            </md-input-container>
+          </div>
+        </div>
+      </div>
+    </md-card>
+    <md-card ng-repeat="(scriptName, scriptOptions) in element.scripts" class="property-card property-card-open">
+      <div layout="row" class="property-card-title">
+        <md-icon aria-label="Script" class="material-icons">description</md-icon><span>{{ scriptName }}</span>
+        <md-menu class="script-card-menu">
+          <md-button ng-click="$mdOpenMenu(ev)" class="md-icon-button">
+            <md-icon aria-label="menu" class="material-icons">more_vert</md-icon>
+          </md-button>
+          <md-menu-content width="4">
+            <md-menu-item ng-click="dettachScript(scriptName)"> 
+              <md-button>
+                <md-icon aria-label="delete" class="material-icons">delete</md-icon>	削除
+              </md-button>
+            </md-menu-item>
+          </md-menu-content>
+        </md-menu>
+      </div>
+    </md-card>
+    <div layout="column" layout-align="center center">			
+      <md-menu>
+        <md-button ng-click="$mdOpenMenu(ev)" class="md-raised md-accent">スクリプトを追加</md-button>
+        <md-menu-content width="4">
+          <md-menu-item ng-repeat="(scriptName, script) in scripts" ng-click="attachScript(scriptName)"> 
+            <md-button>{{scriptName}}</md-button>
+          </md-menu-item>
+        </md-menu-content>
+      </md-menu>
+    </div>
   </div>
 </div>

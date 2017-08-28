@@ -225,7 +225,7 @@
 #property-zone #property-body {
   -webkit-flex: 1;
   flex: 1;
-  padding: 0px 30px 20px 30px;
+  padding: 0px 30px 80px 30px;
   overflow-y: scroll;
 }
 /* line 140, ../../sass/design.scss */
@@ -255,17 +255,23 @@
   font-size: 18px;
   color: #666;
 }
-/* line 165, ../../sass/design.scss */
+/* line 163, ../../sass/design.scss */
+#property-zone #property-body .property-card .property-card-title .script-card-menu {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+/* line 170, ../../sass/design.scss */
 #property-zone #property-body .property-card .property-card-body {
   display: none;
   margin-top: 20px;
   padding: 0 20px;
 }
-/* line 171, ../../sass/design.scss */
+/* line 176, ../../sass/design.scss */
 #property-zone #property-body .property-card croset-dynamic-input {
   position: relative;
 }
-/* line 174, ../../sass/design.scss */
+/* line 179, ../../sass/design.scss */
 #property-zone #property-body .property-card croset-dynamic-input .croset-dynamic-input-border {
   position: absolute;
   top: 0;
@@ -273,11 +279,11 @@
   right: 0;
   bottom: 0;
 }
-/* line 181, ../../sass/design.scss */
+/* line 186, ../../sass/design.scss */
 #property-zone #property-body .property-card croset-dynamic-input .croset-dynamic-input-border:focus {
   outline: none !important;
 }
-/* line 185, ../../sass/design.scss */
+/* line 190, ../../sass/design.scss */
 #property-zone #property-body .property-card croset-dynamic-input .croset-dynamic-input-border::before {
   box-sizing: inherit;
   content: '';
@@ -289,7 +295,7 @@
   left: 0;
   transition: width 0.25s ease-out, height 0.25s ease-out 0.25s;
 }
-/* line 196, ../../sass/design.scss */
+/* line 201, ../../sass/design.scss */
 #property-zone #property-body .property-card croset-dynamic-input .croset-dynamic-input-border::after {
   box-sizing: inherit;
   content: '';
@@ -301,22 +307,22 @@
   height: 0;
   transition: height 0.25s ease-out, width 0.25s ease-out 0.25s;
 }
-/* line 212, ../../sass/design.scss */
-#property-zone #property-body .property-card croset-dynamic-input.croset-dynamic-input-box-attached .croset-dynamic-input-border::before {
+/* line 217, ../../sass/design.scss */
+#property-zone #property-body .property-card croset-dynamic-input.croset-dynamic-input-var-attached .croset-dynamic-input-border::before {
   width: 100%;
   height: 100%;
   border-top-color: #1B96FE;
   border-right-color: #1B96FE;
 }
-/* line 218, ../../sass/design.scss */
-#property-zone #property-body .property-card croset-dynamic-input.croset-dynamic-input-box-attached .croset-dynamic-input-border::after {
+/* line 223, ../../sass/design.scss */
+#property-zone #property-body .property-card croset-dynamic-input.croset-dynamic-input-var-attached .croset-dynamic-input-border::after {
   width: 100%;
   height: 100%;
   border-left-color: #1B96FE;
   border-bottom-color: #1B96FE;
 }
-/* line 225, ../../sass/design.scss */
-#property-zone #property-body .property-card croset-dynamic-input.croset-dynamic-input-box-attached .croset-dynamic-input-remove-border {
+/* line 230, ../../sass/design.scss */
+#property-zone #property-body .property-card croset-dynamic-input.croset-dynamic-input-var-attached .croset-dynamic-input-remove-border {
   display: flex;
   position: absolute;
   top: 0px;
@@ -331,26 +337,26 @@
   cursor: pointer;
   z-index: 22;
 }
-/* line 240, ../../sass/design.scss */
-#property-zone #property-body .property-card croset-dynamic-input.croset-dynamic-input-box-attached .croset-dynamic-input-remove-border md-icon {
+/* line 245, ../../sass/design.scss */
+#property-zone #property-body .property-card croset-dynamic-input.croset-dynamic-input-var-attached .croset-dynamic-input-remove-border md-icon {
   font-size: 14px;
   color: white;
   text-align: center;
 }
-/* line 250, ../../sass/design.scss */
+/* line 255, ../../sass/design.scss */
 #property-zone #property-body .property-card croset-text span {
   font-size: 13px;
 }
-/* line 256, ../../sass/design.scss */
+/* line 261, ../../sass/design.scss */
 #property-zone #property-body .property-card croset-headline span {
   font-size: 15px;
   font-weight: bold;
 }
-/* line 264, ../../sass/design.scss */
+/* line 269, ../../sass/design.scss */
 #property-zone #property-body .property-card-open {
   margin: 20px -10px;
 }
-/* line 267, ../../sass/design.scss */
+/* line 272, ../../sass/design.scss */
 #property-zone #property-body .property-card-open .property-card-body {
   display: block;
 }

@@ -12,6 +12,7 @@ crosetModule.service("CurrentScreenData", [
     this.getElementsManager = function() {
       return that.elementsManager;
     };
+    this.style = {};
   }
 ]).service("ProjectData", [
   "$http", "$rootScope", "$stateParams", "$state", "ScreenElementsManager", "getUUID", "CurrentScreenData", function($http, $rootScope, $stateParams, $state, ScreenElementsManager, getUUID, CurrentScreenData) {
@@ -20,8 +21,9 @@ crosetModule.service("CurrentScreenData", [
     this.name = null;
     this.screens = {};
     this.defaultScreen = "トップ";
-    this.variables = [];
+    this.variables = {};
     this.config = {};
+    this.scripts = {};
     this.getScreens = function() {
       return this.screens;
     };
@@ -36,14 +38,13 @@ crosetModule.service("CurrentScreenData", [
       that.name = null;
       that.screens = {};
       that.defaultScreen = "トップ";
-      return that.variables = [];
+      return that.variables = {};
     };
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams) {
       $state.current = toState;
       if (toState.name.match(/editor/)) {
         if (toParams.projectId === that.projectId + "") {
-          saveCurrentScreen();
-          return CurrentScreenData.workspace = null;
+          return saveCurrentScreen();
         }
       }
     });
@@ -53,7 +54,6 @@ crosetModule.service("CurrentScreenData", [
         xml = Blockly.Xml.workspaceToDom(CurrentScreenData.workspace);
         cards = Blockly.Xml.domToText(xml);
         sourceCode = Blockly.JavaScript.workspaceToCode(CurrentScreenData.workspace);
-        that.variables = CurrentScreenData.workspace.variableList;
       } else {
         cards = (ref = that.screens[CurrentScreenData.id]) != null ? ref.cards : void 0;
         sourceCode = (ref1 = that.screens[CurrentScreenData.id]) != null ? ref1.sourceCode : void 0;
@@ -63,7 +63,8 @@ crosetModule.service("CurrentScreenData", [
         templates: CurrentScreenData.elementsManager.getTemplates(),
         cards: cards,
         sourceCode: sourceCode,
-        boxProperties: (ref2 = CurrentScreenData.elementsManager) != null ? ref2.boxProperties : void 0
+        varProperties: (ref2 = CurrentScreenData.elementsManager) != null ? ref2.varProperties : void 0,
+        style: CurrentScreenData.style
       });
     };
     this.addScreen = function(name) {
@@ -126,32 +127,42 @@ crosetModule.service("CurrentScreenData", [
       }
       return results;
     };
+    CrosetBlock.addVariable = function(newName) {
+      return that.variables[getUUID()] = {
+        name: newName
+      };
+    };
     CrosetBlock.renameVariable = function(oldName, newName) {
-      var boxName, id, key, properties, ref, ref1, ref2;
-      ref1 = (ref = CurrentScreenData.elementsManager) != null ? ref.boxProperties : void 0;
-      for (id in ref1) {
-        properties = ref1[id];
-        for (key in properties) {
-          boxName = properties[key];
-          if (boxName === oldName) {
-            if ((ref2 = CurrentScreenData.elementsManager) != null) {
-              ref2.boxProperties[id][key] = newName;
-            }
-          }
+      var id, name, ref;
+      ref = that.variables;
+      for (id in ref) {
+        name = ref[id];
+        if (that.variables[id].name === oldName) {
+          that.variables[id].name = newName;
+          break;
         }
       }
       return that.triggerCallbackVar();
     };
     CrosetBlock.deleteVariable = function(name) {
-      var boxName, id, key, properties, ref, ref1, ref2;
-      ref1 = (ref = CurrentScreenData.elementsManager) != null ? ref.boxProperties : void 0;
-      for (id in ref1) {
-        properties = ref1[id];
+      var id, key, properties, ref, ref1, ref2, ref3, vId, varId;
+      vId = "";
+      ref = that.variables;
+      for (id in ref) {
+        name = ref[id];
+        if (that.variables[id].name === name) {
+          delete that.variables[id].name;
+          varId = id;
+        }
+      }
+      ref2 = (ref1 = CurrentScreenData.elementsManager) != null ? ref1.varProperties : void 0;
+      for (id in ref2) {
+        properties = ref2[id];
         for (key in properties) {
-          boxName = properties[key];
-          if (boxName === name) {
-            if ((ref2 = CurrentScreenData.elementsManager) != null) {
-              ref2.removeBoxToProperty(id, key);
+          varId = properties[key];
+          if (varId === vId) {
+            if ((ref3 = CurrentScreenData.elementsManager) != null) {
+              ref3.removeVarToProperty(id, key);
             }
           }
         }
@@ -184,17 +195,19 @@ crosetModule.service("CurrentScreenData", [
         screens: this.screens,
         defaultScreen: this.defaultScreen,
         variables: this.variables,
-        config: this.config
+        config: this.config,
+        scripts: this.scripts
       };
       console.log("Builded", projectData);
       return projectData;
     };
   }
 ]).service("SelectedElementOrTemplateUUID", [
-  function() {
-    var isTemplate, uuid;
+  "VisiblePropertyCards", "CurrentScreenData", function(VisiblePropertyCards, CurrentScreenData) {
+    var isTemplate, that, uuid;
     uuid = null;
     isTemplate = null;
+    that = this;
     this.get = function() {
       return uuid;
     };
@@ -205,22 +218,11 @@ crosetModule.service("CurrentScreenData", [
     this.isTemplate = function() {
       return isTemplate;
     };
-  }
-]).service("SelectedElementUUID", [
-  "SelectedElementOrTemplateUUID", "SetElementProperty", "CurrentScreenData", "$rootScope", function(SelectedElementOrTemplateUUID, SetElementProperty, CurrentScreenData, $rootScope) {
-    var uuid;
-    uuid = null;
     this.init = function() {
-      return uuid = null;
-    };
-    this.get = function() {
-      return uuid;
-    };
-    this.set = function(val) {
-      var click, element, handleRatio, onResizedOrDraged, parentElement, screenElements, selectedElement;
+      var screenElements, selectedElement;
       $("#screen-wrapper").removeClass("show-template");
       screenElements = CurrentScreenData.elementsManager;
-      if (uuid && screenElements.get(uuid)) {
+      if (uuid && screenElements.get(uuid) && !isTemplate) {
         selectedElement = $(screenElements.get(uuid).element);
         if (selectedElement.data("ui-resizable")) {
           selectedElement.resizable("destroy");
@@ -228,6 +230,27 @@ crosetModule.service("CurrentScreenData", [
       }
       $(".croset-resizable-parent").removeClass("croset-resizable-parent");
       $(".ui-resizable").removeClass("ui-resizable");
+      uuid = null;
+      isTemplate = null;
+      return VisiblePropertyCards.set([]);
+    };
+  }
+]).service("SelectedElementUUID", [
+  "SelectedElementOrTemplateUUID", "SetElementProperty", "VisiblePropertyCards", "CurrentScreenData", "$rootScope", function(SelectedElementOrTemplateUUID, SetElementProperty, VisiblePropertyCards, CurrentScreenData, $rootScope) {
+    var that, uuid;
+    uuid = null;
+    that = this;
+    this.init = function() {
+      uuid = null;
+      return VisiblePropertyCards.set([]);
+    };
+    this.get = function() {
+      return uuid;
+    };
+    this.set = function(val) {
+      var click, element, handleRatio, onResizedOrDraged, parentElement, screenElements;
+      SelectedElementOrTemplateUUID.init();
+      screenElements = CurrentScreenData.elementsManager;
       uuid = val;
       SetElementProperty(val);
       element = screenElements.get(uuid).element;
@@ -359,9 +382,9 @@ crosetModule.service("CurrentScreenData", [
                   headers: {
                     "Content-Type": "application/json;charset=utf-8"
                   }
-                }).success(function(data, status, headers, config) {
+                }).then(function(result) {
                   return $interval.cancel(stop);
-                }).error(function(data, status, headers, config) {
+                }, function(result) {
                   return $interval.cancel(stop);
                 });
               }
@@ -371,8 +394,9 @@ crosetModule.service("CurrentScreenData", [
             method: "GET",
             url: "/build",
             params: ProjectData.get()
-          }).success(function(data, status, headers, config) {
-            var checkBuilded;
+          }).then(function(result) {
+            var checkBuilded, data;
+            data = result;
             checkBuilded = function() {
               return $http({
                 method: "GET",
@@ -380,7 +404,8 @@ crosetModule.service("CurrentScreenData", [
                 params: {
                   projectId: ProjectData.get().name
                 }
-              }).success(function(data, status, headers, config) {
+              }).then(function(result) {
+                data = result;
                 if (data) {
                   return $timeout(function() {
                     return checkBuilded();
@@ -388,12 +413,15 @@ crosetModule.service("CurrentScreenData", [
                 } else {
                   return $scope.done = true;
                 }
-              }).error(function(data, status, headers, config) {
+              }, function(result) {
+                data = result;
                 return console.log("Failed", data);
               });
             };
             return checkBuilded();
-          }).error(function(data, status, headers, config) {
+          }, function(result) {
+            var data;
+            data = result;
             return console.log("Failed", data);
           });
         }
@@ -464,17 +492,26 @@ crosetModule.service("CurrentScreenData", [
       }).then(function(answer) {}, function() {});
     };
     return saveProject = function(fnc) {
+      var replacer;
+      replacer = function(key, value) {
+        if (value instanceof jQuery) {
+          return void 0;
+        }
+        return value;
+      };
       return $http({
         method: "PUT",
         url: "/project",
-        data: ProjectData.get()
-      }).success(function(data, status, headers, config) {
+        data: JSON.parse(JSON.stringify(ProjectData.get(), replacer))
+      }).then(function(result) {
+        var data;
+        data = result.data;
         console.log("Saved", data);
         if (fnc) {
           return fnc();
         }
-      }).error(function(data, status, headers, config) {
-        return console.log("Failed", data);
+      }, function(result) {
+        return console.log("Failed", result);
       });
     };
   }
@@ -560,7 +597,7 @@ crosetModule.service("CurrentScreenData", [
     };
   }
 ]).controller("EditorController", [
-  "$scope", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$timeout", "$interval", "$mdToast", "$mdSidenav", "$rootScope", "$mdDialog", "ScreenElementsManager", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes", function($scope, ElementDatas, $state, $stateParams, $http, ProjectData, $timeout, $interval, $mdToast, $mdSidenav, $rootScope, $mdDialog, ScreenElementsManager, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) {
+  "$scope", "getUUID", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$timeout", "$interval", "$mdToast", "$mdSidenav", "$rootScope", "$mdDialog", "ScreenElementsManager", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes", function($scope, getUUID, ElementDatas, $state, $stateParams, $http, ProjectData, $timeout, $interval, $mdToast, $mdSidenav, $rootScope, $mdDialog, ScreenElementsManager, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) {
     var cancel, changeScreen, projectData;
     SelectedElementUUID.init();
     $scope.settings = {
@@ -588,6 +625,9 @@ crosetModule.service("CurrentScreenData", [
     $scope.secondModeList = {
       server: {
         icon: "settings_ethernet"
+      },
+      script: {
+        icon: "description"
       }
     };
     $scope.changeMode = function(name) {
@@ -640,6 +680,7 @@ crosetModule.service("CurrentScreenData", [
     console.log("プロジェクト読み込み", projectData);
     ProjectData.init();
     ProjectData.screens = projectData.screens;
+    ProjectData.scripts = projectData.scripts;
     ProjectData.name = projectData.name;
     ProjectData.projectId = projectData.projectId;
     ProjectData.defaultScreen = projectData.defaultScreen;
@@ -660,41 +701,46 @@ crosetModule.service("CurrentScreenData", [
       if (nextScreen.templates == null) {
         nextScreen.templates = {};
       }
-      changeScreen(nextScreen.elements, nextScreen.cards, nextScreen.templates, nextScreen.boxProperties);
+      if (nextScreen.style == null) {
+        nextScreen.style = {};
+      }
+      changeScreen(nextScreen.elements, nextScreen.cards, nextScreen.templates, nextScreen.varProperties, nextScreen.style);
       $scope.progress.isLoading = false;
       return $scope.progress.determinateValue += 100;
     });
-    changeScreen = function(elements, cards, templates, boxProperties) {
+    changeScreen = function(elements, cards, templates, varProperties, style) {
       var newScreenElementsManager;
       newScreenElementsManager = new ScreenElementsManager($("#screen"));
       CurrentScreenData.elementsManager = newScreenElementsManager;
+      CurrentScreenData.workspace = null;
+      CurrentScreenData.style = style;
       angular.forEach(elements, function(data, uuid) {
         return newScreenElementsManager.addFromData(data, uuid);
       });
       angular.forEach(templates, function(data, uuid) {
         return newScreenElementsManager.addTemplateFromData(data, uuid);
       });
-      if (boxProperties == null) {
-        boxProperties = {};
+      if (varProperties == null) {
+        varProperties = {};
       }
-      return newScreenElementsManager.boxProperties = boxProperties;
+      return newScreenElementsManager.varProperties = varProperties;
     };
-    $scope.isBoxToolbarOpen = false;
-    $scope.openBoxToolbar = function() {
-      if ($state.current.name === "editor.design") {
+    $scope.isVarToolbarOpen = false;
+    $scope.openVarToolbar = function() {
+      if ($state.current.name !== "editor.program") {
         if (cancel) {
           $timeout.cancel(cancel);
         }
-        $("#box-fab-toolbar").css("width", "100%");
-        $scope.boxes = ProjectData.variables;
-        return $scope.isBoxToolbarOpen = true;
+        $("#var-fab-toolbar").css("width", "100%");
+        $scope.vars = ProjectData.variables;
+        return $scope.isVarToolbarOpen = true;
       }
     };
     cancel = null;
-    $scope.closeBoxToolbar = function() {
-      $scope.isBoxToolbarOpen = false;
+    $scope.closeVarToolbar = function() {
+      $scope.isVarToolbarOpen = false;
       return cancel = $timeout(function() {
-        return $("#box-fab-toolbar").css("width", "");
+        return $("#var-fab-toolbar").css("width", "");
       }, 1000);
     };
     $scope.$state = $state;
@@ -702,14 +748,21 @@ crosetModule.service("CurrentScreenData", [
       var confirm;
       confirm = $mdDialog.prompt().title('新しいを変数').textContent("新しい変数を追加します。").placeholder('').ariaLabel('名前を入力').targetEvent(ev).ok('OK').cancel('キャンセル');
       return $mdDialog.show(confirm).then(function(result) {
-        if (ProjectData.variables.indexOf(result) === -1) {
-          return ProjectData.variables.push(result);
-        } else {
-          return $mdToast.show($mdToast.simple().textContent('その名前の変数はすでに存在します').position("right bottom").hideDelay(3000));
+        var ref, varId, varName;
+        ref = ProjectData.variables;
+        for (varId in ref) {
+          varName = ref[varId];
+          if (varName = result) {
+            $mdToast.show($mdToast.simple().textContent('その名前の変数はすでに存在します').position("right bottom").hideDelay(3000));
+            return;
+          }
         }
+        return ProjectData.variables[getUUID()] = {
+          name: result
+        };
       }, function() {});
     };
-    $scope.bindServerVariables = function(ev) {
+    $scope.onVariableClicked = function(ev, varId) {
       if ($state.current.name === "editor.server") {
         ev.stopPropagation();
         return $mdDialog.show({
@@ -717,7 +770,10 @@ crosetModule.service("CurrentScreenData", [
           templateUrl: 'templates/server-bind-dialog.tmpl.html',
           parent: angular.element(document.body),
           targetEvent: ev,
-          clickOutsideToClose: false
+          clickOutsideToClose: false,
+          locals: {
+            varId: varId
+          }
         }).then(function(answer) {}, function() {});
       }
     };
@@ -728,8 +784,9 @@ crosetModule.service("CurrentScreenData", [
     return $rootScope.$broadcast("onChangedScreen", $stateParams.screenId || ProjectData.defaultScreen);
   }
 ]).controller("ScreenController", [
-  "$scope", "$timeout", "ListItemSelect", "SelectedElementUUID", "CurrentScreenData", "ElementDatas", function($scope, $timeout, ListItemSelect, SelectedElementUUID, CurrentScreenData, ElementDatas) {
+  "$scope", "$timeout", "ListItemSelect", "SelectedElementUUID", "SelectedElementOrTemplateUUID", "CurrentScreenData", "ElementDatas", function($scope, $timeout, ListItemSelect, SelectedElementUUID, SelectedElementOrTemplateUUID, CurrentScreenData, ElementDatas) {
     var editor, screenDefaultHeight, screenDefaultWidth, screenZone;
+    $scope.currentScreenData = CurrentScreenData;
     $scope.screenScaleRatio = 1;
     editor = $("#editor");
     screenZone = $("#screen-zone");
@@ -749,6 +806,9 @@ crosetModule.service("CurrentScreenData", [
         return $(".ui-resizable-handle").css("transform", "scale(" + handleRatio + ")");
       }, 0);
     }).trigger("resize");
+    $scope.onclick = function() {
+      return SelectedElementOrTemplateUUID.init();
+    };
     $scope.elementDatas = ElementDatas;
     $scope.openListItemSelect = function() {
       $scope.selectedElementUUID = SelectedElementUUID.get();
@@ -763,13 +823,13 @@ crosetModule.service("CurrentScreenData", [
       return $("#screen-wrapper").removeClass("show-template");
     };
   }
-]).directive("boxButton", [
+]).directive("varButton", [
   function() {
     return {
       restrict: "C",
       scope: true,
       link: function(scope) {
-        return scope.boxButtonDragOptions = {
+        return scope.varButtonDragOptions = {
           helper: "clone",
           appendTo: "body",
           cancel: ""

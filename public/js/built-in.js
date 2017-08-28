@@ -1093,7 +1093,7 @@ crosetModule.factory("ElementDatas", function() {
       templatePreviewElement = null;
       templatePreviewScope = null;
       screenElement.empty();
-      this.boxProperties = {};
+      this.varProperties = {};
       that = this;
       if (isPublic == null) {
         isPublic = false;
@@ -1161,18 +1161,18 @@ crosetModule.factory("ElementDatas", function() {
         };
         return searchInArray(screenScope != null ? screenScope.list : void 0);
       };
-      this.setBoxToProperty = function(id, key, boxName) {
+      this.setVariableToProperty = function(id, key, varId) {
         var base, base1;
-        if ((base = this.boxProperties)[id] == null) {
+        if ((base = this.varProperties)[id] == null) {
           base[id] = {};
         }
-        if ((base1 = this.boxProperties[id])[key] == null) {
-          base1[key] = boxName;
+        if ((base1 = this.varProperties[id])[key] == null) {
+          base1[key] = varId;
         }
       };
-      this.removeBoxToProperty = function(id, key, boxName) {
+      this.removeVariableToProperty = function(id, key) {
         var ref;
-        return (ref = this.boxProperties[id]) != null ? delete ref[key] : void 0;
+        return (ref = this.varProperties[id]) != null ? delete ref[key] : void 0;
       };
       this.getSiblings = function(id) {
         var searchParent;
@@ -1218,7 +1218,7 @@ crosetModule.factory("ElementDatas", function() {
       this.removeAll = function() {
         screenScope.list = {};
         screenElement.empty();
-        return this.boxProperties = {};
+        return this.varProperties = {};
       };
       this.add = function(type, uuid) {
         var e, options, ref, scope;
@@ -1337,7 +1337,7 @@ crosetModule.factory("ElementDatas", function() {
           deleteInArray(data.children);
         }
         delete screenScope.list[id];
-        return delete this.boxProperties[id];
+        return delete this.varProperties[id];
       };
       childAddedCallbacks = [];
       this.addChild = function(parentId, childId) {
@@ -1398,6 +1398,26 @@ crosetModule.factory("ElementDatas", function() {
       };
       this.setAddChildCallback = function(fnc) {
         return childAddedCallbacks.push(fnc);
+      };
+      this.attachScript = function(uuid, scriptName) {
+        var base, data;
+        data = that.get(uuid);
+        if (data.scripts == null) {
+          data.scripts = {};
+        }
+        return (base = data.scripts)[scriptName] != null ? base[scriptName] : base[scriptName] = {};
+      };
+      this.dettachScript = function(uuid, scriptName) {
+        var data;
+        data = that.get(uuid);
+        if (data.scripts) {
+          return delete data.scripts[scriptName];
+        }
+      };
+      this.runScript = function(uuid, script) {
+        var func;
+        func = new Function($scope, script);
+        return func(screenScope);
       };
       this.template = function(uuid) {
         var element, ref, ref1, templateId;
@@ -1509,7 +1529,7 @@ crosetModule.factory("ElementDatas", function() {
           deleteInArray(data.children);
         }
         delete screenScope.templates[id];
-        return delete this.boxProperties[id];
+        return delete this.varProperties[id];
       };
       this.showTemplate = function(uuid) {
         var data, e, scope;

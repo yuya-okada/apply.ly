@@ -134,7 +134,7 @@
 
 	#property-body {
 		@include flex(1);
-		padding: 0px 30px 20px 30px;
+		padding: 0px 30px 80px 30px;
 		overflow-y: scroll;
 
 		.property-card {
@@ -160,6 +160,11 @@
 					color: #666;
 					// font-weight: bold;
 				}
+				.script-card-menu {
+					position: absolute;
+					right: 0;
+					top: 0;
+				}	
 			}
 
 			.property-card-body {
@@ -206,7 +211,7 @@
 					}
 					
 				}
-				&.croset-dynamic-input-box-attached {
+				&.croset-dynamic-input-var-attached {
 					
 					.croset-dynamic-input-border {
 						&::before {

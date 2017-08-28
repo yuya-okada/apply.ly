@@ -36,12 +36,13 @@ crosetModule
 				projectId: project
 			}
 		}
-		.success (data, status, headers, config) ->
+		.then (result) ->
+			data = result.data
 			console.log "データ", data
 			$scope.projects.push data
 
-		.error (data, status, headers, config) ->
-			console.log "Failed:", data
+		, (result) ->
+			console.log "Failed:", result
 
 
 
@@ -56,12 +57,11 @@ crosetModule
 					name: name
 				}
 			}
-			.success (data, status, headers, config) ->				# 成功したら作成しtプロジェクトの編集へ遷移
+			.then (result) ->				# 成功したら作成しtプロジェクトの編集へ遷移
+				data = result.data
 				$state.go "editor.design", {projectId: data.projectId}
-			.error (data) ->
+			, (result) ->
 				console.log "Filed: Create Project"
-			.catch (error) ->
-				console.log 'catch', error
 
 			return
 
@@ -80,13 +80,12 @@ crosetModule
 				method: "PUT"
 				data: project
 			}
-			.success (data, status, headers, config) ->				# 成功したら作成しtプロジェクトの編集へ遷移
+			.then (result) ->				# 成功したら作成しtプロジェクトの編集へ遷移
+				data = result
 				console.log "成功"
 				$state.reload()
-			.error (data) ->
+			, (result) ->
 				console.log "Filed: Rename"
-			.catch (error) ->
-				console.log 'catch', error
 
 
 	$scope.remove = (ev, projectId) ->
@@ -108,12 +107,10 @@ crosetModule
 				}
 				headers: {"Content-Type": "application/json;charset=utf-8"}
 			}
-			.success (data, status, headers, config) ->				# 成功したら作成しtプロジェクトの編集へ遷移
+			.then (result) ->				# 成功したら作成しtプロジェクトの編集へ遷移
 				location.reload()
-			.error (data) ->
+			, (result) ->
 				console.log "Filed: Deleting"
-			.catch (error) ->
-				console.log 'catch', error
 
 		, () ->
 

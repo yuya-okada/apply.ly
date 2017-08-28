@@ -79,7 +79,8 @@
     },
     config: Schema.Types.Mixed,
     projectId: Number,
-    valiables: Schema.Types.Mixed
+    valiables: Schema.Types.Mixed,
+    scripts: Schema.Types.Mixed
   }, {
     strict: false
   });
@@ -291,8 +292,8 @@
       } else {
         console.log(user);
         return passport.authenticate("local", {
-          successRedirect: "/#/dashboard",
-          failureRedirect: "/#/login",
+          successRedirect: "/#!/dashboard",
+          failureRedirect: "/#!/login",
           failureFlash: true
         })(req, res, next);
       }
@@ -306,8 +307,8 @@
 
   app.post("/login", function(req, res, next) {
     return passport.authenticate("local", {
-      successRedirect: "/#/dashboard",
-      failureRedirect: "/#/login",
+      successRedirect: "/#!/dashboard",
+      failureRedirect: "/#!/login",
       failureFlash: true
     })(req, res, next);
   });

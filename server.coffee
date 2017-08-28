@@ -61,7 +61,7 @@ ProjectSchema = new Schema {
 	config: Schema.Types.Mixed
 	projectId: Number
 	valiables: Schema.Types.Mixed
-
+	scripts: Schema.Types.Mixed
 
 }, {strict: false}
 
@@ -240,7 +240,7 @@ app.post "/signup", (req, res, next) ->
 			console.log err
 		else
 			console.log user
-			passport.authenticate("local", {successRedirect: "/#/dashboard", failureRedirect: "/#/login", failureFlash: true})(req, res, next)
+			passport.authenticate("local", {successRedirect: "/#!/dashboard", failureRedirect: "/#!/login", failureFlash: true})(req, res, next)
 
 # ログインしている場合ユーザ情報をかえす、
 app.get "/profile", (req, res) ->
@@ -248,7 +248,7 @@ app.get "/profile", (req, res) ->
 
 app.post "/login", (req, res, next) ->
 	# console.log req
-	passport.authenticate("local", {successRedirect: "/#/dashboard", failureRedirect: "/#/login", failureFlash: true})(req, res, next)
+	passport.authenticate("local", {successRedirect: "/#!/dashboard", failureRedirect: "/#!/login", failureFlash: true})(req, res, next)
 
 app.get "/logout", (req, res) ->
 	req.logout()

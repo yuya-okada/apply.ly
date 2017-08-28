@@ -104,6 +104,7 @@ md-progress-linear {
 	#screen-zone {
     transform-origin: top left;
 		opacity: 1;
+		outline: none !important;
 		@include material-single-transition(opacity , .5s);
 
 
@@ -140,7 +141,6 @@ md-progress-linear {
 					outline: 1px dashed #4696F7;
 				}
 		}
-		
 		
 	}
 
@@ -271,7 +271,7 @@ md-progress-linear {
 }
 
 
-#box-fab-toolbar {
+#var-fab-toolbar {
 	position: fixed;
 	right: 0px;
 	bottom: 0px;
@@ -285,7 +285,7 @@ md-progress-linear {
 	
 	}
 	
-	.box-button {
+	.var-button {
 		color: white;
 		background-color: #526FFF;
 	}

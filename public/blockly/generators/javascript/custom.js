@@ -2,7 +2,7 @@
 
 
 // TODO: もう少し賢い方法
-setInterval(function() {
+setTimeout(function() {
   Blockly.JavaScript['log'] = function (block) {
     console.log(block)
     var code = "console.log(" + Blockly.JavaScript.valueToCode(block, "TEXT", Blockly.JavaScript.ORDER_NONE) + ");\n";

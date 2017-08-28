@@ -14,5 +14,24 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "devDependencies": {
+    "angular-ui-ace": "^0.2.3",
+    "jquery": "~3.2.1",
+    "jquery-ui": "~1.12.1",
+    "jqueryui-touch-punch": "*",
+    "hammerjs": "hammer#~2.0.8",
+    "angular": "~1.6.6",
+    "angular-animate": "~1.6.6",
+    "angular-filter": "~0.5.16",
+    "angular-messages": "~1.6.6",
+    "angular-aria": "~1.6.6",
+    "angular-ui-router": "0.3.2",
+    "angular-material": "1.1.0-rc2",
+    "tinycolor": "~1.4.1",
+    "md-color-picker": "~0.2.6",
+    "angular-dragdrop": "~1.0.13",
+    "angular-ui-router-styles": "~1.1.0",
+    "oclazyload": "^1.1.0"
+  }
 }

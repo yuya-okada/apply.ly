@@ -1,0 +1,112 @@
+
+<div id="script" layout="row" ng-controller="ScriptController">
+  <div id="script-files">
+    <md-list ng-cloak="ng-cloak">
+      <md-list-item ng-repeat="(scriptName, script) in scripts" ng-click="loadScript(scriptName)" ng-class="{scriptSelected: scriptName == currentScriptName}">
+        <p>{{ scriptName }}</p>
+      </md-list-item>
+    </md-list>
+    <div id="add-script" layout="column">
+      <md-button id="add-inlay-script" ng-click="addBlockScript($event)" class="md-rised md-primary">新しいブロックスクリプト</md-button>
+      <md-button id="add-js-script" ng-click="addJsScript($event)" class="md-rised md-primary">新しいJSスクリプト</md-button>
+    </div>
+  </div>
+  <div id="script-code" ng-show="currentScript.type == 'javascript'" flex="flex" ui-ace="{     theme:'xcode',     mode: 'javascript',     onLoad: aceLoaded,     onChange: aceChanged   }"></div>
+  <div id="program-zone" layout="row" ng-show="currentScript.type == 'block'" flex="flex"> 
+    <div id="program-code" style="height: 100%; width: 100%;" workspace="workspaceXML" workspace-changed="onWorkspaceChanged" class="croset-mat">
+      <xml id="toolbox" style="display: none">
+        <category name="基本">
+          <block type="server"> </block>
+        
+          <block type="log"> </block>
+          <block type="intent"> </block>
+          <block type="instantiate"> </block>
+          <block type="instantiateTo"> </block>
+        
+        
+          <block type="watch"> </block>
+          <block type="controls_if"> </block>
+          <block type="controls_interval"> </block>
+        
+          <block type="controls_repeat"> </block>
+          <block type="controls_whileUntil"> </block>
+          <block type="controls_for"> </block>
+          <block type="controls_forEach"> </block>
+          <block type="controls_flow_statements"> </block>
+        </category>
+        
+        <category name="ロジック">
+          <block type="logic_boolean"> </block>
+          <block type="logic_compare"> </block>
+          <block type="logic_operation"> </block>
+          <block type="logic_negate"> </block>
+          <block type="logic_null"> </block>
+          <block type="logic_ternary"> </block>
+        </category>
+        
+        <category name="数学">
+          <block type="math_number"> </block>
+          <block type="math_arithmetic"> </block>
+          <block type="math_single"> </block>
+          <block type="math_trig"> </block>
+          <block type="math_constant"> </block>
+          <block type="math_number_property"> </block>
+          <block type="math_round"> </block>
+          <block type="math_on_list"> </block>
+          <block type="math_modulo"> </block>
+          <block type="math_constrain"> </block>
+          <block type="math_random_int"> </block>
+          <block type="math_random_float"> </block>
+          <block type="parse_int"> </block>
+        </category>
+        
+        <category name="テキスト">
+          <block type="text"> </block>
+          <block type="text_join"> </block>
+          <block type="text_create_join_item"> </block>
+          <block type="text_append"> </block>
+          <block type="text_length"> </block>
+          <block type="text_isEmpty"> </block>
+          <block type="text_indexOf"> </block>
+          <block type="text_charAt"> </block>
+          <block type="text_getSubstring"> </block>
+          <block type="text_changeCase"> </block>
+          <block type="text_print"> </block>
+          <block type="text_prompt_ext"> </block>
+          <block type="text_count"> </block>
+          <block type="text_replace"> </block>
+          <block type="text_reverse"> </block>
+        
+        </category>
+        
+        <category name="変数" custom="VARIABLE"></category>
+        <category name="関数" custom="PROCEDURE"></category>
+        
+        
+        <category name="リスト">
+          <block type="lists_create_empty"> </block>
+          <block type="lists_repeat"> </block>
+          <block type="lists_reverse"> </block>
+          <block type="lists_isEmpty"> </block>
+          <block type="lists_length"> </block>
+          <block type="lists_create_with"> </block>
+          <block type="lists_indexOf"> </block>
+          <block type="lists_getIndex"> </block>
+          <block type="lists_setIndex"> </block>
+          <block type="lists_getSublist"> </block>
+          <block type="lists_sort"> </block>
+          <block type="lists_split"> </block>
+        </category>
+        
+        <category name="色" id="aaaaa">
+          <block type="colour_picker"> </block>
+          <block type="colour_random"> </block>
+          <block type="colour_rgb"> </block>
+          <block type="colour_blend"> </block>
+        </category>
+        
+        <category name="画面部品" custom="ELEMENT"> </category>
+      </xml>
+    </div>
+  </div>
+</div>

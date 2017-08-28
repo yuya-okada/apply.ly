@@ -1,0 +1,74 @@
+@charset "UTF-8";
+/* line 2, ../../sass/workspace.scss */
+.blocklyToolboxDiv {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12);
+  background-color: white;
+  width: 240px;
+}
+/* line 8, ../../sass/workspace.scss */
+.blocklyToolboxDiv .blocklyTreeRow:not(.blocklyHidden) {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  /* 縦方向中央揃え */
+  justify-content: center;
+  /* 横方向中央揃え */
+  margin-bottom: 0px;
+  color: rgba(0, 0, 0, 0.87);
+  border-bottom: 1px solid #ddd;
+}
+/* line 18, ../../sass/workspace.scss */
+.blocklyToolboxDiv .blocklyTreeRow:not(.blocklyHidden) .blocklyTreeLabel {
+  font-size: 14px;
+}
+
+/* line 23, ../../sass/workspace.scss */
+.blocklyFlyout {
+  z-index: 100;
+}
+/* line 27, ../../sass/workspace.scss */
+.blocklyFlyout .blocklyFlyoutBackground {
+  border-radius: 0;
+  fill: #fff;
+}
+
+/* line 33, ../../sass/workspace.scss */
+.blocklyBubbleCanvas .blocklyFlyoutBackground {
+  fill: #ddd;
+}
+/* line 38, ../../sass/workspace.scss */
+.blocklyBubbleCanvas > g > g {
+  filter: inherit;
+}
+/* line 41, ../../sass/workspace.scss */
+.blocklyBubbleCanvas .blocklyDraggable {
+  rx: 0;
+  ry: 0;
+  fill: #4696F7;
+}
+
+/* line 49, ../../sass/workspace.scss */
+.blocklyMainBackground {
+  fill: #f5f5f5 !important;
+}
+
+/* line 53, ../../sass/workspace.scss */
+.blocklyPathDark, .blocklyPathLight {
+  display: none;
+}
+
+/* line 56, ../../sass/workspace.scss */
+.blocklySelected > .blocklyPath {
+  stroke-width: 0px !important;
+}
+
+/* line 60, ../../sass/workspace.scss */
+.blocklyEditableText > rect {
+  rx: 2 !important;
+  ry: 2 !important;
+}
+
+/* line 66, ../../sass/workspace.scss */
+.blocklyWidgetDiv {
+  z-index: 100 !important;
+}

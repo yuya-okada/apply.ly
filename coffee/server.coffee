@@ -194,14 +194,36 @@ crosetModule
 
 
 
-.controller	"ServerBindDialogController", ["$scope", "$timeout", "$mdDialog", "ProjectData", "CrosetTable", ($scope, $timeout, $mdDialog, ProjectData, CrosetTable) ->
-  table = new CrosetTable()
-  table.fieldsRef.once "value", (dataSnapshot) ->
+.controller	"ServerBindDialogController", ["$scope", "$timeout", "$mdDialog", "ProjectData", "CrosetTable", "varId", ($scope, $timeout, $mdDialog, ProjectData, CrosetTable, varId) ->
+ 
+  $scope.result = ProjectData.variables[varId]?.bindServer || {fields: {}}
+  $scope.table = $scope.result.table
+  
+  tableRef = null
+  $scope.tables = []
+  firebase.database().ref("/").once "child_added", (childSnapshot) ->
     $timeout () ->
-      $scope.fields = dataSnapshot.toJSON()    
+      $scope.tables.push childSnapshot.key 
+      if !$scope.table
+        $scope.table = childSnapshot.key
+      if !tableRef
+        onTableLoaded()
+        
+  
+  onTableChanged = () ->
+    $scope.result = {fields: {}}
+    onTableChanged()
 
-  $scope.result = {
-  }
+  onTableLoaded = () ->
+    tableRef = firebase.database().ref "/" + $scope.table
+    tableRef.child("fields").once "value", (dataSnapshot) ->
+      $timeout () ->
+        $scope.fields = dataSnapshot.toJSON()
+        for fieldId, fieldName of $scope.fields
+          $scope.result.fields[fieldId] ?= {}
+          $scope.result.fields[fieldId].type = "number"
+          
+          
   $scope.operators = [
     {text: "＝", compile: "="},
     {text: "＞", compile: ">"},
@@ -211,18 +233,19 @@ crosetModule
   ]
   $scope.variables = ProjectData.variables
   $scope.types = [
-    {text: "数字", value: "number"},
     {text: "テキスト", value: "text"},
     {text: "変数", value: "variable"}
   ]
-  
+
   $scope.ok = () ->
-  
+    $scope.result.table = $scope.table
+    ProjectData.variables[varId]?.bindServer = $scope.result
+    console.log $scope.result
     $mdDialog.hide()
-    
+
   $scope.cancel = () ->
     $mdDialog.hide()
-  
+
 ]
 
 

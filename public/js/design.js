@@ -225,13 +225,15 @@ crosetModule.service("VisiblePropertyCards", function() {
     };
   }
 ]).controller("PropertyController", [
-  "$scope", "$element", "CurrentScreenData", "SelectedElementUUID", "VisiblePropertyCards", "$timeout", "$interval", "$rootScope", function($scope, $element, CurrentScreenData, SelectedElementUUID, VisiblePropertyCards, $timeout, $interval, $rootScope) {
-    var onResizedOrDraged, screenElementsManager;
+  "$scope", "$element", "CurrentScreenData", "ProjectData", "SelectedElementOrTemplateUUID", "SelectedElementUUID", "VisiblePropertyCards", "$timeout", "$interval", "$rootScope", function($scope, $element, CurrentScreenData, ProjectData, SelectedElementOrTemplateUUID, SelectedElementUUID, VisiblePropertyCards, $timeout, $interval, $rootScope) {
+    var onResizedOrDraged, reloadCards, screenElementsManager;
     $scope.visiblePropertyCards = [];
     $scope.elementName = null;
+    $scope.currentScreenData = CurrentScreenData;
+    $scope.scripts = ProjectData.scripts;
     $scope.isVisibleOffsetProperty = "none";
     screenElementsManager = CurrentScreenData.elementsManager;
-    VisiblePropertyCards.onchange(function(value, isTemplate) {
+    reloadCards = function(value, isTemplate) {
       return $timeout(function() {
         var ref, ref1;
         $scope.visiblePropertyCards = value;
@@ -245,7 +247,8 @@ crosetModule.service("VisiblePropertyCards", function() {
           return $scope.element = screenElementsManager.getTemplate(SelectedElementUUID.get());
         }
       }, 0);
-    });
+    };
+    VisiblePropertyCards.onchange(reloadCards);
     $rootScope.$on("onResizedOrDraged", onResizedOrDraged);
     onResizedOrDraged = function(ev, element) {
       var resizing;
@@ -282,12 +285,20 @@ crosetModule.service("VisiblePropertyCards", function() {
       }
       return screenElementsManager.set(SelectedElementUUID.get(), "width", $scope.width);
     };
-    return $scope.onChangeHeight = function() {
+    $scope.onChangeHeight = function() {
       var ref;
       if ((ref = screenElementsManager.get(SelectedElementUUID.get())) != null) {
         ref.element.height($scope.height);
       }
       return screenElementsManager.set(SelectedElementUUID.get(), "height", $scope.height);
+    };
+    $scope.attachScript = function(scriptName) {
+      screenElementsManager.attachScript(SelectedElementOrTemplateUUID.get(), scriptName);
+      return reloadCards($scope.visiblePropertyCards, $scope.isTemplate);
+    };
+    return $scope.dettachScript = function(scriptName) {
+      screenElementsManager.dettachScript(SelectedElementOrTemplateUUID.get(), scriptName);
+      return reloadCards($scope.visiblePropertyCards, $scope.isTemplate);
     };
   }
 ]).directive("propertyCard", function() {
@@ -319,7 +330,7 @@ crosetModule.service("VisiblePropertyCards", function() {
       },
       controller: [
         "$scope", "$attrs", "CurrentScreenData", "SelectedElementUUID", "SelectedTemplate", "SelectedElementOrTemplateUUID", "ProjectData", function($scope, $attrs, CurrentScreenData, SelectedElementUUID, SelectedTemplate, SelectedElementOrTemplateUUID, ProjectData) {
-          var boxProperty, ref;
+          var ref, varProperty;
           this.onchange = function(value) {
             if (!$scope.$parent.isTemplate) {
               return CurrentScreenData.elementsManager.set(SelectedElementUUID.get(), $scope.options.result, value);
@@ -328,21 +339,24 @@ crosetModule.service("VisiblePropertyCards", function() {
             }
           };
           this.onchange($scope.options.defaultValue);
-          boxProperty = (ref = CurrentScreenData.elementsManager) != null ? ref.boxProperties[SelectedElementOrTemplateUUID.get()] : void 0;
-          if (boxProperty) {
-            $scope.$parent.box = boxProperty[$scope.options.result];
+          varProperty = (ref = CurrentScreenData.elementsManager) != null ? ref.varProperties[SelectedElementOrTemplateUUID.get()] : void 0;
+          if (varProperty) {
+            $scope.$parent.varId = varProperty[$scope.options.result];
+            $scope.$parent["var"] = ProjectData.variables[$scope.$parent.varId];
           }
           $scope.$parent.onDrop = function(ev, ui) {
-            $scope.$parent.box = angular.element(ui.draggable).scope().box;
-            return CurrentScreenData.elementsManager.setBoxToProperty(SelectedElementOrTemplateUUID.get(), $scope.options.result, $scope.$parent.box);
+            $scope.$parent.varId = angular.element(ui.draggable).scope().varId;
+            $scope.$parent["var"] = angular.element(ui.draggable).scope()["var"];
+            return CurrentScreenData.elementsManager.setVariableToProperty(SelectedElementOrTemplateUUID.get(), $scope.options.result, $scope.$parent.varId);
           };
           ProjectData.onVariableChanged = function(variables) {
-            if (variables.indexOf($scope.$parent.$box) !== -1) {
-              return $scope.$parent.box = null;
+            if (!variables[$scope.$parent.$varId]) {
+              $scope.$parent["var"] = null;
+              return $scope.$parent.varId = null;
             }
           };
-          $scope.$parent.removeBoxToProperty = function() {
-            return CurrentScreenData.elementsManager.removeBoxToProperty(SelectedElementOrTemplateUUID.get(), $scope.options.result, $scope.$parent.box);
+          $scope.$parent.removeVariableToProperty = function() {
+            return CurrentScreenData.elementsManager.removeVariableToProperty(SelectedElementOrTemplateUUID.get(), $scope.options.result, $scope.$parent.varId);
           };
         }
       ]
@@ -353,10 +367,10 @@ crosetModule.service("VisiblePropertyCards", function() {
     return {
       restrict: "C",
       link: function(scope, el) {
-        scope.removeBox = function(ev) {
-          scope.removeBoxToProperty();
-          scope.box = null;
-          return ev.stopPropagation();
+        scope.removeVar = function(ev) {
+          scope.removeVariableToProperty();
+          scope["var"] = null;
+          return scope.varId = null;
         };
         scope.hoverIn = function() {
           return scope.hover = true;

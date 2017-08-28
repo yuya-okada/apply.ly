@@ -13,9 +13,9 @@ CrosetBlock.setElementBlocks = function () {
 
     function getOptionsText (block) {
       if (isTemplate) {
-        return "$scope.getTemplate('" +  Blockly.JavaScript.valueToCode(block, "ELEMENT", Blockly.JavaScript.ORDER_NONE) + "').options"
+        return "$scope.getTemplate('" + block.getFieldValue("ELEMENT") + "').options"
       } else {
-        return "$scope.get('" +  Blockly.JavaScript.valueToCode(block, "ELEMENT", Blockly.JavaScript.ORDER_NONE) + "').options"
+        return "$scope.get('" + block.getFieldValue("ELEMENT") + "').options"
       }
     }
 

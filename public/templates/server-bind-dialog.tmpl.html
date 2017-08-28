@@ -1,14 +1,25 @@
 <div layout="column" id="server-bind-dialog">
   <div layout="column" class="md-dialog-content">
-
+    
+    <md-input-container>
+      <label>テーブル</label>
+      <md-select ng-model="table" ng-change="onTableChanged()">
+        <md-option ng-repeat="table in tables" value="{{table}}">
+          {{table}}
+        </md-option>
+      </md-select>
+    </md-input-container>
+    
     <div layout="column">
       <div layout="row" layout-align="center center" ng-repeat="(fieldId, fieldName) in fields">
-        <span flex="25" class="md-padding"> {{fieldName}} </span>
+        <md-checkbox ng-model="result.fields[fieldId].enabled" aria-label="check" flex="25">
+          <span class="md-padding"> {{fieldName}} </span>
+        </md-checkbox>
         
         <md-input-container flex="25" class="md-padding">
           <label>演算子</label>
-          <md-select ng-model="ope">
-            <md-option ng-repeat="operator in operators" value="{{operator.compile}}">
+          <md-select ng-model="result.fields[fieldId].operator" ng-disabled="!result.fields[fieldId].enabled">
+            <md-option ng-repeat="operator in operators" value="{{operator.compile}}" ng-if="(result.fields[fieldId].type != 'text' || operator.compile == '=')">
               {{operator.text}}
             </md-option>
           </md-select>
@@ -18,23 +29,23 @@
 
           <md-input-container>
             <label>タイプ</label>
-            <md-select ng-model="result[fieldId].type">
+            <md-select ng-model="result.fields[fieldId].type" ng-disabled="!result.fields[fieldId].enabled">
               <md-option ng-repeat="type in types" value="{{type.value}}">
                 {{type.text}}
               </md-option>
             </md-select>
           </md-input-container>
 
-          <md-input-container class="input-value" ng-if="result[fieldId].type != 'variable'">
+          <md-input-container class="input-value" ng-if="result.fields[fieldId].type != 'variable'">
             <label>値</label>
-            <input ng-model="result[fieldId].value">
+            <input ng-model="result.fields[fieldId].value" ng-disabled="!result.fields[fieldId].enabled">
           </md-input-container>
 
-          <md-input-container ng-if="result[fieldId].type == 'variable'">
+          <md-input-container ng-if="result.fields[fieldId].type == 'variable'">
             <label>変数</label>
-            <md-select ng-model="result[fieldId].value">
-              <md-option ng-repeat="variable in variables" value="{{variable}}">
-                {{variable}}
+            <md-select ng-model="result.fields[fieldId].value" ng-disabled="!result.fields[fieldId].enabled">
+              <md-option ng-repeat="(varId, var) in variables" value="{{varId}}">
+                {{var.name}}
               </md-option>
             </md-select>
           </md-input-container>

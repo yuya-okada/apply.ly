@@ -45,7 +45,7 @@ div#server(ng-controller="DatabaseController" layout="column")
           div(layout="row" style="position: relative")
             div.flex(ng-repeat="(fieldId, field) in fields")
               md-input-container
-                input(ng-model="record[fieldId]")
+                input(ng-model="record[fieldId]" ng-change="onRecordChanged(recordId, fieldId, record[fieldId])")
             
             div.add-record-button-container(layout="row" layout-align="center center")
               md-button.md-icon-button(ng-click="removeRecord($event, recordId)")

@@ -15,8 +15,7 @@ module.exports = (grunt) =>
         compass:
             dist:
                 options:
-                    sassDir: "sass"
-                    cssDir: "public/css/"
+	                  config: "config.rb"
         coffee:
             compile:
                 options:
@@ -68,6 +67,6 @@ module.exports = (grunt) =>
     grunt.loadNpmTasks 'grunt-shell'
 	# grunt.loadNpmTasks 'grunt-este-watch'
     grunt.loadNpmTasks 'grunt-newer'
-    grunt.registerTask 'make', ['bower', 'newer:coffee', 'newer:jade', 'newer:compass']
+    grunt.registerTask 'make', ['bower', 'newer:coffee', 'newer:jade', 'compass']
    #  grunt.registerTask 'default', ['make', 'connect', 'esteWatch']
     grunt.registerTask 'default', ['make', 'shell:start'] #, 'esteWatch']

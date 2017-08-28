@@ -1,0 +1,48 @@
+/* line 1, ../../sass/script.scss */
+#right-zone, #left-zone, #screen-wrapper {
+  display: none;
+}
+
+/* line 5, ../../sass/script.scss */
+#full-zone {
+  width: 100%;
+  height: 100%;
+  padding: 0px 40px;
+}
+/* line 10, ../../sass/script.scss */
+#full-zone > .ui-view-fade {
+  height: 100%;
+}
+
+/* line 15, ../../sass/script.scss */
+#script-files {
+  width: 200px;
+  position: relative;
+  background-color: white;
+  height: 100%;
+}
+/* line 21, ../../sass/script.scss */
+#script-files .scriptSelected {
+  color: #1B96FE;
+}
+/* line 25, ../../sass/script.scss */
+#script-files #add-script {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+}
+
+/* line 32, ../../sass/script.scss */
+#script-code {
+  height: 100%;
+}
+
+/* line 36, ../../sass/script.scss */
+#program-zone {
+  height: 100%;
+}
+
+/* line 41, ../../sass/script.scss */
+.blocklyToolboxDiv {
+  border-left: 1px solid #ddd;
+}

@@ -161,17 +161,55 @@ crosetModule.service("CrosetTable", [
     ];
   }
 ]).controller("ServerBindDialogController", [
-  "$scope", "$timeout", "ProjectData", "CrosetTable", function($scope, $timeout, ProjectData, CrosetTable) {
-    var table;
-    table = new CrosetTable();
-    table.fieldsRef.once("value", function(dataSnapshot) {
+  "$scope", "$timeout", "$mdDialog", "ProjectData", "CrosetTable", "varId", function($scope, $timeout, $mdDialog, ProjectData, CrosetTable, varId) {
+    var onTableChanged, onTableLoaded, ref, tableRef;
+    $scope.result = ((ref = ProjectData.variables[varId]) != null ? ref.bindServer : void 0) || {
+      fields: {}
+    };
+    $scope.table = $scope.result.table;
+    tableRef = null;
+    $scope.tables = [];
+    firebase.database().ref("/").once("child_added", function(childSnapshot) {
       return $timeout(function() {
-        return $scope.fields = dataSnapshot.toJSON();
+        $scope.tables.push(childSnapshot.key);
+        if (!$scope.table) {
+          $scope.table = childSnapshot.key;
+        }
+        if (!tableRef) {
+          return onTableLoaded();
+        }
       });
     });
-    $scope.result = {};
+    onTableChanged = function() {
+      $scope.result = {
+        fields: {}
+      };
+      return onTableChanged();
+    };
+    onTableLoaded = function() {
+      tableRef = firebase.database().ref("/" + $scope.table);
+      return tableRef.child("fields").once("value", function(dataSnapshot) {
+        return $timeout(function() {
+          var base, fieldId, fieldName, ref1, results;
+          $scope.fields = dataSnapshot.toJSON();
+          ref1 = $scope.fields;
+          results = [];
+          for (fieldId in ref1) {
+            fieldName = ref1[fieldId];
+            if ((base = $scope.result.fields)[fieldId] == null) {
+              base[fieldId] = {};
+            }
+            results.push($scope.result.fields[fieldId].type = "number");
+          }
+          return results;
+        });
+      });
+    };
     $scope.operators = [
       {
+        text: "＝",
+        compile: "="
+      }, {
         text: "＞",
         compile: ">"
       }, {
@@ -186,11 +224,8 @@ crosetModule.service("CrosetTable", [
       }
     ];
     $scope.variables = ProjectData.variables;
-    return $scope.types = [
+    $scope.types = [
       {
-        text: "数字",
-        value: "number"
-      }, {
         text: "テキスト",
         value: "text"
       }, {
@@ -198,5 +233,17 @@ crosetModule.service("CrosetTable", [
         value: "variable"
       }
     ];
+    $scope.ok = function() {
+      var ref1;
+      $scope.result.table = $scope.table;
+      if ((ref1 = ProjectData.variables[varId]) != null) {
+        ref1.bindServer = $scope.result;
+      }
+      console.log($scope.result);
+      return $mdDialog.hide();
+    };
+    return $scope.cancel = function() {
+      return $mdDialog.hide();
+    };
   }
 ]);

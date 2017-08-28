@@ -47,7 +47,7 @@
           <div layout="row" style="position: relative">
             <div ng-repeat="(fieldId, field) in fields" class="flex">
               <md-input-container>
-                <input ng-model="record[fieldId]"/>
+                <input ng-model="record[fieldId]" ng-change="onRecordChanged(recordId, fieldId, record[fieldId])"/>
               </md-input-container>
             </div>
             <div layout="row" layout-align="center center" class="add-record-button-container">

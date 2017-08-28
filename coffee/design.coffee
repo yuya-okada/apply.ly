@@ -248,13 +248,16 @@ crosetModule.service "VisiblePropertyCards", () ->
 
 
 # 詳細設定
-.controller "PropertyController", ["$scope", "$element", "CurrentScreenData", "SelectedElementUUID", "VisiblePropertyCards", "$timeout",　"$interval", "$rootScope",
-($scope, $element, CurrentScreenData, SelectedElementUUID, VisiblePropertyCards, $timeout, $interval, $rootScope) ->
+.controller "PropertyController", ["$scope", "$element", "CurrentScreenData", "ProjectData", "SelectedElementOrTemplateUUID", "SelectedElementUUID", "VisiblePropertyCards", "$timeout",　"$interval", "$rootScope",
+($scope, $element, CurrentScreenData, ProjectData, SelectedElementOrTemplateUUID, SelectedElementUUID, VisiblePropertyCards, $timeout, $interval, $rootScope) ->
 	$scope.visiblePropertyCards = []
 	$scope.elementName = null
+	$scope.currentScreenData = CurrentScreenData
+	$scope.scripts = ProjectData.scripts
 	$scope.isVisibleOffsetProperty = "none"
 	screenElementsManager = CurrentScreenData.elementsManager
-	VisiblePropertyCards.onchange (value, isTemplate) ->
+	
+	reloadCards = (value, isTemplate) ->
 		$timeout ()->									# applyが多重に実行されるとバグるので、代わりにtimeoutを使う
 			$scope.visiblePropertyCards = value
 			$scope.isVisibleOffsetProperty = "block"
@@ -267,9 +270,13 @@ crosetModule.service "VisiblePropertyCards", () ->
 			else
 				$scope.elementName = screenElementsManager.getTemplate(SelectedElementUUID.get())?.name
 				$scope.element = screenElementsManager.getTemplate(SelectedElementUUID.get())
-
+			
+		
 		, 0
 
+	VisiblePropertyCards.onchange reloadCards
+	
+	
 	# 以下は offsetに関するプロパティの設定
 # 	resizing = false
 	$rootScope.$on "onResizedOrDraged", onResizedOrDraged
@@ -309,6 +316,16 @@ crosetModule.service "VisiblePropertyCards", () ->
 # 		if !resizing && $scope.element?.unresizable != "xy"
 		screenElementsManager.get(SelectedElementUUID.get())?.element.height $scope.height
 		screenElementsManager.set SelectedElementUUID.get(), "height", $scope.height
+		
+		
+	$scope.attachScript = (scriptName) ->
+		screenElementsManager.attachScript SelectedElementOrTemplateUUID.get(), scriptName
+		reloadCards	$scope.visiblePropertyCards, $scope.isTemplate
+		
+	$scope.dettachScript = (scriptName) ->
+		screenElementsManager.dettachScript SelectedElementOrTemplateUUID.get(), scriptName
+		reloadCards	$scope.visiblePropertyCards, $scope.isTemplate
+		
 ]
 
 # プロパティのカード
@@ -352,21 +369,24 @@ crosetModule.service "VisiblePropertyCards", () ->
 
 			this.onchange $scope.options.defaultValue
 			
-			boxProperty = CurrentScreenData.elementsManager?.boxProperties[SelectedElementOrTemplateUUID.get()]
-			if boxProperty
-				$scope.$parent.box = boxProperty[$scope.options.result]
+			varProperty = CurrentScreenData.elementsManager?.varProperties[SelectedElementOrTemplateUUID.get()]
+			if varProperty
+				$scope.$parent.varId = varProperty[$scope.options.result]
+				$scope.$parent.var = ProjectData.variables[$scope.$parent.varId]
 				
 				
 			$scope.$parent.onDrop = (ev, ui) ->
-				$scope.$parent.box = angular.element(ui.draggable).scope().box
-				CurrentScreenData.elementsManager.setBoxToProperty SelectedElementOrTemplateUUID.get(), $scope.options.result, $scope.$parent.box
+				$scope.$parent.varId = angular.element(ui.draggable).scope().varId
+				$scope.$parent.var = angular.element(ui.draggable).scope().var
+				CurrentScreenData.elementsManager.setVariableToProperty SelectedElementOrTemplateUUID.get(), $scope.options.result, $scope.$parent.varId
 			
 			ProjectData.onVariableChanged = (variables) ->
-				if variables.indexOf($scope.$parent.$box) != -1
-					$scope.$parent.box = null
+				if !variables[$scope.$parent.$varId]
+					$scope.$parent.var = null
+					$scope.$parent.varId = null
 					
-			$scope.$parent.removeBoxToProperty = () ->
-				CurrentScreenData.elementsManager.removeBoxToProperty SelectedElementOrTemplateUUID.get(), $scope.options.result, $scope.$parent.box
+			$scope.$parent.removeVariableToProperty = () ->
+				CurrentScreenData.elementsManager.removeVariableToProperty SelectedElementOrTemplateUUID.get(), $scope.options.result, $scope.$parent.varId
 				
 			return
 		]
@@ -378,10 +398,10 @@ crosetModule.service "VisiblePropertyCards", () ->
 		restrict: "C"
 		link: (scope, el) ->
 					
-			scope.removeBox = (ev) ->
-				scope.removeBoxToProperty()
-				scope.box = null
-				ev.stopPropagation()
+			scope.removeVar = (ev) ->
+				scope.removeVariableToProperty()
+				scope.var = null
+				scope.varId = null
 				
 			scope.hoverIn = () ->
 				scope.hover = true

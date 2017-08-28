@@ -1092,7 +1092,7 @@ crosetModule
 		templatePreviewElement = null
 		templatePreviewScope = null
 		screenElement.empty()
-		this.boxProperties = {}
+		this.varProperties = {}
 
 		that = this
 		isPublic ?= false						# 本番環境の時はtrueにする
@@ -1152,16 +1152,16 @@ crosetModule
 
 			searchInArray screenScope?.list
 
-		this.setBoxToProperty = (id, key, boxName) ->
-			this.boxProperties[id] ?= {}
-			this.boxProperties[id][key] ?= boxName
+		this.setVariableToProperty = (id, key, varId) ->
+			this.varProperties[id] ?= {}
+			this.varProperties[id][key] ?= varId
 			
 			return
 		
 			
 	
-		this.removeBoxToProperty = (id, key, boxName) ->
-			delete this.boxProperties[id]?[key]
+		this.removeVariableToProperty = (id, key) ->
+			delete this.varProperties[id]?[key]
 			
 
 		# 特定の要素の兄弟要素を取得
@@ -1201,7 +1201,7 @@ crosetModule
 		this.removeAll = () ->
 			screenScope.list = {}
 			screenElement.empty()
-			this.boxProperties = {}
+			this.varProperties = {}
 
 		this.add = (type, uuid) ->
 			if !screenScope 		# 初期化されてない場合初期化
@@ -1334,7 +1334,7 @@ crosetModule
 				deleteInArray data.children
 
 			delete screenScope.list[id]
-			delete this.boxProperties[id]
+			delete this.varProperties[id]
 		
 
 
@@ -1415,7 +1415,24 @@ crosetModule
 		# 引数に　子要素のデータ、　子要素のID
 		this.setAddChildCallback = (fnc) ->
 			childAddedCallbacks.push fnc
-
+			
+		this.attachScript = (uuid, scriptName) ->
+			data = that.get(uuid)
+			data.scripts ?= {}
+			data.scripts[scriptName] ?= {}  
+		
+		
+		this.dettachScript = (uuid, scriptName) ->
+			data = that.get(uuid)
+			if data.scripts
+				delete data.scripts[scriptName]
+				
+		
+		this.runScript = (uuid, script) ->
+			func = new Function($scope, script)	
+			func(screenScope)
+				
+				
 
 		# 与えられたidの要素をテンプレート化する
 		this.template = (uuid) ->
@@ -1507,7 +1524,7 @@ crosetModule
 				deleteInArray data.children
 
 			delete screenScope.templates[id]
-			delete this.boxProperties[id]
+			delete this.varProperties[id]
 		
 
 
@@ -1584,8 +1601,9 @@ crosetModule
 		restrict: "C"
 		scope: false
 		link: (scope, element, attrs) ->
-			# scope.options = scope.s.list[uuid].options.fontSize
-
+# 			if !scope.isTemplate
+# 				for scriptName, script of scope.s.get(scope.uuid)?.scripts
+# 					scope.s?.runScript(scope.uuid, script)
 	}
 ]
 
