@@ -253,6 +253,8 @@ crosetModule.service "VisiblePropertyCards", () ->
 	$scope.visiblePropertyCards = []
 	$scope.elementName = null
 	$scope.currentScreenData = CurrentScreenData
+	CurrentScreenData.style?.overflowY ?= "hidden"
+	
 	$scope.scripts = ProjectData.scripts
 	$scope.isVisibleOffsetProperty = "none"
 	screenElementsManager = CurrentScreenData.elementsManager
@@ -279,9 +281,7 @@ crosetModule.service "VisiblePropertyCards", () ->
 	
 	# 以下は offsetに関するプロパティの設定
 # 	resizing = false
-	$rootScope.$on "onResizedOrDraged", onResizedOrDraged
-	
-	onResizedOrDraged = (ev, element) ->		# editor.jsからbroadcastされる。
+	$scope.$on "onResizedOrDraged", (ev, element) ->		# editor.jsからbroadcastされる。
 		resizing = true
 		$timeout () ->
 			$scope.top = parseInt element.css("top"), 10
@@ -290,8 +290,9 @@ crosetModule.service "VisiblePropertyCards", () ->
 				$scope.width = element.width()
 				$scope.height = element.height()
 		
-	onResizedOrDraged(null, $element)
-		
+# 	onResizedOrDraged(null, $element)
+	$rootScope.$broadcast "onResizedOrDraged", $element
+
 	
 
 # 	$rootScope.$on "onResizedOrDraged", (ev) ->		# editor.jsからbroadcastされる。
@@ -443,13 +444,19 @@ crosetModule.service "VisiblePropertyCards", () ->
 				$mdColorPicker.show {
 					value: scope.color
 					$event: ev
+					alphaChannel: true
 				}
 				.then (color) ->
 					setColor color
 
 			setColor = (value)->
 				scope.color = value
-				scope.textColor = GetTextColor HexToRgb value
+				
+				if value.indexOf("#") != -1 
+					scope.textColor = GetTextColor HexToRgb value
+				
+				if value.indexOf("hsl") != -1
+					scope.textColor = GetTextColor value
 
 				dynamicInput.onchange scope.color
 

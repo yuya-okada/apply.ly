@@ -1,2 +1,2 @@
 
-<div ng-class="{crosetBold: options.formatBold, crosetItalic: options.formatItalic}" ng-style="{     color: options.textColor,     fontSize: options.fontSize,     textAlign: options.textAlign,     verticalAlign: options.verticalAlign     }"> <span>{{options.text}}</span></div>
+<div ng-class="{crosetBold: s.get(uuid).options.formatBold, crosetItalic: s.get(uuid).options.formatItalic}" ng-style="{     color: s.get(uuid).options.textColor,     fontSize: s.get(uuid).options.fontSize,     alignItems: s.get(uuid).options.verticalAlign,     justifyContent: s.get(uuid).options.textAlign     }"> <span>{{s.get(uuid).options.text}}</span></div>

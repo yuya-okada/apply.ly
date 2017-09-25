@@ -1139,6 +1139,9 @@ Blockly.Block.prototype.interpolate_ = function(message, args, lastDummyAlign) {
             case 'field_colour':
               field = new Blockly.FieldColour(element['colour']);
               break;
+            case 'field_value_input':
+              field = new Blockly.FieldValueLabel(element);
+              break;
             case 'field_element':
               field = new Blockly.FieldElement(element['filter'], element['defaultId']);
               break;

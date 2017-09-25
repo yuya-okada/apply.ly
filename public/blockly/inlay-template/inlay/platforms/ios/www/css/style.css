@@ -1,0 +1,12 @@
+/* Empty. Add your own CSS if you like */
+.number {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+}
+
+#clear, #ok {
+
+}

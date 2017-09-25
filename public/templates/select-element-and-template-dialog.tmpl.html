@@ -1,0 +1,8 @@
+<md-list ng-cloak>
+  <md-subheader ng-show="elements"> 画面要素 </md-subheader> 
+  <select-element-dialog-item ng-repeat="element in elements | toArray  | orderBy: 'zIndex'"> </select-element-dialog-item>
+	<md-divider ng-show="templates"></md-divider>
+	<md-subheader ng-show="templates"> テンプレート </md-subheader> 
+  <select-element-dialog-item ng-repeat="element in templates | toArray  | orderBy: 'zIndex'"> </select-element-dialog-item>
+</md-list>
+

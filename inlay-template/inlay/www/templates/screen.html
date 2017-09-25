@@ -1,1 +1,61 @@
-<div id="screen"></div>
+<div id="screen" ng-style="{transform: 'scale(' + screenScaleRatio + ')'}"></div>
+
+<md-fab-speed-dial id="screen-speed-dial" md-direction="up" md-open="dial.isOpen" class="md-scale md-fab-bottom-right md-scale" ng-hide="dial.isInvisible" ng-if="isDebugMode">
+  <md-fab-trigger>
+    <md-button aria-label="menu" class="md-fab md-warn">
+      <md-icon class="material-icons" aria-label="menu"> more_vert </md-icon>
+    </md-button>
+  </md-fab-trigger>
+
+  <md-fab-actions>
+    <div>
+      <md-button aria-label="Reload" class="md-fab md-raised md-mini" ng-click="reload()">
+        <md-tooltip md-direction="left" md-visible="tooltipVisible">
+          再実行
+        </md-tooltip>
+        <md-icon class="material-icons" aria-label="reload"> refresh </md-icon>
+      </md-button>
+    </div>
+    <div>
+      <md-button aria-label="Log" class="md-fab md-raised md-mini" ng-click="showLog()">
+        <md-tooltip md-direction="left" md-visible="tooltipVisible">
+          ログ
+        </md-tooltip>
+        <md-icon class="material-icons" aria-label="reload"> speaker_notes </md-icon>
+      </md-button>
+    </div>
+    <div>
+      <md-button aria-label="Visibility Off" class="md-fab md-raised md-mini" ng-click="invisibleDial()">
+        <md-tooltip md-direction="left" md-visible="tooltipVisible">
+          一時非表示にする
+        </md-tooltip>
+        <md-icon class="material-icons" aria-label="reload"> visibility_off </md-icon>
+      </md-button>
+    </div>
+    <div>
+      <md-button aria-label="Exit" class="md-fab md-raised md-mini md-primary" ng-click="exit()">
+        <md-tooltip md-direction="left" md-visible="tooltipVisible">
+          終了
+        </md-tooltip>
+        <md-icon class="material-icons" aria-label="reload"> exit_to_app </md-icon>
+      </md-button>
+    </div>
+  </md-fab-actions>
+</md-fab-speed-dial>
+
+
+
+
+<md-sidenav id="log-sidenav" class="md-sidenav-right md-whiteframe-z2" md-component-id="log-sidenav">
+  <md-toolbar class="md-theme-indigo">
+    <h1 class="md-toolbar-tools"> ログ </h1>
+  </md-toolbar>
+  <md-content layout-padding ng-controller="LogDialogController" class="log-sidenav-content">
+    <md-list ng-cloak>
+      <md-list-item ng-repeat="log in logs">
+        <div class="log-wrapper" ng-class="'log-' + log.type"> <p ng-repeat="argument in log.arguments"> {{argument}} </p> </div>
+        <md-divider> </md-divider>
+      </md-list-item>
+    </md-list>
+  </md-content>
+</md-sidenav>

@@ -29,6 +29,11 @@ goog.provide('Blockly.JavaScript.procedures');
 goog.require('Blockly.JavaScript');
 
 
+Blockly.JavaScript['procedure_argument'] = function(block) {
+  console.log("block", block);
+  return block.getFieldValue("ARG_NAME");
+}
+
 Blockly.JavaScript['procedures_defreturn'] = function(block) {
   // Define a procedure with a return value.
   var funcName = Blockly.JavaScript.variableDB_.getName(

@@ -226,69 +226,73 @@ crosetModule.service("VisiblePropertyCards", function() {
   }
 ]).controller("PropertyController", [
   "$scope", "$element", "CurrentScreenData", "ProjectData", "SelectedElementOrTemplateUUID", "SelectedElementUUID", "VisiblePropertyCards", "$timeout", "$interval", "$rootScope", function($scope, $element, CurrentScreenData, ProjectData, SelectedElementOrTemplateUUID, SelectedElementUUID, VisiblePropertyCards, $timeout, $interval, $rootScope) {
-    var onResizedOrDraged, reloadCards, screenElementsManager;
+    var ref, reloadCards, screenElementsManager;
     $scope.visiblePropertyCards = [];
     $scope.elementName = null;
     $scope.currentScreenData = CurrentScreenData;
+    if ((ref = CurrentScreenData.style) != null) {
+      if (ref.overflowY == null) {
+        ref.overflowY = "hidden";
+      }
+    }
     $scope.scripts = ProjectData.scripts;
     $scope.isVisibleOffsetProperty = "none";
     screenElementsManager = CurrentScreenData.elementsManager;
     reloadCards = function(value, isTemplate) {
       return $timeout(function() {
-        var ref, ref1;
+        var ref1, ref2;
         $scope.visiblePropertyCards = value;
         $scope.isVisibleOffsetProperty = "block";
         $scope.isTemplate = isTemplate;
         if (!isTemplate) {
-          $scope.elementName = (ref = screenElementsManager.get(SelectedElementUUID.get())) != null ? ref.name : void 0;
+          $scope.elementName = (ref1 = screenElementsManager.get(SelectedElementUUID.get())) != null ? ref1.name : void 0;
           return $scope.element = screenElementsManager.get(SelectedElementUUID.get());
         } else {
-          $scope.elementName = (ref1 = screenElementsManager.getTemplate(SelectedElementUUID.get())) != null ? ref1.name : void 0;
+          $scope.elementName = (ref2 = screenElementsManager.getTemplate(SelectedElementUUID.get())) != null ? ref2.name : void 0;
           return $scope.element = screenElementsManager.getTemplate(SelectedElementUUID.get());
         }
       }, 0);
     };
     VisiblePropertyCards.onchange(reloadCards);
-    $rootScope.$on("onResizedOrDraged", onResizedOrDraged);
-    onResizedOrDraged = function(ev, element) {
+    $scope.$on("onResizedOrDraged", function(ev, element) {
       var resizing;
       resizing = true;
       return $timeout(function() {
-        var ref;
+        var ref1;
         $scope.top = parseInt(element.css("top"), 10);
         $scope.left = parseInt(element.css("left"), 10);
-        if (((ref = $scope.element) != null ? ref.unresizable : void 0) !== "xy") {
+        if (((ref1 = $scope.element) != null ? ref1.unresizable : void 0) !== "xy") {
           $scope.width = element.width();
           return $scope.height = element.height();
         }
       });
-    };
-    onResizedOrDraged(null, $element);
+    });
+    $rootScope.$broadcast("onResizedOrDraged", $element);
     $scope.onChangeTop = function() {
-      var ref;
-      if ((ref = screenElementsManager.get(SelectedElementUUID.get())) != null) {
-        ref.element.css("top", $scope.top);
+      var ref1;
+      if ((ref1 = screenElementsManager.get(SelectedElementUUID.get())) != null) {
+        ref1.element.css("top", $scope.top);
       }
       return screenElementsManager.set(SelectedElementUUID.get(), "top", $scope.top);
     };
     $scope.onChangeLeft = function() {
-      var ref;
-      if ((ref = screenElementsManager.get(SelectedElementUUID.get())) != null) {
-        ref.element.css("left", $scope.left);
+      var ref1;
+      if ((ref1 = screenElementsManager.get(SelectedElementUUID.get())) != null) {
+        ref1.element.css("left", $scope.left);
       }
       return screenElementsManager.set(SelectedElementUUID.get(), "left", $scope.left);
     };
     $scope.onChangeWidth = function() {
-      var ref;
-      if ((ref = screenElementsManager.get(SelectedElementUUID.get())) != null) {
-        ref.element.width($scope.width);
+      var ref1;
+      if ((ref1 = screenElementsManager.get(SelectedElementUUID.get())) != null) {
+        ref1.element.width($scope.width);
       }
       return screenElementsManager.set(SelectedElementUUID.get(), "width", $scope.width);
     };
     $scope.onChangeHeight = function() {
-      var ref;
-      if ((ref = screenElementsManager.get(SelectedElementUUID.get())) != null) {
-        ref.element.height($scope.height);
+      var ref1;
+      if ((ref1 = screenElementsManager.get(SelectedElementUUID.get())) != null) {
+        ref1.element.height($scope.height);
       }
       return screenElementsManager.set(SelectedElementUUID.get(), "height", $scope.height);
     };
@@ -411,14 +415,20 @@ crosetModule.service("VisiblePropertyCards", function() {
         scope.onclick = function(ev) {
           return $mdColorPicker.show({
             value: scope.color,
-            $event: ev
+            $event: ev,
+            alphaChannel: true
           }).then(function(color) {
             return setColor(color);
           });
         };
         setColor = function(value) {
           scope.color = value;
-          scope.textColor = GetTextColor(HexToRgb(value));
+          if (value.indexOf("#") !== -1) {
+            scope.textColor = GetTextColor(HexToRgb(value));
+          }
+          if (value.indexOf("hsl") !== -1) {
+            scope.textColor = GetTextColor(value);
+          }
           return dynamicInput.onchange(scope.color);
         };
         return setColor(scope.options.defaultValue);

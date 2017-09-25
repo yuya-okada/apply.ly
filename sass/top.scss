@@ -1,0 +1,80 @@
+body {
+  overflow: scroll !important;
+}
+
+
+#top-bar {
+  height: 40px;
+  background-color: #2E64C3;
+}
+
+
+#top-menu {
+  padding: 0 100px 0 100px;  
+  color: white;
+  background-color: #1B96FE;;
+}
+
+
+#thumbnail {
+  padding: 0 100px 0 100px;  
+  width: 100%;
+  height: 80%;
+  background-color: #1B96FE;
+  color: white;
+  
+  #get-started { 
+    margin-top: 50px;
+    width: 152px;
+    height: 50px;
+    color: #1B96FE;
+    font-size: 16px;
+    box-shadow: none;
+  }
+}
+
+.column {
+  padding: 50px 60px 50px 60px;
+  
+  & > * {
+    min-width: 350px;
+  }
+}
+
+h1 {
+  font-size: 43px;
+  font-weight: 100;
+  text-align: center;
+}
+h2 {
+  font-size: 25px; 
+  font-weight: 100;
+  text-align: center;
+}
+
+p {
+  font-size: 16px;
+}
+
+
+#items-card {
+  padding: 50px;
+}
+
+#copy-right {
+    z-index: 1;
+    position: relative;
+    padding: 50px 0 50px 100px;
+    background-color: #E0E0E0;
+    color: #9E9E9E;
+}
+
+@media screen and (max-width: 865px) {
+  #logo-top { display: none; }
+  #title { flex: 80 }
+}
+
+@media screen and (min-width: 865px) {
+   /* 表示領域が865以上の場合に適用するスタイル */
+   #items-card {   margin-top: -65px;  }
+}

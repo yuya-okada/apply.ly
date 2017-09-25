@@ -58,9 +58,9 @@
       <div layout="column" class="property-card-body">
         <div layout="row">
           <div layout="row" layout-align="center" flex="flex" class="flex-100">
-            <md-input-container class="md-block">
+            <md-input-container flex="flex" class="md-block">
               <label>オーバーフロー(縦)</label>
-              <md-select ng-model="currentScreenData.style.overflowY || 'hidden'" ng-change="onChangeScreenOverflowY()">
+              <md-select ng-model="currentScreenData.style.overflowY" ng-change="onChangeScreenOverflowY()">
                 <md-option value="hidden">隠す</md-option>
                 <md-option value="scroll">スクロール</md-option>
               </md-select>
@@ -86,7 +86,7 @@
         </md-menu>
       </div>
     </md-card>
-    <div layout="column" layout-align="center center">			
+    <div layout="column" layout-align="center center" ng-hide="visiblePropertyCards.length == 0">			
       <md-menu>
         <md-button ng-click="$mdOpenMenu(ev)" class="md-raised md-accent">スクリプトを追加</md-button>
         <md-menu-content width="4">

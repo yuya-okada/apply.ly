@@ -1,14 +1,14 @@
-CrosetBlock.setElementBlocks = function () {
+window.CrosetBlock.setElementBlocks = function () {
   
   set(true);
   set(false);
   
   function set(isTemplate) {
-    typeText = ""
+    var typeText = ""
     if (isTemplate) {
-      typeText = "template"
+      typeText = "_template"
     } else {
-      typeText = "element"
+      typeText = "_element"
     }
 
     function getOptionsText (block) {
@@ -18,44 +18,45 @@ CrosetBlock.setElementBlocks = function () {
         return "$scope.get('" + block.getFieldValue("ELEMENT") + "').options"
       }
     }
-
+    
+    
+    for (var elementType in window.CrosetBlock.elementBlocks) {
+      var elementBlocks = window.CrosetBlock.elementBlocks[elementType]
+      
+      for (var i in elementBlocks) {
+        var block = elementBlocks[i]
+                
+        // 画面部品のオプションのゲッタ/セッタなら、         
+        if (block.type.indexOf("_get") != -1) {
+          var targetOption = block.type.split("_")[1];
+          defineGetterBlock(block.type, targetOption);      
+          
+        } else if (block.type.indexOf("_set") != -1) {
+          var targetOption = block.type.split("_")[1];
+          defineSetterBlock(block.type, targetOption);
+        }
+      }
+    }
+    
+    function defineGetterBlock (blockType, targetOption) {
+      Blockly.JavaScript[blockType + typeText] = function (block) {
+        var code = getOptionsText(block) + "." + targetOption;
+        return [code, Blockly.JavaScript.ORDER_NONE]
+      };
+    }
+    
+    function defineSetterBlock (blockType, targetOption) {
+      Blockly.JavaScript[blockType + typeText] = function (block) {
+        var code = getOptionsText(block) + "." + targetOption + "= " + Blockly.JavaScript.valueToCode(block, "VALUE", Blockly.JavaScript.ORDER_NONE) + "\n";
+        return code
+      };
+    }
+    
+    
     //  button
-    Blockly.JavaScript['button_text_set_' + typeText] = function (block) {
-      var code = getOptionsText(block) + ".text = " + Blockly.JavaScript.valueToCode(block, "TEXT", Blockly.JavaScript.ORDER_NONE) + "\n";
+    Blockly.JavaScript['button_onclick' + typeText] = function (block) {
+      var code = getOptionsText(block) + ".click = function() {\n" + Blockly.JavaScript.statementToCode(block, "DO") + "\n}\n";
       return code
-    };
-    Blockly.JavaScript['button_text_get_' + typeText] = function (block) {
-      var code = getOptionsText(block) + ".text";
-      return [code, Blockly.JavaScript.ORDER_NONE]
-    };
-    Blockly.JavaScript['button_onclick_' + typeText] = function (block) {
-      var code = getOptionsText(block) + ".click = function() {\n" + Blockly.JavaScript.statementToCode(block, "STATEMENT") + "\n}\n";
-      return code
-    };
-
-
-    //  text
-    Blockly.JavaScript['text_text_set_' + typeText] = function (block) {
-      var code = getOptionsText(block) + ".text = " + Blockly.JavaScript.valueToCode(block, "TEXT", Blockly.JavaScript.ORDER_NONE) + "\n";
-      return code
-    };
-    Blockly.JavaScript['text_text_get_' + typeText] = function (block) {
-      var code = getOptionsText(block) + ".text";
-      return [code, Blockly.JavaScript.ORDER_NONE]
-    };
-
-
-    //  textbox
-    console.log("ここには来ました")
-    Blockly.JavaScript['textbox_text_set_' + typeText] = function (block) {
-      var code = getOptionsText(block) + ".text = " + Blockly.JavaScript.valueToCode(block, "TEXT", Blockly.JavaScript.ORDER_NONE) + "\n";
-      return code
-    };
-    Blockly.JavaScript['textbox_text_get_' + typeText] = function (block) {
-      console.log(block)
-      var code = getOptionsText(block) + ".text";
-      console.log(code)
-      return [code, Blockly.JavaScript.ORDER_NONE]
     };
   }
 }

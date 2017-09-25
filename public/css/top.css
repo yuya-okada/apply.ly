@@ -1,0 +1,97 @@
+@charset "UTF-8";
+/* line 1, ../../sass/top.scss */
+body {
+  overflow: scroll !important;
+}
+
+/* line 6, ../../sass/top.scss */
+#top-bar {
+  height: 40px;
+  background-color: #2E64C3;
+}
+
+/* line 12, ../../sass/top.scss */
+#top-menu {
+  padding: 0 100px 0 100px;
+  color: white;
+  background-color: #1B96FE;
+}
+
+/* line 19, ../../sass/top.scss */
+#thumbnail {
+  padding: 0 100px 0 100px;
+  width: 100%;
+  height: 80%;
+  background-color: #1B96FE;
+  color: white;
+}
+/* line 26, ../../sass/top.scss */
+#thumbnail #get-started {
+  margin-top: 50px;
+  width: 152px;
+  height: 50px;
+  color: #1B96FE;
+  font-size: 16px;
+  box-shadow: none;
+}
+
+/* line 36, ../../sass/top.scss */
+.column {
+  padding: 50px 60px 50px 60px;
+}
+/* line 39, ../../sass/top.scss */
+.column > * {
+  min-width: 350px;
+}
+
+/* line 44, ../../sass/top.scss */
+h1 {
+  font-size: 43px;
+  font-weight: 100;
+  text-align: center;
+}
+
+/* line 49, ../../sass/top.scss */
+h2 {
+  font-size: 25px;
+  font-weight: 100;
+  text-align: center;
+}
+
+/* line 55, ../../sass/top.scss */
+p {
+  font-size: 16px;
+}
+
+/* line 60, ../../sass/top.scss */
+#items-card {
+  padding: 50px;
+}
+
+/* line 64, ../../sass/top.scss */
+#copy-right {
+  z-index: 1;
+  position: relative;
+  padding: 50px 0 50px 100px;
+  background-color: #E0E0E0;
+  color: #9E9E9E;
+}
+
+@media screen and (max-width: 865px) {
+  /* line 73, ../../sass/top.scss */
+  #logo-top {
+    display: none;
+  }
+
+  /* line 74, ../../sass/top.scss */
+  #title {
+    flex: 80;
+  }
+}
+@media screen and (min-width: 865px) {
+  /* 表示領域が865以上の場合に適用するスタイル */
+  /* line 79, ../../sass/top.scss */
+  #items-card {
+    margin-top: -65px;
+  }
+}

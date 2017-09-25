@@ -118,7 +118,6 @@
           return next(err);
         } else {
           self.projectId = counter.count;
-          console.log("プロジェクトid", self);
           counter.count++;
           return counter.save(function(err) {
             if (err) {
@@ -203,15 +202,11 @@
             } else {
               user.projects.push(proj.projectId);
               user.save(function(err, us) {
-                console.log(us);
                 return res.send(proj);
               });
               req.session.passport.user.projects = user.projects;
               return req.session.save(function() {
-                console.log("saved");
-                return req.session.reload(function() {
-                  return console.log("reloaded");
-                });
+                return req.session.reload(function() {});
               });
             }
           });
@@ -224,7 +219,6 @@
     Project.update({
       projectId: req.body.projectId
     }, req.body, {}, function(err) {
-      console.log("PUT PROJ:", req.body);
       if (err) {
         return console.log(err);
       }
@@ -234,7 +228,6 @@
 
   app.get("/project", function(req, res) {
     return Project.findOne(req.query, function(err, project) {
-      console.log("GET PROJ:", project);
       if (project) {
         delete project["_id"];
       }
@@ -243,7 +236,6 @@
   });
 
   app["delete"]("/project", function(req, res) {
-    console.log("消す", req.body);
     Project.remove({
       projectId: req.body.projectId
     }, function(err, result) {
@@ -267,10 +259,7 @@
           }
         });
         return req.session.save(function() {
-          console.log("saved");
-          return req.session.reload(function() {
-            return console.log("reloaded");
-          });
+          return req.session.reload(function() {});
         });
       }
     });
@@ -279,7 +268,6 @@
 
   app.post("/signup", function(req, res, next) {
     var user;
-    console.log(req.body);
     user = new User({
       username: req.body.username,
       email: req.body.email,
@@ -290,7 +278,6 @@
       if (err) {
         return console.log(err);
       } else {
-        console.log(user);
         return passport.authenticate("local", {
           successRedirect: "/#!/dashboard",
           failureRedirect: "/#!/login",
@@ -321,15 +308,14 @@
   app.get("/build", function(req, res) {
     var buildingTask;
     buildingTask = new BuildingTask({
-      projectId: req.query.name,
+      projectId: req.query.projectId,
       target: "zip"
     });
     buildingTask.save(function(err, buildingTask) {
       if (err) {
         return console.log(err);
       } else {
-        return execFile("/home/develop/Croset/build.sh", [JSON.stringify(req.query), req.query.name + ".zip"], [], function(err, stdout, stderr) {
-          console.log("finished e:", err, "  st:", stdout, "  ste:", stderr);
+        return execFile("/home/develop/Croset/build.sh", [JSON.stringify(req.query), req.query.projectId + ".zip"], [], function(err, stdout, stderr) {
           if (err !== null) {
             console.log("Error:" + err);
             return;
@@ -339,7 +325,6 @@
             return;
           }
           return buildingTask.remove(function(err, buildingTask) {
-            console.log("removed");
             if (err) {
               return console.log(err);
             }
@@ -351,17 +336,14 @@
   });
 
   app["delete"]("/build", function(req, res) {
-    exec("rm ./public/builded-projects/" + req.body.name + ".zip", {
+    exec("rm ./public/builded-projects/" + req.body.projectId + ".zip", {
       maxBuffer: 1024 * 10000
     }, function(err, stdout, stderr) {
       if (err !== null) {
         console.log("Error:" + err);
       }
       if (stderr) {
-        console.log("StdErr" + stderr);
-      }
-      if (stdout) {
-        return console.log(stdout);
+        return console.log("StdErr" + stderr);
       }
     });
     return res.send("OK");

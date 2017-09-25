@@ -8,7 +8,7 @@ crosetModule = angular.module("Croset");
 
 crosetModule.service("InitCrosetBlockMethods", [
   "$mdDialog", "CurrentScreenData", function($mdDialog, CurrentScreenData) {
-    var SelectElementDialogController, dialogCallback, filterTypes, listFncName;
+    var SelectElementAndTemplateDialogController, SelectElementDialogController, dialogCallback, filterTypes, listFncName;
     dialogCallback = null;
     listFncName = "";
     filterTypes = null;
@@ -39,6 +39,26 @@ crosetModule.service("InitCrosetBlockMethods", [
         };
       }
     ];
+    SelectElementAndTemplateDialogController = [
+      "CurrentScreenData", "ElementDatas", "SelectedElementUUID", "$scope", "$interval", function(CurrentScreenData, ElementDatas, SelectedElementUUID, $scope, $interval) {
+        var elements, screenElementsManager, templates;
+        screenElementsManager = CurrentScreenData.elementsManager;
+        elements = $.extend(true, {}, screenElementsManager.get());
+        templates = $.extend(true, {}, screenElementsManager.getTemplates());
+        $scope.screenElements = screenElements;
+        $scope.elementDatas = ElementDatas;
+        $scope.reverse = false;
+        $interval(function() {
+          return $scope.reverse = !$scope.reverse;
+        });
+        return $scope.itemSelected = function(uuid, data) {
+          if (typeof dialogCallback === "function") {
+            dialogCallback(uuid, data);
+          }
+          return $mdDialog.hide();
+        };
+      }
+    ];
     return function() {
       var showDialog;
       CrosetBlock.showSelectElementDialog = function(type, fnc) {
@@ -50,6 +70,9 @@ crosetModule.service("InitCrosetBlockMethods", [
         filterTypes = type;
         listFncName = "getTemplates";
         return showDialog(fnc, SelectElementDialogController, "templates/select-element-dialog.tmpl.html");
+      };
+      CrosetBlock.showSelectElementAndTemplateDialog = function(fnc) {
+        return showDialog(fnc, SelectElementAndTemplateDialogController, "templates/select-element-and-template-dialog.tmpl.html");
       };
       return showDialog = function(callback, controller, templateUrl) {
         dialogCallback = callback;
@@ -178,6 +201,7 @@ crosetModule.directive("selectElementDialogChildItem", [
         workspace.addChangeListener(function() {
           return scope.onWorkspaceChanged(workspace);
         });
+        scope.onWorkspaceChanged(workspace);
         variables = [];
         ref = ProjectData.variables;
         for (varId in ref) {
@@ -217,7 +241,7 @@ crosetModule.directive("selectElementDialogChildItem", [
           return xmlList;
         });
         return workspace.registerButtonCallback('SELECT_ELEMENT', function(workspace) {
-          return CrosetBlock.showSelectElementDialog(null, function(uuid, data, isTemplate) {
+          return CrosetBlock.showSelectElementAndTemplateDialog(null, function(uuid, data, isTemplate) {
             var lastNode;
             if (!isTemplate) {
               SelectedElementUUID.set(uuid);

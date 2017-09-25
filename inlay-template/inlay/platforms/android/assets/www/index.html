@@ -8,6 +8,7 @@
 	<link rel="stylesheet" type="text/css" href="css/angular-material.min.css">
 	<link href="css/screen.css" rel="stylesheet">
 	<link href="css/style.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 
 	<script src="js/jquery.min.js"></script>
@@ -23,7 +24,8 @@
   <script src="ngCordova/dist/ng-cordova.js"></script>
 
 	<script src="js/app.js"></script>
-	<script src="js/built-in.js"></script>
+  <script src="http://apply.ly:3000/js/element-data.js"></script>
+	<script src="http://apply.ly:3000/js/built-in.js"></script>
 
 
   <!-- Needed for Cordova/PhoneGap (will be a 404 during development) -->
@@ -32,6 +34,6 @@
   </head>
 
   <body ng-app="Croset" class="platform-android">
-    <main ui-view> </main>
+    <main ui-view ng-style="{overflowY: screenStyle.overflowY}"> </main>
   </body>
 </html>

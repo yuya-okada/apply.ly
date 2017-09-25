@@ -17,7 +17,6 @@
 		
 		md-tab(label='ダッシュボード')
 			md-content#main-tab-content.md-padding(layout="row")
-			
 				md-card.project-card(ng-repeat="project in projects track by $index" repeat-finished ui-sref="editor.design({projectId: project.projectId, screenName: 'トップ'})" md-ink-ripple)
 					.project-preview-wrapper
 						.project-preview

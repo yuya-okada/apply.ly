@@ -102,13 +102,12 @@ crosetModule.factory "IsInDiv", () ->
 	stateChangeBypass = false			# 遷移が無限ループするのを回避
 	$rootScope.$on "$stateChangeStart", (ev, toState, toParams, fromState, fromParams) ->
 
-		if stateChangeBypass || toState.name == "login"		# 無限ループ回避
+		if stateChangeBypass || toState.name == "login" || toState.name == "top"		# 無限ループ回避
 			stateChangeBypass = false;
 			return
 
 		ev.preventDefault() 			# 一時的に繊維をストップ
 
-		console.log "Change"
 		$http.get "/profile"
 		.then (result) ->
 			data = result.data
@@ -202,17 +201,21 @@ crosetModule.factory "IsInDiv", () ->
 # 						return $ocLazyLoad.load ["blockly/blockly_uncompressed.js", "blockly/generators/javascript.js", "blockly/blocks/logic.js", "blockly/blocks/math.js", "blockly/blocks/lists.js", "blockly/blocks/colour.js", "blockly/blocks/loops.js", "blockly/blocks/variables.js", "blockly/blocks/text.js", "blockly/blocks/procedures.js", "blockly/blocks/custom.js", "blockly/blocks/element.js", "blockly/generators/javascript/logic.js", "blockly/generators/javascript/math.js", "blockly/generators/javascript/lists.js", "blockly/generators/javascript/colour.js", "blockly/generators/javascript/loops.js", "blockly/generators/javascript/variables.js", "blockly/generators/javascript/text.js", "blockly/generators/javascript/procedures.js", "blockly/generators/javascript/custom.js", "blockly/generators/javascript/element.js", "blockly/msg/js/ja.js"]
 # 					]
 			}
+			.state "top", {
+				url: "/"
+				css: "css/top"
+				templateUrl: "top.html"
+			}
 			.state "editor.design", {
 				url: "/design/:screenId"
 				css: "css/design"
 				views:
 					left:
 						templateUrl: "hierarchy.html"
-
+						controller: "ChildEditorController"
+			
 					right:
 						templateUrl: "properties.html"
-
-
 			}
 			.state "editor.program", {
 				url: "/program/:screenId"
@@ -255,7 +258,7 @@ crosetModule.factory "IsInDiv", () ->
 				controller: "DashboardController"
 			}
 
-# 		$urlRouterProvider.otherwise "/login"
+		$urlRouterProvider.otherwise "/"
 	]
 
 crosetModule.controller "LoginController", ["$scope", ($scope) ->
@@ -301,13 +304,26 @@ crosetModule.controller "CrosetController", ["$scope", "$rootScope", "$mdSidenav
 
 
 
-crosetModule.controller "SideMenuController", ["$scope", "$injector", "$state", "$mdSidenav", ($scope, $injector, $state, $mdSidenav) ->
+crosetModule.controller "SideMenuController", ["$scope", "$injector", "$state", "$mdSidenav", "$rootScope", "$http", ($scope, $injector, $state, $mdSidenav, $rootScope, $http) ->
 	$scope.toggleSideNav = () ->
 		$mdSidenav "side-menu"
 			.toggle()
 			.then () ->
+				
+	$scope.$watch () ->
+		return $rootScope.profile?.username
+	, (newVal, oldVal) ->
+		$scope.accountName = newVal
+		
+	$scope.logout = () ->
+		$http {
+			method: "GET"
+			url: "/logout"
+		}
+		.then () ->
+			$state.go "login"
 
-
+	
 	$scope.navigateTo = (sref) ->
 		$state.go sref
 
@@ -316,6 +332,7 @@ crosetModule.controller "SideMenuController", ["$scope", "$injector", "$state", 
 			{
 				icon: "home"
 				text: "ホーム"
+				sref: "top"
 			}
 			{
 				icon: "dashboard"

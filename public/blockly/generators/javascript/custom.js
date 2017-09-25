@@ -46,10 +46,10 @@ if (!window.CrosetBlock) {
 	window.CrosetBlock = {}
 }
 
-CrosetBlock.customBlockGenerator = {}
+window.CrosetBlock.customBlockGenerator = {}
 
 // 画面遷移
-CrosetBlock.customBlockGenerator.intentBlockGenerator = function() {
+window.CrosetBlock.customBlockGenerator.intentBlockGenerator = function() {
   Blockly.JavaScript["intent"] = function (block) {
     var code = "stateGo('screen" + block.getFieldValue("ID") + "')";
     return code

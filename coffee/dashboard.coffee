@@ -20,7 +20,7 @@ crosetModule
 
 	$scope.$on 'repeatFinishedEventFired', (ev, element) ->
 		project = ev.targetScope.project
-		screenElementsManager = new ScreenElementsManager element.find(".project-preview"), true
+		screenElementsManager = new ScreenElementsManager element.find(".project-preview"), "preview"
 
 		for uuid, data of project.screens[project.defaultScreen]?.elements
 			screenElementsManager.addFromData data, uuid

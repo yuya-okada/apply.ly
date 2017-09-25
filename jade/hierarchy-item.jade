@@ -4,8 +4,6 @@ md-list-item(croset-hierarchy-item ng-click="onclick(element)" ng-class="{'hiera
   md-icon(md-font-icon="menu" aria-label="Type") {{elementDatas[element.type].icon}}
   p.hierarcy-text {{element.name}}
   
-  md-icon.md-secondary(ng-click="duplicate($event)" aria-label="Add" ng-show="isTemplate") add
-
   
   md-menu.md-secondary
     md-button(aria-label="Open phone interactions menu" class="md-icon-button" ng-click="$mdOpenMenu($event)")

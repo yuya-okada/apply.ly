@@ -35,6 +35,7 @@ goog.require('Blockly.Events');
 goog.require('Blockly.FieldAngle');
 goog.require('Blockly.FieldCheckbox');
 goog.require('Blockly.FieldColour');
+goog.require('Blockly.FieldValueLabel');
 goog.require('Blockly.FieldElement');
 goog.require('Blockly.FieldTemplate');
 

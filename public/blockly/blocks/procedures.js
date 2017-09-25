@@ -34,6 +34,25 @@ goog.require('Blockly.Blocks');
  */
 Blockly.Blocks.procedures.HUE = 290;
 
+
+Blockly.defineBlocksWithJsonArray([  // BEGIN JSON EXTRACT
+  // Block for numeric value.
+  {
+    "type": "procedure_argument",
+    "message0": "%1",
+    args0: [
+      {
+        "type": "field_value_input",
+        "name": "ARG_NAME"
+      }
+    ],
+    "output": null,
+    "colour": Blockly.Blocks.math.HUE,
+    "helpUrl": "",
+    "tooltip": "",
+  }
+]);
+
 Blockly.Blocks['procedures_defnoreturn'] = {
   /**
    * Block for defining a procedure with no return value.
@@ -43,10 +62,11 @@ Blockly.Blocks['procedures_defnoreturn'] = {
     var nameField = new Blockly.FieldTextInput('',
         Blockly.Procedures.rename);
     nameField.setSpellcheck(false);
-    this.appendDummyInput()
+    this.topRow_ = this.appendDummyInput()
         .appendField(Blockly.Msg.PROCEDURES_DEFNORETURN_TITLE)
         .appendField(nameField, 'NAME')
         .appendField('', 'PARAMS');
+    
     this.setMutator(new Blockly.Mutator(['procedures_mutatorarg']));
     if ((this.workspace.options.comments ||
          (this.workspace.options.parentWorkspace &&
@@ -109,11 +129,80 @@ Blockly.Blocks['procedures_defnoreturn'] = {
       paramString = Blockly.Msg.PROCEDURES_BEFORE_PARAMS +
           ' ' + this.arguments_.join(', ');
     }
+    
+    
     // The params field is deterministic based on the mutation,
     // no need to fire a change event.
     Blockly.Events.disable();
     try {
-      this.setFieldValue(paramString, 'PARAMS');
+//       this.setFieldValue(paramString, 'PARAMS');
+
+      if (!this.getInput("BR")) {
+        this.appendDummyInput("BR")
+        this.moveInputBefore('BR', 'STACK');
+      }
+      
+      
+      for (var j = 0; true; j++) {
+        if (this.getInput("PARAM" + j)) {
+          
+          var oldName = this.getInput("PARAM" + j).connection.targetBlock().getFieldValue("ARG_NAME");
+          var newName = this.arguments_[j];
+          console.log(newName, oldName)
+          
+          if (newName !== oldName) {
+            this.getInput("PARAM" + j).connection.targetBlock().setFieldValue(newName, "ARG_NAME");
+//             var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+//             for (var k = 0, block; block = allBlocks[k]; k++) {
+//               console.log("parentProcedureId", block.parentProcedureId)
+//               if (block.parentProcedureId == this.id && block.getFieldValue("ARG_NAME") == oldName) {
+//                 block.setFieldValue(newName, "ARG_NAME");
+//               }
+//             }
+          }
+          
+        } else if (j < this.arguments_.length) {
+
+          var input = this.appendValueInput("PARAM" + j)
+          this.moveInputBefore('PARAM' + j, 'BR');
+
+          var that = this
+          var disableArgumentGeneration = false;
+          var generateArgumentBlock = function (index) {
+            var block = Blockly.Block.obtain(Blockly.getMainWorkspace(), "procedure_argument");
+            block.getField("ARG_NAME").setValue(that.arguments_[index]);
+            block.parentProcedureId = that.id;
+
+            block.setOnChange(function(e) {
+              console.log(e)
+              if (e.blockId == block.id && e.oldParentId == that.id && !disableArgumentGeneration) {
+                generateArgumentBlock(index)
+                disableArgumentGeneration = true;
+              } else if (e.oldParentId === undefined) {
+                disableArgumentGeneration = false;
+              }
+
+            });
+            block.initSvg();
+            block.render();
+            block.outputConnection.connect(input.connection);
+          } 
+          generateArgumentBlock(j);  
+
+        }
+               
+        
+        if (j >= this.arguments_.length) {
+          if (this.getInput("PARAM" + j)) {
+            this.getInput("PARAM" + j).connection.targetBlock().dispose();
+            this.removeInput("PARAM" + j)
+          } else {
+            break;
+          }
+        }
+        
+      }
+      
     } finally {
       Blockly.Events.enable();
     }
@@ -285,6 +374,7 @@ Blockly.Blocks['procedures_defnoreturn'] = {
           }
         }
       }
+      
     }
   },
   /**
@@ -310,19 +400,19 @@ Blockly.Blocks['procedures_defnoreturn'] = {
     options.push(option);
 
     // Add options to create getters for each parameter.
-    if (!this.isCollapsed()) {
-      for (var i = 0; i < this.arguments_.length; i++) {
-        var option = {enabled: true};
-        var name = this.arguments_[i];
-        option.text = Blockly.Msg.VARIABLES_SET_CREATE_GET.replace('%1', name);
-        var xmlField = goog.dom.createDom('field', null, name);
-        xmlField.setAttribute('name', 'VAR');
-        var xmlBlock = goog.dom.createDom('block', null, xmlField);
-        xmlBlock.setAttribute('type', 'variables_get');
-        option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
-        options.push(option);
-      }
-    }
+//     if (!this.isCollapsed()) {
+//       for (var i = 0; i < this.arguments_.length; i++) {
+//         var option = {enabled: true};
+//         var name = this.arguments_[i];
+//         option.text = Blockly.Msg.VARIABLES_SET_CREATE_GET.replace('%1', name);
+//         var xmlField = goog.dom.createDom('field', null, name);
+//         xmlField.setAttribute('name', 'VAR');
+//         var xmlBlock = goog.dom.createDom('block', null, xmlField);
+//         xmlBlock.setAttribute('type', 'variables_get');
+//         option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
+//         options.push(option);
+//       }
+//     }
   },
   callType_: 'procedures_callnoreturn'
 };
@@ -404,10 +494,10 @@ Blockly.Blocks['procedures_mutatorarg'] = {
    * @this Blockly.Block
    */
   init: function() {
-    var field = new Blockly.FieldTextInput('x', this.validator_);
+    var field = new Blockly.FieldTextInput('x', this.validator_);    
     this.appendDummyInput()
         .appendField(Blockly.Msg.PROCEDURES_MUTATORARG_TITLE)
-        .appendField(field, 'NAME');
+        .appendField(field, 'NAME')
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setColour(Blockly.Blocks.procedures.HUE);
@@ -416,8 +506,8 @@ Blockly.Blocks['procedures_mutatorarg'] = {
 
     // Create the default variable when we drag the block in from the flyout.
     // Have to do this after installing the field on the block.
-    field.onFinishEditing_ = this.createNewVar_;
-    field.onFinishEditing_('x');
+//     field.onFinishEditing_ = this.createNewVar_;
+//     field.onFinishEditing_('x');
   },
   /**
    * Obtain a valid name for the procedure.
@@ -575,6 +665,7 @@ Blockly.Blocks['procedures_callnoreturn'] = {
         }
       }
     }
+    
     // Restore rendering and show the changes.
     this.rendered = savedRendered;
     if (this.rendered) {
@@ -587,6 +678,7 @@ Blockly.Blocks['procedures_callnoreturn'] = {
    * @this Blockly.Block
    */
   updateShape_: function() {
+
     for (var i = 0; i < this.arguments_.length; i++) {
       var field = this.getField('ARGNAME' + i);
       if (field) {
@@ -649,6 +741,7 @@ Blockly.Blocks['procedures_callnoreturn'] = {
    * @this Blockly.Block
    */
   domToMutation: function(xmlElement) {
+
     var name = xmlElement.getAttribute('name');
     this.renameProcedure(this.getProcedureCall(), name);
     var args = [];

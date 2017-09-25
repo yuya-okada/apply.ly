@@ -132,11 +132,22 @@ crosetModule.service("CurrentScreenData", [
         name: newName
       };
     };
-    CrosetBlock.renameVariable = function(oldName, newName) {
-      var id, name, ref;
+    CrosetBlock.getVariableIdByName = function(name) {
+      var id, ref, variable;
       ref = that.variables;
       for (id in ref) {
-        name = ref[id];
+        variable = ref[id];
+        if (that.variables[id].name === name) {
+          return id;
+        }
+      }
+      return null;
+    };
+    CrosetBlock.renameVariable = function(oldName, newName) {
+      var id, ref, variable;
+      ref = that.variables;
+      for (id in ref) {
+        variable = ref[id];
         if (that.variables[id].name === oldName) {
           that.variables[id].name = newName;
           break;
@@ -145,11 +156,11 @@ crosetModule.service("CurrentScreenData", [
       return that.triggerCallbackVar();
     };
     CrosetBlock.deleteVariable = function(name) {
-      var id, key, properties, ref, ref1, ref2, ref3, vId, varId;
+      var id, key, properties, ref, ref1, ref2, ref3, vId, varId, variable;
       vId = "";
       ref = that.variables;
       for (id in ref) {
-        name = ref[id];
+        variable = ref[id];
         if (that.variables[id].name === name) {
           delete that.variables[id].name;
           varId = id;
@@ -187,19 +198,25 @@ crosetModule.service("CurrentScreenData", [
       return results;
     };
     this.get = function() {
-      var projectData;
+      var projectData, replacer;
+      replacer = function(key, value) {
+        if (value instanceof jQuery) {
+          return void 0;
+        }
+        return value;
+      };
       saveCurrentScreen();
       projectData = {
         name: this.name,
         projectId: this.projectId,
         screens: this.screens,
         defaultScreen: this.defaultScreen,
-        variables: this.variables,
+        variables: this.variables || {},
         config: this.config,
         scripts: this.scripts
       };
       console.log("Builded", projectData);
-      return projectData;
+      return JSON.parse(JSON.stringify(projectData, replacer));
     };
   }
 ]).service("SelectedElementOrTemplateUUID", [
@@ -263,7 +280,7 @@ crosetModule.service("CurrentScreenData", [
           screenElements.set(uuid, "height", element.height());
         }
       };
-      $rootScope.$broadcast("onResizedOrDragging", element);
+      $rootScope.$broadcast("onResizedOrDraged", element);
       click = {
         x: 0,
         y: 0
@@ -351,10 +368,15 @@ crosetModule.service("CurrentScreenData", [
     };
   }
 ]).controller("HeaderController", [
-  "$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$interval", "$injector", "$stateParams", "$mdToast", "ProjectData", function($scope, $http, $mdDialog, $mdSidenav, $timeout, $interval, $injector, $stateParams, $mdToast, ProjectData) {
-    var cancel, saveProject;
+  "$scope", "$rootScope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$interval", "$injector", "$stateParams", "$mdToast", "ProjectData", function($scope, $rootScope, $http, $mdDialog, $mdSidenav, $timeout, $interval, $injector, $stateParams, $mdToast, ProjectData) {
+    var cancel, ref, ref1, saveProject, screenId;
     $scope.projectName = null;
-    $scope.screenId = $stateParams.screenId;
+    screenId = $stateParams.screenId || "default";
+    $scope.screenName = (ref = ProjectData.screens) != null ? (ref1 = ref[screenId]) != null ? ref1.name : void 0 : void 0;
+    $rootScope.$on("onChangedScreen", function(ev, screenId) {
+      var ref2, ref3;
+      return $scope.screenName = (ref2 = ProjectData.screens) != null ? (ref3 = ref2[screenId]) != null ? ref3.name : void 0 : void 0;
+    });
     cancel = $interval(function() {
       $scope.projectName = ProjectData.name;
       if ($scope.projectName) {
@@ -372,7 +394,7 @@ crosetModule.service("CurrentScreenData", [
           $scope.download = function() {
             var stop, win;
             $mdDialog.hide();
-            win = $window.open("/builded-projects/" + ProjectData.get().name + ".zip");
+            win = $window.open("/builded-projects/" + ProjectData.get().projectId + ".zip");
             return stop = $interval(function() {
               if (win.closed) {
                 return $http({
@@ -396,16 +418,16 @@ crosetModule.service("CurrentScreenData", [
             params: ProjectData.get()
           }).then(function(result) {
             var checkBuilded, data;
-            data = result;
+            data = result.data;
             checkBuilded = function() {
               return $http({
                 method: "GET",
                 url: "/builded",
                 params: {
-                  projectId: ProjectData.get().name
+                  projectId: ProjectData.get().projectId
                 }
               }).then(function(result) {
-                data = result;
+                data = result.data;
                 if (data) {
                   return $timeout(function() {
                     return checkBuilded();
@@ -414,7 +436,7 @@ crosetModule.service("CurrentScreenData", [
                   return $scope.done = true;
                 }
               }, function(result) {
-                data = result;
+                data = result.data;
                 return console.log("Failed", data);
               });
             };
@@ -436,7 +458,7 @@ crosetModule.service("CurrentScreenData", [
     };
     $scope.save = function(ev) {
       return saveProject(function() {
-        return $mdToast.show($mdToast.simple().textContent('保存しました').position("right top").hideDelay(3000));
+        return $mdToast.show($mdToast.simple().textContent('保存しました').position("right bottom").hideDelay(3000));
       });
     };
     $scope.run = function(ev) {
@@ -492,17 +514,10 @@ crosetModule.service("CurrentScreenData", [
       }).then(function(answer) {}, function() {});
     };
     return saveProject = function(fnc) {
-      var replacer;
-      replacer = function(key, value) {
-        if (value instanceof jQuery) {
-          return void 0;
-        }
-        return value;
-      };
       return $http({
         method: "PUT",
         url: "/project",
-        data: JSON.parse(JSON.stringify(ProjectData.get(), replacer))
+        data: ProjectData.get()
       }).then(function(result) {
         var data;
         data = result.data;
@@ -597,8 +612,9 @@ crosetModule.service("CurrentScreenData", [
     };
   }
 ]).controller("EditorController", [
-  "$scope", "getUUID", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$timeout", "$interval", "$mdToast", "$mdSidenav", "$rootScope", "$mdDialog", "ScreenElementsManager", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes", function($scope, getUUID, ElementDatas, $state, $stateParams, $http, ProjectData, $timeout, $interval, $mdToast, $mdSidenav, $rootScope, $mdDialog, ScreenElementsManager, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) {
+  "$scope", "getUUID", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$timeout", "$interval", "$injector", "$mdToast", "$mdSidenav", "$rootScope", "$mdDialog", "ScreenElementsManager", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes", function($scope, getUUID, ElementDatas, $state, $stateParams, $http, ProjectData, $timeout, $interval, $injector, $mdToast, $mdSidenav, $rootScope, $mdDialog, ScreenElementsManager, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) {
     var cancel, changeScreen, projectData;
+    $scope.isLoading = true;
     SelectedElementUUID.init();
     $scope.settings = {
       elementDatas: ElementDatas
@@ -623,9 +639,6 @@ crosetModule.service("CurrentScreenData", [
       }
     };
     $scope.secondModeList = {
-      server: {
-        icon: "settings_ethernet"
-      },
       script: {
         icon: "description"
       }
@@ -671,10 +684,6 @@ crosetModule.service("CurrentScreenData", [
         screenId: CurrentScreenData.id
       });
     };
-    $scope.progress = {
-      determinateValue: 0,
-      isLoading: true
-    };
     Elements.set("screen", angular.element("#screen"));
     projectData = projectDataRes.data;
     console.log("プロジェクト読み込み", projectData);
@@ -705,8 +714,7 @@ crosetModule.service("CurrentScreenData", [
         nextScreen.style = {};
       }
       changeScreen(nextScreen.elements, nextScreen.cards, nextScreen.templates, nextScreen.varProperties, nextScreen.style);
-      $scope.progress.isLoading = false;
-      return $scope.progress.determinateValue += 100;
+      return $scope.progress.isLoading = false;
     });
     changeScreen = function(elements, cards, templates, varProperties, style) {
       var newScreenElementsManager;
@@ -752,7 +760,7 @@ crosetModule.service("CurrentScreenData", [
         ref = ProjectData.variables;
         for (varId in ref) {
           varName = ref[varId];
-          if (varName = result) {
+          if (varName === result) {
             $mdToast.show($mdToast.simple().textContent('その名前の変数はすでに存在します').position("right bottom").hideDelay(3000));
             return;
           }
@@ -777,6 +785,7 @@ crosetModule.service("CurrentScreenData", [
         }).then(function(answer) {}, function() {});
       }
     };
+    $stateParams = $injector.get("$stateParams");
     return $rootScope.$broadcast("onChangedScreen", $stateParams.screenId || ProjectData.defaultScreen);
   }
 ]).controller("ChildEditorController", [

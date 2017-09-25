@@ -75,6 +75,16 @@ Blockly.Xml.blockToDomWithXY = function(block, opt_noId) {
  * @return {!Element} Tree of XML elements.
  */
 Blockly.Xml.blockToDom = function(block, opt_noId) {
+  
+  // 関数の引数ブロックは、関数の宣言ブロック内ではビルドしない  
+  var parent = block.getParent()
+  if (parent) {
+    console.log(parent.type, block.type)
+  }
+  if (block.type == "procedure_argument" && parent && (parent.type == "procedures_defnoreturn" || parent.type == "procedures_defreturn")) {
+    return null
+  }
+  
   var element = goog.dom.createDom(block.isShadow() ? 'shadow' : 'block');
   element.setAttribute('type', block.type);
   if (!opt_noId) {
@@ -134,8 +144,11 @@ Blockly.Xml.blockToDom = function(block, opt_noId) {
         container.appendChild(Blockly.Xml.cloneShadow_(shadow));
       }
       if (childBlock) {
-        container.appendChild(Blockly.Xml.blockToDom(childBlock, opt_noId));
-        empty = false;
+        var childDom = Blockly.Xml.blockToDom(childBlock, opt_noId);
+        if (childDom) {
+          container.appendChild(childDom);
+          empty = false;
+        }
       }
     }
     container.setAttribute('name', input.name);

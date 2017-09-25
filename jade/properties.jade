@@ -68,9 +68,9 @@
 			div.property-card-body(layout="column")
 				div(layout="row")
 					div.flex-100(layout="row" layout-align="center" flex)
-						md-input-container.md-block
+						md-input-container.md-block(flex)
 							label オーバーフロー(縦)
-							md-select(ng-model="currentScreenData.style.overflowY || 'hidden'" ng-change="onChangeScreenOverflowY()")
+							md-select(ng-model="currentScreenData.style.overflowY" ng-change="onChangeScreenOverflowY()")
 								md-option(value="hidden") 隠す
 								md-option(value="scroll") スクロール
 								
@@ -91,7 +91,7 @@
 								|	削除
 
 					
-		div(layout="column" layout-align="center center")			
+		div(layout="column" layout-align="center center" ng-hide="visiblePropertyCards.length == 0")			
 			md-menu
 				md-button.md-raised.md-accent(ng-click='$mdOpenMenu(ev)') スクリプトを追加
 

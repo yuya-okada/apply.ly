@@ -22,8 +22,8 @@
   </div>
 </md-toolbar>
 <div id="editor" layout="row">
-  <div id="progress" layout="column" ng-show="progress.isLoading"><img src="http://assets.materialup.com/uploads/d0b393f6-3975-48dd-b7ca-bf0289187c6e/preview"/>
-    <md-progress-linear md-mode="determinate" value="{{progress.determinateValue}}"></md-progress-linear>
+  <div id="progress" layout="column" ng-show="!isLoading">
+    <md-progress-circular md-mode="indeterminate"></md-progress-circular>
   </div>
   <div id="mode-changer" layout="column">
     <md-button id="changeScreen" ng-click="changeScreen()" class="md-icon-button md-primary">
@@ -51,9 +51,6 @@
       <div id="screen" ng-style="{overflowY: currentScreenData.style.overflowY}" class="screen"></div>
       <div class="home"></div>
       <div class="bottom-bar"></div>
-      <md-button ng-click="openListItemSelect()" class="md-fab md-accent change-select-mode"> 
-        <md-icon aria-label="Menu" class="material-icons">format_list_bulleted</md-icon>
-      </md-button>
     </div>
     <div layout="column" id="template-preview-wrapper">
       <md-card layout="column" layout-align="center center">
@@ -65,22 +62,24 @@
         <div id="template-preview" layout="column" layout-align="center center"></div>
       </md-card>
     </div>
-    <div layout="column" id="list-item-select">
-      <md-card layout="column">
-        <md-card-actions layout="row" layout-align="start start">
-          <md-button ng-click="closeListItemSelect()" class="md-icon-button">
-            <md-icon aria-label="Close" class="material-icons">arrow_back</md-icon>
-          </md-button>
-        </md-card-actions>
-        <md-list ng-cloak="ng-cloak">
-          <md-subheader>画面要素</md-subheader>
-          <hierarchy-item ng-repeat="element in screenElements | toArray | orderBy: 'zIndex'"></hierarchy-item>
-          <md-divider ng-show="templates"></md-divider>
-          <md-subheader ng-show="templates">テンプレート</md-subheader>
-          <hierarchy-item ng-repeat="element in templates | toArray" istemplate="true"></hierarchy-item>
-        </md-list>
-      </md-card>
-    </div>
+    <!-- div(layout="column")#list-item-select
+    md-card(layout="column")
+    	md-card-actions(layout="row" layout-align="start start")
+    		md-button.md-icon-button(ng-click="closeListItemSelect()")
+    			md-icon(aria-label="Close" class="material-icons") arrow_back
+    
+    	md-list(ng-cloak)
+    		md-subheader 画面要素
+    		hierarchy-item(ng-repeat="element in screenElements | toArray | orderBy: 'zIndex'")
+    
+    		md-divider(ng-show="templates")
+    
+    		md-subheader(ng-show="templates") テンプレート
+    		hierarchy-item(ng-repeat="element in templates | toArray" istemplate="true")
+    
+    
+    
+    -->
   </div>
   <div id="right-zone" class="editor-card flex">
     <div ui-view="right" class="ui-view-fade"></div>
@@ -99,31 +98,8 @@
         <md-button ng-click="addVariable($event)" class="var-button">
           <md-icon aria-label="Add" class="material-icons">add	</md-icon>
         </md-button>
-        <md-button ng-click="onVariableClicked($event, varId)" aria-label="{{var.name}}" ng-repeat="(varId, var) in vars" data-drag="{{$state.current.name == 'editor.design'}}" jqyoui-draggable="jqyoui-draggable" data-jqyoui-options="{{varButtonDragOptions}}" class="var-button">{{var.name}}</md-button>
+        <md-button ng-click="onVariableClicked($event, varId)" aria-label="{{var.name}}" ng-repeat="(varId, var) in vars" data-drag="true" jqyoui-draggable="jqyoui-draggable" data-jqyoui-options="{helper: &quot;clone&quot;, appendTo: &quot;body&quot;, cancel: &quot;&quot;}" class="var-button">{{var.name}}</md-button>
       </md-fab-actions>
     </md-toolbar>
   </md-fab-toolbar>
 </div>
-<script src="blockly/blockly_uncompressed.js"></script>
-<script src="blockly/generators/javascript.js"></script>
-<script src="blockly/blocks/logic.js"></script>
-<script src="blockly/blocks/math.js"></script>
-<script src="blockly/blocks/lists.js"></script>
-<script src="blockly/blocks/colour.js"></script>
-<script src="blockly/blocks/loops.js"></script>
-<script src="blockly/blocks/variables.js"></script>
-<script src="blockly/blocks/text.js"></script>
-<script src="blockly/blocks/procedures.js"></script>
-<script src="blockly/blocks/custom.js"></script>
-<script src="blockly/blocks/element.js"></script>
-<script src="blockly/generators/javascript/logic.js"></script>
-<script src="blockly/generators/javascript/math.js"></script>
-<script src="blockly/generators/javascript/lists.js"></script>
-<script src="blockly/generators/javascript/colour.js"></script>
-<script src="blockly/generators/javascript/loops.js"></script>
-<script src="blockly/generators/javascript/variables.js"></script>
-<script src="blockly/generators/javascript/text.js"></script>
-<script src="blockly/generators/javascript/procedures.js"></script>
-<script src="blockly/generators/javascript/custom.js"></script>
-<script src="blockly/generators/javascript/element.js"></script>
-<script src="blockly/msg/js/ja.js"></script>

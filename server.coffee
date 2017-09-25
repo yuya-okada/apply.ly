@@ -97,7 +97,6 @@ ProjectSchema.pre 'save', (next)->
 
 			else
 				self.projectId = counter.count
-				console.log "プロジェクトid", self
 
 				counter.count++
 				counter.save (err) ->
@@ -168,37 +167,34 @@ app.post "/project", (req, res) ->
 					else
 						user.projects.push proj.projectId
 						user.save (err, us)->
-							console.log us
 							res.send proj
 
 
 						req.session.passport.user.projects = user.projects
 						req.session.save () ->
-							console.log "saved"
 							req.session.reload ()->
-								console.log "reloaded"
 
 
 app.put "/project", (req, res) ->
 	Project.update {projectId: req.body.projectId}, req.body, {},
 	(err) ->
-		console.log "PUT PROJ:", req.body
+
 		if err
 			console.log err
-
+		
+		
 	res.send "OK"
 
 # projectを取得。
 # parameterにqueryに渡す値を入れる。
 app.get "/project", (req, res) ->
 	Project.findOne req.query, (err, project) ->
-		console.log "GET PROJ:", project
+
 		if project
 			delete project["_id"]
 		res.send project
 
 app.delete "/project", (req, res) ->
-	console.log "消す", req.body
 	Project.remove {projectId: req.body.projectId}, (err, result) ->
 		if err
 			console.log err
@@ -219,15 +215,12 @@ app.delete "/project", (req, res) ->
 
 
 			req.session.save () ->
-				console.log "saved"
 				req.session.reload ()->
-					console.log "reloaded"
 	res.send "OK"
 
 
 
 app.post "/signup", (req, res, next) ->
-	console.log req.body
 	user = new User {
 		username: req.body.username
 		email: req.body.email
@@ -239,7 +232,6 @@ app.post "/signup", (req, res, next) ->
 		if err
 			console.log err
 		else
-			console.log user
 			passport.authenticate("local", {successRedirect: "/#!/dashboard", failureRedirect: "/#!/login", failureFlash: true})(req, res, next)
 
 # ログインしている場合ユーザ情報をかえす、
@@ -259,7 +251,7 @@ app.get "/logout", (req, res) ->
 app.get "/build", (req, res) ->
 
 	buildingTask = new BuildingTask {			# ビルド状況をタスクに登録
-		projectId: req.query.name
+		projectId: req.query.projectId
 		target: "zip"
 	}
 	buildingTask.save (err, buildingTask) ->			# 保存
@@ -269,8 +261,8 @@ app.get "/build", (req, res) ->
 		else									# エラーがでないならビルド
 
 			# exec "./build.sh '" + req.query  + "' '" + req.query.name	 + ".zip'" , {maxBuffer: 1024 * 10000},(err, stdout, stderr) ->
-			execFile "/home/develop/Croset/build.sh", [JSON.stringify(req.query), req.query.name + ".zip"], [], (err, stdout, stderr) ->
-				console.log("finished e:", err, "  st:", stdout, "  ste:", stderr )
+			execFile "/home/develop/Croset/build.sh", [JSON.stringify(req.query), req.query.projectId + ".zip"], [], (err, stdout, stderr) ->
+# 				console.log("finished e:", err, "  st:", stdout, "  ste:", stderr )
 
 
 				if err != null
@@ -283,7 +275,6 @@ app.get "/build", (req, res) ->
 
 				# 成功した場合
 				buildingTask.remove (err, buildingTask) ->
-					console.log "removed"
 					if err
 						console.log err
 
@@ -294,15 +285,14 @@ app.get "/build", (req, res) ->
 # 条件に一致するプロジェクトを削除する。
 # req.body: {name: プロジェクト名}
 app.delete "/build", (req, res) ->
-	exec "rm ./public/builded-projects/" + req.body.name + ".zip" , {maxBuffer: 1024 * 10000},  (err, stdout, stderr) ->
+	exec "rm ./public/builded-projects/" + req.body.projectId + ".zip" , {maxBuffer: 1024 * 10000},  (err, stdout, stderr) ->
 		if err != null
 			console.log "Error:" + err
 
 		if stderr
 			console.log "StdErr" + stderr
 
-		if stdout						# 成功した場合
-			console.log stdout
+# 		if stdout						# 成功した場合
 	res.send "OK"
 
 

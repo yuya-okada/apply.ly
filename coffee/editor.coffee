@@ -142,9 +142,19 @@ crosetModule
 		that.variables[getUUID()] = {
 			name: newName
 		}
+
+	# blockly/generators/javacsript/variable.jsから
+	CrosetBlock.getVariableIdByName = (name) ->
+		for id, variable of that.variables
+			if that.variables[id].name == name
+				return id
+			
+		return null
+					
+
 	# blockly/core/workspace.jsから
 	CrosetBlock.renameVariable = (oldName, newName) ->
-		for id, name of that.variables
+		for id, variable of that.variables
 			if that.variables[id].name == oldName
 				that.variables[id].name = newName
 				break
@@ -155,7 +165,7 @@ crosetModule
 	# blockly/core/workspace.jsから
 	CrosetBlock.deleteVariable = (name) ->
 		vId = ""
-		for id, name of that.variables
+		for id, variable of that.variables
 			if that.variables[id].name == name
 				delete that.variables[id].name
 				varId = id
@@ -183,18 +193,27 @@ crosetModule
 			
 			
 	this.get = () ->
+		
+		
+		# jQueryがたまに無限参照をしててstringifyできないのでとりのぞく
+		replacer = (key, value) ->
+			if value instanceof jQuery
+				return undefined
+			
+			return value
+		
 		saveCurrentScreen()
 		projectData = {
 			name: this.name
 			projectId: this.projectId
 			screens: this.screens
 			defaultScreen: this.defaultScreen
-			variables: this.variables
+			variables: this.variables || {}
 			config: this.config
 			scripts: this.scripts
 		}
 		console.log "Builded", projectData
-		return projectData
+		return JSON.parse JSON.stringify projectData, replacer
 
 
 	return
@@ -272,7 +291,7 @@ crosetModule
 
 
 		# design.jsのPropertyController内で受け取り
-		$rootScope.$broadcast "onResizedOrDragging", element
+		$rootScope.$broadcast "onResizedOrDraged", element
 		click = {
 			x: 0
 			y: 0
@@ -373,11 +392,16 @@ crosetModule
 	}
 ]
 
-.controller "HeaderController", ["$scope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$interval", "$injector", "$stateParams", "$mdToast", "ProjectData", ($scope, $http, $mdDialog, $mdSidenav, $timeout, $interval, $injector, $stateParams, $mdToast, ProjectData) ->
+.controller "HeaderController", ["$scope", "$rootScope", "$http", "$mdDialog", "$mdSidenav", "$timeout", "$interval", "$injector", "$stateParams", "$mdToast", "ProjectData", ($scope, $rootScope, $http, $mdDialog, $mdSidenav, $timeout, $interval, $injector, $stateParams, $mdToast, ProjectData) ->
 
 	# プロジェクト名と画面名を設定
 	$scope.projectName = null
-	$scope.screenId = $stateParams.screenId
+	screenId = $stateParams.screenId || "default"
+	$scope.screenName =	ProjectData.screens?[screenId]?.name
+	
+	$rootScope.$on "onChangedScreen", (ev, screenId) ->		# ChildEditorControllerから呼ばれる
+		$scope.screenName =	ProjectData.screens?[screenId]?.name
+	
 	cancel = $interval () ->
 		$scope.projectName = ProjectData.name
 		if $scope.projectName
@@ -400,7 +424,7 @@ crosetModule
 			# ビルド成功したプロジェクトをダウンロード
 			$scope.download = () ->
 				$mdDialog.hide()			# ダイアログを閉じる
-				win = $window.open "/builded-projects/" + ProjectData.get().name + ".zip"		# ダウンロード
+				win = $window.open "/builded-projects/" + ProjectData.get().projectId + ".zip"		# ダウンロード
 
 
 				stop = $interval () ->				# windowが閉じていることを確認 (TODO:もうすこしスマートな方法がありそう)
@@ -427,18 +451,18 @@ crosetModule
 				params: ProjectData.get()
 			}
 			.then (result) ->
-				data = result
+				data = result.data
 				# ビルドが完了しているかを確認
 				checkBuilded = () ->
 					$http {
 						method : "GET"
 						url : "/builded"
 						params: {
-							projectId: ProjectData.get().name
+							projectId: ProjectData.get().projectId
 						}
 					}
 					.then (result) ->
-						data = result
+						data = result.data
 						if data
 							$timeout () ->
 								checkBuilded()
@@ -449,7 +473,7 @@ crosetModule
 
 
 					, (result) ->
-						data = result
+						data = result.data
 						console.log "Failed", data
 
 				checkBuilded()
@@ -480,7 +504,7 @@ crosetModule
 			$mdToast.show(
 				$mdToast.simple()
 				.textContent '保存しました'
-				.position "right top"
+				.position "right bottom"
 				.hideDelay 3000
 			)
 
@@ -548,17 +572,10 @@ crosetModule
 	saveProject = (fnc)->
 		
 		
-		# jQueryがたまに無限参照をしててstringifyできないのでとりのぞく
-		replacer = (key, value) ->
-			if value instanceof jQuery
-				return undefined
-			
-			return value
-		
 		$http {
 			method : "PUT"
 			url : "/project"
-			data: JSON.parse JSON.stringify ProjectData.get(), replacer			# TODO: 多分なんかもっといい方法がある
+			data: ProjectData.get()			# TODO: 多分なんかもっといい方法がある
 		}
 		.then (result) ->
 			data = result.data
@@ -672,9 +689,12 @@ crosetModule
 
 # エディタ画面のコントローラー
 # projectDataResはresolveからinjectされる
-.controller "EditorController", ["$scope", "getUUID", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$timeout", "$interval", "$mdToast", "$mdSidenav", "$rootScope", "$mdDialog", "ScreenElementsManager", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes",
-($scope, getUUID, ElementDatas, $state, $stateParams, $http, ProjectData, $timeout, $interval, $mdToast, $mdSidenav, $rootScope, $mdDialog, ScreenElementsManager, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) ->
+.controller "EditorController", ["$scope", "getUUID", "ElementDatas", "$state", "$stateParams", "$http", "ProjectData", "$timeout", "$interval", "$injector", "$mdToast", "$mdSidenav", "$rootScope", "$mdDialog", "ScreenElementsManager", "Elements", "SelectedElementUUID", "CurrentScreenData", "projectDataRes",
+($scope, getUUID, ElementDatas, $state, $stateParams, $http, ProjectData, $timeout, $interval, $injector, $mdToast, $mdSidenav, $rootScope, $mdDialog, ScreenElementsManager, Elements, SelectedElementUUID, CurrentScreenData, projectDataRes) ->
 
+	# Progress bar
+	$scope.isLoading = true
+	
 	SelectedElementUUID.init()
 
 	$scope.settings = {
@@ -702,8 +722,8 @@ crosetModule
 			icon: "code"
 	}
 	$scope.secondModeList = {
-		server:
-			icon: "settings_ethernet"
+# 		server:
+# 			icon: "settings_ethernet"
 		script:
 			icon: "description"
 	}
@@ -757,11 +777,6 @@ crosetModule
 						
 		$state.go "editor." + name, {screenId: CurrentScreenData.id}
 
-	# Progress bar
-	$scope.progress = {
-		determinateValue: 0
-		isLoading: true
-	}
 
 	Elements.set "screen", angular.element "#screen"
 
@@ -790,7 +805,6 @@ crosetModule
 
 		# 読み込みのプログレスバー削除
 		$scope.progress.isLoading = false
-		$scope.progress.determinateValue += 100
 
 
 	# 表示されている画面を変更
@@ -842,7 +856,7 @@ crosetModule
 
 		$mdDialog.show(confirm).then (result) ->
 			for varId, varName of ProjectData.variables
-				if varName = result
+				if varName == result
 					$mdToast.show(
 						$mdToast.simple()
 						.textContent 'その名前の変数はすでに存在します'
@@ -877,8 +891,9 @@ crosetModule
 				return
 			, () ->
 				return
-		
- 		
+			
+			
+	$stateParams = $injector.get "$stateParams"
 	$rootScope.$broadcast "onChangedScreen", $stateParams.screenId || ProjectData.defaultScreen
 ]
 

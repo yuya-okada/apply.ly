@@ -37,6 +37,26 @@ crosetModule
 
 	]
 
+	SelectElementAndTemplateDialogController = ["CurrentScreenData", "ElementDatas", "SelectedElementUUID", "$scope", "$interval", (CurrentScreenData, ElementDatas, SelectedElementUUID, $scope, $interval)->
+		screenElementsManager = CurrentScreenData.elementsManager
+		elements = $.extend true, {}, screenElementsManager.get()
+		templates = $.extend true, {}, screenElementsManager.getTemplates()
+		
+		$scope.screenElements = screenElements
+			
+		$scope.elementDatas = ElementDatas
+
+
+		$scope.reverse = false
+		$interval () ->
+			$scope.reverse = !$scope.reverse
+			
+		$scope.itemSelected = (uuid, data) ->
+			dialogCallback?(uuid, data)
+			$mdDialog.hide()
+
+	]
+
 
 
 	return () ->
@@ -55,6 +75,10 @@ crosetModule
 			filterTypes = type
 			listFncName = "getTemplates"
 			showDialog fnc, SelectElementDialogController, "templates/select-element-dialog.tmpl.html"
+		
+		
+		CrosetBlock.showSelectElementAndTemplateDialog = (fnc) ->
+			showDialog fnc, SelectElementAndTemplateDialogController, "templates/select-element-and-template-dialog.tmpl.html"
 
 			
 		showDialog = (callback, controller, templateUrl) ->
@@ -184,7 +208,9 @@ crosetModule
 			}
 			workspace.addChangeListener () ->
 				scope.onWorkspaceChanged workspace
-	
+			
+			scope.onWorkspaceChanged workspace
+			
 			variables = []
 			for varId, variable of ProjectData.variables
 				variables.push variable.name
@@ -238,7 +264,7 @@ crosetModule
 
 			# 要素を選択
 			workspace.registerButtonCallback　'SELECT_ELEMENT', (workspace) ->
-				CrosetBlock.showSelectElementDialog null, (uuid, data, isTemplate) ->
+				CrosetBlock.showSelectElementAndTemplateDialog null, (uuid, data, isTemplate) ->
 					if !isTemplate
 						SelectedElementUUID.set uuid
 					else

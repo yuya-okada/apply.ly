@@ -3,7 +3,16 @@ Blockly.Blocks.element = {
   HUE: "#3F51B5"
 }
 
+// 実行順の関係で未定義なので宣言する
+if (!Blockly.Blocks.logic) {
+	Blockly.Blocks.logic = {};
+}
+Blockly.Blocks.logic.HUE = "#526FFF"
+
 //##################################################
+
+
+
 
 
 // 独自のブロックの登録
@@ -117,22 +126,6 @@ Blockly.defineBlocksWithJsonArray([  // BEGIN JSON EXTRACT
 		"colour": Blockly.Blocks.logic.HUE,
 		"tooltip": "",
 		"helpUrl": ""
-	},
-	{
-		"type": "server",
-		"message0": "サーバーから取得 %1",
-		"args0": [
-			{
-				"type": "input_value",
-				"name": "ARG"
-			}
-		],
-		"previousStatement": null,
-		"nextStatement": null,
-		"colour": Blockly.Blocks.logic.HUE,
-		"tooltip": "",
-		"helpUrl": "",
-		"mutator": "server_mutator"
 	}
 
 ]);
@@ -147,9 +140,9 @@ if (!window.CrosetBlock) {
 	window.CrosetBlock = {}
 }
   
-CrosetBlock.customBlock = {}
+window.CrosetBlock.customBlock = {}
 // 画面遷移
-CrosetBlock.customBlock.intentBlock = {
+window.CrosetBlock.customBlock.intentBlock = {
   "type": "intent",
   "message0": "画面を移動 %1",
   "args0": [
@@ -161,7 +154,7 @@ CrosetBlock.customBlock.intentBlock = {
   ],
   "previousStatement": null,
   "nextStatement": null,
-  "colour": Blockly.Constants.Logic.HUE,
+  "colour": Blockly.Blocks.logic.HUE,
   "tooltip": "",
   "helpUrl": ""
 };

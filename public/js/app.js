@@ -80,12 +80,11 @@ crosetModule.factory("IsInDiv", function() {
     console.log("run");
     stateChangeBypass = false;
     return $rootScope.$on("$stateChangeStart", function(ev, toState, toParams, fromState, fromParams) {
-      if (stateChangeBypass || toState.name === "login") {
+      if (stateChangeBypass || toState.name === "login" || toState.name === "top") {
         stateChangeBypass = false;
         return;
       }
       ev.preventDefault();
-      console.log("Change");
       return $http.get("/profile").then(function(result) {
         var data;
         data = result.data;
@@ -149,7 +148,7 @@ crosetModule.factory("IsInDiv", function() {
     }).accentPalette('myOrange', {
       'default': '500'
     });
-    return $stateProvider.state("editor", {
+    $stateProvider.state("editor", {
       url: "/editor/:projectId",
       controller: "EditorController",
       templateUrl: "editor.html",
@@ -164,19 +163,19 @@ crosetModule.factory("IsInDiv", function() {
               }
             });
           }
-        ],
-        files: [
-          "$ocLazyLoad", function($ocLazyLoad) {
-            return $ocLazyLoad.load(["blockly/blockly_uncompressed.js", "blockly/generators/javascript.js", "blockly/blocks/logic.js", "blockly/blocks/math.js", "blockly/blocks/lists.js", "blockly/blocks/colour.js", "blockly/blocks/loops.js", "blockly/blocks/variables.js", "blockly/blocks/text.js", "blockly/blocks/procedures.js", "blockly/blocks/custom.js", "blockly/blocks/element.js", "blockly/generators/javascript/logic.js", "blockly/generators/javascript/math.js", "blockly/generators/javascript/lists.js", "blockly/generators/javascript/colour.js", "blockly/generators/javascript/loops.js", "blockly/generators/javascript/variables.js", "blockly/generators/javascript/text.js", "blockly/generators/javascript/procedures.js", "blockly/generators/javascript/custom.js", "blockly/generators/javascript/element.js", "blockly/msg/js/ja.js"]);
-          }
         ]
       }
+    }).state("top", {
+      url: "/",
+      css: "css/top",
+      templateUrl: "top.html"
     }).state("editor.design", {
       url: "/design/:screenId",
       css: "css/design",
       views: {
         left: {
-          templateUrl: "hierarchy.html"
+          templateUrl: "hierarchy.html",
+          controller: "ChildEditorController"
         },
         right: {
           templateUrl: "properties.html"
@@ -220,6 +219,7 @@ crosetModule.factory("IsInDiv", function() {
       templateUrl: "dashboard.html",
       controller: "DashboardController"
     });
+    return $urlRouterProvider.otherwise("/");
   }
 ]);
 
@@ -266,9 +266,23 @@ crosetModule.controller("CrosetController", [
 ]);
 
 crosetModule.controller("SideMenuController", [
-  "$scope", "$injector", "$state", "$mdSidenav", function($scope, $injector, $state, $mdSidenav) {
+  "$scope", "$injector", "$state", "$mdSidenav", "$rootScope", "$http", function($scope, $injector, $state, $mdSidenav, $rootScope, $http) {
     $scope.toggleSideNav = function() {
       return $mdSidenav("side-menu").toggle().then(function() {});
+    };
+    $scope.$watch(function() {
+      var ref;
+      return (ref = $rootScope.profile) != null ? ref.username : void 0;
+    }, function(newVal, oldVal) {
+      return $scope.accountName = newVal;
+    });
+    $scope.logout = function() {
+      return $http({
+        method: "GET",
+        url: "/logout"
+      }).then(function() {
+        return $state.go("login");
+      });
     };
     $scope.navigateTo = function(sref) {
       return $state.go(sref);
@@ -278,7 +292,8 @@ crosetModule.controller("SideMenuController", [
       list = [
         {
           icon: "home",
-          text: "ホーム"
+          text: "ホーム",
+          sref: "top"
         }, {
           icon: "dashboard",
           text: "ダッシュボード",

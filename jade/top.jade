@@ -1,0 +1,61 @@
+div#top-bar(layout)
+
+div#top-menu(layout="row")
+  h2 inLay
+  md-button.md-raised.md-primary(style="right: 70px; position: absolute;" ui-sref="dashboard") ログイン
+  
+div#thumbnail(layout="row" layout-align="space-around center")
+
+  div#title(layout="column" flex="40")
+    h1 新しいアプリ開発のカタチ。
+    h2 inLayではプログラムを書かずにスマートフォンアプリを作ることができます
+
+    div(layout="row" layout-align="space-around center")
+      md-button#get-started.md-raised
+        a(ui-sref="dashboard" style="color: black;") はじめる
+  
+  div#logo-top(flex="40")
+    img(src="img/logo-reverse-orange.png" width="400px")
+
+div.column(layout="row" layout-wrap layout-align="space-around center" style="background-color: #F6F7FA")
+
+  div(layout="column" flex="40")
+    h2 視覚的操作で、ハイクオリティなアプリを
+    p inLayでは、テキストによる難しいプログラミングをしなくても、アプリケーションを開発することができます。
+    p いままでのプログラミングより容易に習得でき、いままでのプログラミングより作りやすく、いままでのプログラミングより高い効率を発揮できるように設計されています。
+    
+    
+    
+    
+  div(flex="40")
+    img(src="img/editor.png" style="width: 400px")
+   
+  
+div.column(layout="row" layout-wrap layout-align="space-around center" style="background-color: white; flex-direction: row-reverse;")
+
+    
+  div(layout="column" flex="40")
+    h2 洗練された部品
+    p inLayが提供するクリーンでシンプルなパーツを画面に並べるだけで、洗練されたデザインのアプリケーションに仕上がります。デザインの知識は必要ありません。
+    
+    
+  md-card#items-card(layout="column" layout-align="center center" flex="40") 
+    md-button.md-raised(style="width: 200px;") ボタン
+    md-input-container
+      label 入力
+      input(value="テキストフィールド")      
+    md-checkbox チェックボックス
+    md-switch スイッチ
+    
+    
+div.column(layout="row" layout-wrap layout-align="space-around center" style="background-color: #2E64C3; color: white !important;")
+
+  div(layout="column" flex="60")
+    h2 一度作れば全てのデバイスで
+    p inLayで作ったアプリケーションは、AndroidやiOSをはじめとした様々なデバイスで動作させることができます。ストアに配信することも可能です。
+    
+    
+    
+#copy-right(layout="row" layout-align="center center")  Copyright © 2017 AppLy.Inc. All Rights Reserved.
+    
+  

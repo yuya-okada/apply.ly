@@ -36,9 +36,8 @@ md-toolbar#header(ng-controller="HeaderController")
 			
 #editor(layout="row")
 	
-	#progress(layout="column" ng-show="progress.isLoading")
-		img(src="http://assets.materialup.com/uploads/d0b393f6-3975-48dd-b7ca-bf0289187c6e/preview")
-		md-progress-linear(md-mode="determinate" value="{{progress.determinateValue}}")
+	#progress(layout="column" ng-show="!isLoading")
+		md-progress-circular(md-mode="indeterminate")
 		
 	
 	#mode-changer(layout="column")
@@ -75,7 +74,7 @@ md-toolbar#header(ng-controller="HeaderController")
 			.home
 			.bottom-bar
 			
-			md-button.md-fab.md-accent.change-select-mode(ng-click="openListItemSelect()") 
+			//- md-button.md-fab.md-accent.change-select-mode(ng-click="openListItemSelect()") 
 				md-icon(aria-label="Menu" class="material-icons") format_list_bulleted
 		
 
@@ -89,7 +88,7 @@ md-toolbar#header(ng-controller="HeaderController")
 				#template-preview(layout="column" layout-align="center center")
 			
 	
-		div(layout="column")#list-item-select
+		// div(layout="column")#list-item-select
 			md-card(layout="column")
 				md-card-actions(layout="row" layout-align="start start")
 					md-button.md-icon-button(ng-click="closeListItemSelect()")
@@ -125,7 +124,7 @@ md-toolbar#header(ng-controller="HeaderController")
 			md-fab-actions.md-toolbar-tools
 				md-button.var-button(ng-click="addVariable($event)")
 					md-icon(aria-label="Add" class="material-icons") add	
-				md-button.var-button(ng-click="onVariableClicked($event, varId)" aria-label='{{var.name}}' ng-repeat="(varId, var) in vars" data-drag="{{$state.current.name == 'editor.design'}}" jqyoui-draggable data-jqyoui-options="{{varButtonDragOptions}}") {{var.name}}
+				md-button.var-button(ng-click="onVariableClicked($event, varId)" aria-label='{{var.name}}' ng-repeat="(varId, var) in vars" data-drag="true" jqyoui-draggable data-jqyoui-options='{helper: "clone", appendTo: "body", cancel: ""}') {{var.name}}
 
 		
 		
